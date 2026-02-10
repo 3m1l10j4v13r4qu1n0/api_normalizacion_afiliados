@@ -108,3 +108,21 @@ Solicitud de sincronización.
 
 Resultado esperado:
 Datos sincronizados correctamente.
+
+---
+
+## CP7 — Dar de baja afiliado
+
+Requerimientos relacionados:
+RF13, RN16
+
+Descripción:
+Verificar que el sistema permita dar de baja un afiliado existente.
+
+Entrada:
+Solicitud de baja de un afiliado válido.
+
+Resultado esperado:
+- Afiliado marcado como inactivo
+- El registro permanece en la base de datos
+

@@ -44,20 +44,24 @@ RF11 — El sistema debe permitir consultar un afiliado por identificador.
 
 RF12 — El sistema debe permitir actualizar datos de afiliados.
 
+RF13 — El sistema debe permitir dar de baja afiliados.
+
 ---
 
 #### Persistencia
-RF13 — El sistema debe almacenar los datos en una base de datos SQLite.
+RF14 — El sistema debe almacenar los datos en una base de datos SQLite.
 
 ---
 
 #### Sincronización
-RF14 — El sistema debe permitir sincronizar los datos de afiliados con Google Sheets.
+RF15 — El sistema debe permitir sincronizar los datos de afiliados con Google Sheets.
 
 ---
 
 #### API REST
-RF15 — El sistema debe exponer endpoints REST para la gestión de afiliados.
+RF16 — El sistema debe exponer endpoints REST para la gestión de afiliados.
+
+
 
 ---
 

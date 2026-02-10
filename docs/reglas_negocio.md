@@ -56,3 +56,6 @@ RN14 — Solo se sincronizan afiliados válidos.
 
 RN15 — La sincronización no debe modificar datos locales.
 
+RN16 — La eliminación de un afiliado debe realizarse mediante baja lógica, marcando su estado como inactivo.
+
+

@@ -72,9 +72,24 @@ Afiliado actualizado correctamente.
 
 ---
 
+## Eliminar afiliado
+
+Endpoint:
+DELETE /afiliados/{id}
+
+Descripción:
+Marca un afiliado como inactivo en el sistema (baja lógica).
+
+Resultado esperado:
+- Afiliado marcado como inactivo
+- El registro no se elimina físicamente de la base de datos
+
+---
+
 ### 3. Sincronización
 
 ---
+
 
 ## Sincronizar con Google Sheets
 

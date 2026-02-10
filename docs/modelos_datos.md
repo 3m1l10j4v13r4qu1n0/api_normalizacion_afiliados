@@ -17,18 +17,40 @@ El objetivo es identificar las entidades principales del sistema y sus atributos
 Descripción:
 Representa a una persona afiliada al sindicato.
 
-Atributos:
-- id
-- nombre
-- dni
-- direccion
-- telefono
-- estado
-- fecha_alta
+**Atributos:**
 
-Reglas relacionadas:
-- El DNI debe ser único
-- El nombre es obligatorio
+- id (PK): Identificador único
+- apellido (string, 50)
+- nombre (string, 50)
+- fecha_nacimiento (date)
+- dni (string, 20)
+- email (string, 150)
+- telefono (string, 20)
+- nacionalidad (string, 50)
+- genero (string, 10)
+- estado_civil (string, 20)
+- provincia (string, 50)
+- localidad (string, 50)
+- direccion (string, 100)
+- codigo_postal (string, 20)
+- nivel_educativo (string, 50)
+- titulo_obtenido (string, 100, opcional)
+- numero_legajo (string, 50)
+- fecha_ingreso (date)
+- fecha_alta (date)
+- comuna_donde_trabaja (string, 50)
+- relacion_dependencia (string, 50)
+- marca_temporal_creacion (datetime)
+- marca_temporal_actualizacion (datetime)
+- estado (enum: activo, inactivo)
+
+
+**Reglas relacionadas:**
+
+- Nombre, apellido y DNI son obligatorios
+- DNI, email y número_legajo deben ser únicos
+- Relación laboral puede ser: `monotributista`, `planta_transitoria`, `planta_permanente`
+- Nivel educativo y género deben pertenecer a valores controlados
 - Los datos deben almacenarse normalizados
 
 ---
@@ -38,9 +60,11 @@ Reglas relacionadas:
 Descripción:
 Representa un error detectado durante la importación de datos.
 
-Atributos:
+**Atributos:**
+
 - id
-- registro_origen
+- registro_origen: Identificador del registro de entrada que originó el error 
+  (fila, índice o identificador externo según la fuente de datos)
 - campo
 - descripcion_error
 - fecha_error
@@ -48,6 +72,7 @@ Atributos:
 Reglas relacionadas:
 - Los errores deben registrarse
 - Los registros inválidos no deben persistirse
+- El registro_origen debe permitir identificar el registro de entrada con error
 
 ---
 
@@ -56,7 +81,8 @@ Reglas relacionadas:
 Descripción:
 Representa un proceso de importación de datos de afiliados.
 
-Atributos:
+**Atributos:**
+
 - id
 - fecha_importacion
 - cantidad_registros

@@ -4,35 +4,31 @@
 ### 1. Introducción
 Este documento describe los casos de uso del sistema de normalización de datos de afiliados.
 
-Los casos de uso representan las interacciones entre los actores y el sistema para cumplir un objetivo funcional.
+Los casos de uso representan las interacciones entre los actores externos y el sistema.
 
 ---
 
-## UC0 — Ingresar Datos
+## UC1 — Importar Afiliados
 
 Actor principal:
 Sistema Cliente
 
 Descripción:
-Permite importar datos de afiliados al sistema.
+Permite importar datos de afiliados al sistema para su validación, normalización y almacenamiento.
 
 Flujo principal:
 1. El sistema cliente envía datos de afiliados.
-2. El sistema recibe los datos.
-3. El sistema valida los datos.
-4. El sistema normaliza los datos.
-5. El sistema almacena los datos válidos.
-6. El sistema registra errores de validación si existen.
-
-Flujo alternativo:
-- Datos inválidos → registrar error y continuar importación.
+2. El sistema valida los datos.
+3. El sistema normaliza la información.
+4. El sistema almacena los registros válidos.
+5. El sistema registra errores si existen.
 
 Resultado:
 Datos de afiliados almacenados correctamente.
 
 ---
 
-## UC1 — Consultar Datos
+## UC2 — Consultar Afiliados
 
 Actor principal:
 Usuario Administrativo / Sistema Cliente
@@ -50,64 +46,7 @@ Listado de afiliados.
 
 ---
 
-## UC2 — Normalizar Datos
-
-Actor principal:
-Sistema
-
-Descripción:
-Proceso interno que estandariza los datos de afiliados.
-
-Flujo principal:
-1. Convertir textos a mayúsculas.
-2. Eliminar espacios innecesarios.
-3. Normalizar formato de DNI.
-4. Preparar datos para almacenamiento.
-
-Resultado:
-Datos normalizados.
-
----
-
-## UC3 — Validar Datos
-
-Actor principal:
-Sistema
-
-Descripción:
-Proceso interno que verifica la integridad de los datos.
-
-Flujo principal:
-1. Verificar campos obligatorios.
-2. Validar formatos.
-3. Detectar duplicados.
-4. Registrar errores.
-
-Resultado:
-Datos validados.
-
----
-
-## UC4 — Sincronizar con Google Sheets
-
-Actor principal:
-Usuario Administrativo
-
-Descripción:
-Permite sincronizar los datos almacenados con Google Sheets.
-
-Flujo principal:
-1. El usuario inicia la sincronización.
-2. El sistema obtiene afiliados válidos.
-3. El sistema envía los datos a Google Sheets.
-4. El sistema confirma la operación.
-
-Resultado:
-Datos sincronizados.
-
----
-
-## UC5 — Actualizar Afiliado
+## UC3 — Actualizar Afiliado
 
 Actor principal:
 Usuario Administrativo / Sistema Cliente
@@ -123,3 +62,43 @@ Flujo principal:
 
 Resultado:
 Afiliado actualizado.
+
+---
+
+## UC4 — Sincronizar con Google Sheets
+
+Actor principal:
+Usuario Administrativo
+
+Descripción:
+El usuario administrativo inicia la acción a través de un sistema cliente.
+Permite sincronizar los datos almacenados con Google Sheets.
+
+Flujo principal:
+1. El usuario inicia la sincronización.
+2. El sistema obtiene afiliados válidos.
+3. El sistema envía los datos a Google Sheets.
+4. El sistema confirma la operación.
+
+Resultado:
+Datos sincronizados.
+
+---
+
+## UC5 — Dar de baja afiliado
+
+Actor principal:
+Usuario Administrativo / Sistema Cliente
+
+Descripción:
+Permite dar de baja un afiliado marcándolo como inactivo en el sistema.
+
+Flujo principal:
+1. El actor solicita la baja del afiliado.
+2. El sistema verifica la existencia del afiliado.
+3. El sistema marca el afiliado como inactivo.
+4. El sistema confirma la operación.
+
+Resultado:
+Afiliado dado de baja lógicamente.
+
