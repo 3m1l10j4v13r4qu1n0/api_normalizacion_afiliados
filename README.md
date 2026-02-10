@@ -117,6 +117,14 @@ Proyecto en desarrollo con fines educativos y de portfolio.
 
 ---
 
+## Roadmap
+
+- Fase 1: Documentación funcional ✔
+- Fase 2: Diseño técnico (pendiente)
+- Fase 3: Implementación (pendiente)
+
+---
+
 ## Autor
 
 Emilio Javier Aquino   
