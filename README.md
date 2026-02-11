@@ -8,7 +8,7 @@
 
 ---
 
-## Descripción
+## 📌 Descripción general
 
 Este proyecto implementa una API REST para la importación, validación, normalización y gestión de datos de afiliados.
 
@@ -23,7 +23,7 @@ El sistema actúa como una capa intermedia entre fuentes de datos externas y sis
 
 ---
 
-## Objetivos del proyecto
+## 🎯 Objetivos del proyecto
 
 - Normalizar datos de afiliados
 - Validar información obligatoria
@@ -111,17 +111,40 @@ api_normalizacion_afiliados
 
 ---
 
-## Estado del proyecto
+## ✅ Estado del proyecto
 
-Proyecto en desarrollo con fines educativos y de portfolio.
+✔ Fase 1 — Documentación funcional: FINALIZADA
+
+La documentación fue revisada y validada asegurando coherencia entre visión, alcance, reglas de negocio, casos de uso, API y modelo de datos.
+
+📄 Ver detalle del cierre: [fase_1_cierre.md](face_1_cierre.md)
+
 
 ---
 
-## Roadmap
+## 🗺️ Roadmap
 
 - Fase 1: Documentación funcional ✔
-- Fase 2: Diseño técnico (pendiente)
-- Fase 3: Implementación (pendiente)
+
+- Fase 2: Diseño técnico y arquitectura (pendiente)
+
+- Fase 3: Implementación API REST (pendiente)
+
+- Fase 4: Pruebas y validación (pendiente)
+
+---
+
+## 🧠 Perfil objetivo
+
+Este proyecto está pensado como material demostrativo para:
+
+- Analista Funcional Jr
+
+- Analista Técnico Funcional
+
+- Primeros roles en proyectos de software administrativo
+
+El foco está puesto en análisis, documentación, trazabilidad y coherencia funcional.
 
 ---
 
@@ -129,3 +152,7 @@ Proyecto en desarrollo con fines educativos y de portfolio.
 
 Emilio Javier Aquino   
 Estudiante de Analista de Sistemas
+
+## 📄 Licencia
+
+Proyecto de uso educativo y demostrativo.
