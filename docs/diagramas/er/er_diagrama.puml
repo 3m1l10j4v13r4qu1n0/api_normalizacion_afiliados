@@ -1,0 +1,130 @@
+@startuml Diagrama ER Modelo 3FN Completo  Sistema de Normalización de Afiliados
+
+hide circle
+skinparam linetype ortho
+
+' =========================
+' ENTIDADES PRINCIPALES
+' =========================
+
+entity Importacion {
+    + id : INTEGER <<PK>>
+    --
+    fecha_importacion : DATETIME
+    cantidad_registros : INTEGER
+    cantidad_errores : INTEGER
+    estado : VARCHAR(20)
+}
+
+entity Afiliado {
+    + id : INTEGER <<PK>>
+    --
+    dni : VARCHAR(20) <<UNIQUE>>
+    nombre : VARCHAR(50)>
+    apellido : VARCHAR(50)>
+    fecha_nacimiento : DATE
+    email : VARCHAR(150) <<UNIQUE>>
+    telefono : VARCHAR(20)
+    numero_legajo : VARCHAR(50) <<UNIQUE>>
+    fecha_ingreso : DATE
+    fecha_alta : DATE
+    titulo_obtenido : VARCHAR(100)
+    marca_temporal_creacion : DATETIME
+    marca_temporal_actualizacion : DATETIME
+
+    genero_id : INTEGER <<FK>>
+    estado_civil_id : INTEGER <<FK>>
+    nivel_educativo_id : INTEGER <<FK>>
+    relacion_dependencia_id : INTEGER <<FK>>
+    estado_afiliado_id : INTEGER <<FK>>
+    domicilio_id : INTEGER <<FK>>
+    importacion_id : INTEGER <<FK>>
+}
+
+entity ErrorValidacion {
+    + id : INTEGER <<PK>>
+    --
+    registro_origen : VARCHAR(100)
+    campo : VARCHAR(100)
+    descripcion_error : TEXT
+    fecha_error : DATETIME
+    importacion_id : INTEGER <<FK>>
+}
+
+' =========================
+' TABLAS DE DOMINIO
+' =========================
+
+entity Genero {
+    + id : INTEGER <<PK>>
+    --
+    descripcion : VARCHAR(50)
+}
+
+entity EstadoCivil {
+    + id : INTEGER <<PK>>
+    --
+    descripcion : VARCHAR(50)
+}
+
+entity NivelEducativo {
+    + id : INTEGER <<PK>>
+    --
+    descripcion : VARCHAR(50)
+}
+
+entity RelacionDependencia {
+    + id : INTEGER <<PK>>
+    --
+    descripcion : VARCHAR(50)
+}
+
+entity EstadoAfiliado {
+    + id : INTEGER <<PK>>
+    --
+    descripcion : VARCHAR(20)
+}
+
+' =========================
+' NORMALIZACIÓN DE DOMICILIO
+' =========================
+
+entity Provincia {
+    + id : INTEGER <<PK>>
+    --
+    nombre : VARCHAR(100)
+}
+
+entity Localidad {
+    + id : INTEGER <<PK>>
+    --
+    nombre : VARCHAR(100)
+    provincia_id : INTEGER <<FK>>
+}
+
+entity Domicilio {
+    + id : INTEGER <<PK>>
+    --
+    direccion : VARCHAR(150)
+    codigo_postal : VARCHAR(20)
+    localidad_id : INTEGER <<FK>>
+}
+
+' =========================
+' RELACIONES
+' =========================
+
+Importacion ||--o{ Afiliado
+Importacion ||--o{ ErrorValidacion
+
+Afiliado }o--|| Genero
+Afiliado }o--|| EstadoCivil
+Afiliado }o--|| NivelEducativo
+Afiliado }o--|| RelacionDependencia
+Afiliado }o--|| EstadoAfiliado
+Afiliado }o--|| Domicilio
+
+Domicilio }o--|| Localidad
+Localidad }o--|| Provincia
+
+@enduml

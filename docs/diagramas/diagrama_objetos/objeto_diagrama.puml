@@ -1,0 +1,108 @@
+@startuml Diagrama de Objetos
+skinparam linetype ortho
+
+' =========================
+' OBJETOS (instancias)
+' =========================
+
+object importacion_20260210 {
+    id = 1
+    fechaImportacion = "2026-02-10"
+    cantidadRegistros = 3
+    cantidadErrores = 1
+    estado = "COMPLETADA"
+    archivoOrigen = "afiliados_febrero_2026.csv"
+    usuarioCarga = "admin_sistema"
+    fechaProcesamiento = "2026-02-10 14:30:25"
+    tiempoProcesamiento = "00:00:45"
+    cantidadAfiliadosCreados = 2
+    cantidadAfiliadosActualizados = 0
+}
+
+object afiliado_30111222 {
+    id = 101
+    apellido = "PEREZ"
+    nombre = "JUAN"
+    fecha_nacimiento = "1985-03-15"
+    dni = "30111222"
+    email = "juan.perez@email.com"
+    telefono = "1145678901"
+    nacionalidad = "ARGENTINA"
+    genero = "masculino"
+    estado_civil = "CASADO"
+    provincia = "BUENOS AIRES"
+    localidad = "LA PLATA"
+    direccion = "Av. Siempre Viva 123"
+    codigo_postal = "1900"
+    nivel_educativo = "UNIVERSITARIO"
+    titulo_obtenido = "LIC. EN ADMINISTRACION"
+    numero_legajo = "LEG-2024-00123"
+    fecha_ingreso = "2024-01-15"
+    fecha_alta = "2024-01-15"
+    comuna_donde_trabaja = "COMUNA 1"
+    relacion_dependencia = "PLANTA PERMANENTE"
+    marca_temporal_creacion = "2024-01-15 09:30:00"
+    marca_temporal_actualizacion = "2026-02-10 14:30:30"
+    estado = "activo"
+}
+
+object afiliado_28999888 {
+    id = 102
+    apellido = "GOMEZ"
+    nombre = "MARIA"
+    fecha_nacimiento = "1990-07-22"
+    dni = "28999888"
+    email = "maria.gomez@email.com"
+    telefono = "1156789012"
+    nacionalidad = "ARGENTINA"
+    genero = "femenino"
+    estado_civil = "CASADA"
+    provincia = "BUENOS AIRES"
+    localidad = "BERISSO"
+    direccion = "Calle Falsa 456"
+    codigo_postal = "1923"
+    nivel_educativo = "TERCIARIO"
+    titulo_obtenido = "TEC. EN RRHH"
+    numero_legajo = "LEG-2024-00145"
+    fecha_ingreso = "2024-02-20"
+    fecha_alta = "2024-02-20"
+    comuna_donde_trabaja = "COMUNA 2"
+    relacion_dependencia = "CONTRATADO"
+    marca_temporal_creacion = "2024-02-20 10:15:00"
+    marca_temporal_actualizacion = "2026-02-10 14:30:31"
+    estado = "activo"
+}
+
+object error_dni_duplicado {
+    id = 9001
+    registroOrigen = "fila_3"
+    campo = "dni"
+    descripcionError = "DNI duplicado"
+    valorErroneo = "30111222"
+    fechaError = "2026-02-10 14:30:26"
+    criticidad = "ALTA"
+    tipoError = "VALIDACION"
+    sugerencia = "Verificar si el afiliado ya existe en el sistema"
+}
+
+object estado_activo {
+    id = 1
+    descripcion = "ACTIVO"
+    codigo = "A"
+    fechaDesde = "2024-01-01"
+    fechaHasta = "NULL"
+    permiteOperaciones = true
+}
+
+' =========================
+' RELACIONES ENTRE OBJETOS
+' =========================
+
+importacion_20260210 -- afiliado_30111222
+importacion_20260210 -- afiliado_28999888
+importacion_20260210 -- error_dni_duplicado
+
+afiliado_30111222 -- estado_activo
+afiliado_28999888 -- estado_activo
+
+@enduml

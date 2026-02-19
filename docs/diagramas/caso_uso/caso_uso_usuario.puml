@@ -1,0 +1,44 @@
+@startuml ApiFlack
+left to right direction
+
+title Sistema de Normalización de Datos de Afiliados del Sindicato
+
+' Actores 
+actor "Google Sheets" as GS
+actor "Cliente\n(Usuario)" as Cliente
+
+' Sistema 
+rectangle "API REST de Normalización" {
+    
+    ' Casos de Uso
+    (UC0: IngresarDatos) as UC0
+    (UC1: ConsultarDatos) as UC1
+    (UC2: NormalizarDatos) as UC2
+    (UC3: CRUD SQLite) as UC3
+    (UC4: ValidarDatos) as UC4
+    (UC5: NotificarErrores) as UC5
+    (UC6: SincronizarSheets) as UC6
+    (UC7: ActualizarAfiliado) as UC7
+}
+
+' Relaciones de Actores 
+GS --> UC0 : importa datos
+Cliente --> UC1 : consulta
+Cliente --> UC7 : actualiza
+
+' Relaciones Include 
+UC0 ..> UC2 : <<include>>
+UC2 ..> UC4 : <<include>>
+UC4 ..> UC3 : <<include>>
+UC7 ..> UC2 : <<include>>
+UC2 ..> UC6 : <<include>>
+UC1 ..> UC3 : <<include>>
+
+' Relaciones Extend 
+UC4 ..> UC5 : <<extend>>
+UC7 ..> UC6 : <<extend>>
+
+' Sincronización bidireccional 
+UC6 --> GS : sincroniza
+
+@enduml

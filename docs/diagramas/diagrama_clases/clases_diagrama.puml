@@ -1,0 +1,114 @@
+@startuml Diagrama de Clases Sistema de Normalización
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+
+' =========================
+' CLASES PRINCIPALES
+' =========================
+
+class Importacion {
+    - id : Integer
+    - fechaImportacion : DateTime
+    - cantidadRegistros : Integer
+    - cantidadErrores : Integer
+    - estado : String
+
+    + procesar()
+    + registrarError()
+}
+
+class Afiliado {
+    - id : Integer
+    - dni : String
+    - nombre : String
+    - apellido : String
+    - fechaNacimiento : Date
+    - email : String
+    - telefono : String
+    - numeroLegajo : String
+    - fechaIngreso : Date
+    - fechaAlta : Date
+    - tituloObtenido : String
+    - fechaCreacion : DateTime
+    - fechaActualizacion : DateTime
+
+    + actualizarDatos()
+    + darDeBaja()
+    + normalizarDatos()
+}
+
+class ErrorValidacion {
+    - id : Integer
+    - registroOrigen : String
+    - campo : String
+    - descripcionError : String
+    - fechaError : DateTime
+}
+
+' =========================
+' CLASES DE DOMINIO
+' =========================
+
+class Genero {
+    - id : Integer
+    - descripcion : String
+}
+
+class EstadoCivil {
+    - id : Integer
+    - descripcion : String
+}
+
+class NivelEducativo {
+    - id : Integer
+    - descripcion : String
+}
+
+class RelacionDependencia {
+    - id : Integer
+    - descripcion : String
+}
+
+class EstadoAfiliado {
+    - id : Integer
+    - descripcion : String
+}
+
+' =========================
+' DOMICILIO
+' =========================
+
+class Domicilio {
+    - id : Integer
+    - direccion : String
+    - codigoPostal : String
+}
+
+class Localidad {
+    - id : Integer
+    - nombre : String
+}
+
+class Provincia {
+    - id : Integer
+    - nombre : String
+}
+
+' =========================
+' RELACIONES
+' =========================
+
+Importacion "1" -- "0..*" Afiliado
+Importacion "1" -- "0..*" ErrorValidacion
+
+Afiliado "1" -- "1" Genero
+Afiliado "1" -- "1" EstadoCivil
+Afiliado "1" -- "1" NivelEducativo
+Afiliado "1" -- "1" RelacionDependencia
+Afiliado "1" -- "1" EstadoAfiliado
+Afiliado "1" -- "1" Domicilio
+
+Domicilio "1" -- "1" Localidad
+Localidad "1" -- "1" Provincia
+
+@enduml

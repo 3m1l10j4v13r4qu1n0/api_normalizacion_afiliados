@@ -27,7 +27,7 @@ Representa a una persona afiliada al sindicato.
 - email (string, 150)
 - telefono (string, 20)
 - nacionalidad (string, 50)
-- genero (string, 10)
+- genero (enum: masculino, femenino, otro)
 - estado_civil (string, 20)
 - provincia (string, 50)
 - localidad (string, 50)
