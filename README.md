@@ -59,7 +59,7 @@ Esto simula la documentación generada por un **analista funcional junior en un 
 - Importación de afiliados
 - Validación de datos
 - Normalización de información
-- Persistencia en base de datos SQLite
+- Persistencia en base de datos PostgreSQL
 - Consulta de afiliados
 - Actualización de afiliados
 - Baja lógica de afiliados
@@ -84,7 +84,7 @@ Esto permite mantener el sistema modular y mantenible.
 
 - Python
 - FastAPI
-- SQLite
+- PostgreSQL
 - Pydantic
 - Google Sheets API
 
@@ -100,6 +100,9 @@ api_normalizacion_afiliados
 │   ├── api.md
 │   ├── casos_de_uso.md
 │   ├── diagramas
+│   │   ├── arquitectura
+│   │   │   ├── arquitectura_diagrama.png
+│   │   │   └── arquitectura_diagrama.puml
 │   │   ├── caso_uso
 │   │   │   ├── caso_uso_usuario.png
 │   │   │   └── caso_uso_usuario.puml

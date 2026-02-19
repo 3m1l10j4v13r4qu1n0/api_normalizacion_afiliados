@@ -15,7 +15,7 @@ El sistema incluirá las siguientes funcionalidades:
 - Validación de información obligatoria
 - Normalización de datos (formato de texto, identificación, etc.)
 - Registro de errores de validación
-- Almacenamiento de afiliados en base de datos SQLite
+- Almacenamiento de afiliados en base de datos PostgreSQL
 - Consulta de afiliados
 - Actualización de datos de afiliados
 - Sincronización de datos con Google Sheets

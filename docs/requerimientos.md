@@ -49,7 +49,7 @@ RF13 — El sistema debe permitir dar de baja afiliados.
 ---
 
 #### Persistencia
-RF14 — El sistema debe almacenar los datos en una base de datos SQLite.
+RF14 — El sistema debe almacenar los datos en una base de datos PostgreSQL.
 
 ---
 

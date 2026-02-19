@@ -56,7 +56,7 @@ El sistema incluye:
 
 - Normalización de datos de afiliados
 - Validación de información
-- Persistencia en base de datos SQLite
+- Persistencia en base de datos PostgreSQL
 - API REST para operaciones CRUD
 - Sincronización con Google Sheets
 
@@ -76,6 +76,6 @@ El sistema no incluye:
 - La API será consumida por scripts o sistemas externos.
 
 #### Restricciones
-- Base de datos SQLite
+- Base de datos PostgreSQL
 - Arquitectura basada en API REST
 - Proyecto orientado a prototipo funcional para demostración
