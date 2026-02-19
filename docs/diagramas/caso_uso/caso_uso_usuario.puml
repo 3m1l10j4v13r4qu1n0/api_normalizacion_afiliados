@@ -1,4 +1,4 @@
-@startuml ApiFlack
+@startuml Api
 left to right direction
 
 title Sistema de Normalización de Datos de Afiliados del Sindicato
@@ -14,7 +14,7 @@ rectangle "API REST de Normalización" {
     (UC0: IngresarDatos) as UC0
     (UC1: ConsultarDatos) as UC1
     (UC2: NormalizarDatos) as UC2
-    (UC3: CRUD SQLite) as UC3
+    (UC3: CRUD PostgreSQL) as UC3
     (UC4: ValidarDatos) as UC4
     (UC5: NotificarErrores) as UC5
     (UC6: SincronizarSheets) as UC6

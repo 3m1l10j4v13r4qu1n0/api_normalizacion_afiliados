@@ -1,0 +1,58 @@
+@startuml Diagrama de Arquitectura
+title Arquitectura - Sistema de Normalización de Datos de Afiliados
+
+package "Clientes Externos" {
+  [Sistema Cliente]
+  [Usuario Administrativo]
+}
+
+package "API REST" {
+  [Controladores REST]
+}
+
+package "Capa de Aplicación" {
+  [Servicio Importacion]
+  [Servicio Afiliado]
+  [Servicio Sincronizacion]
+}
+
+package "Capa de Dominio" {
+  [Entidad Afiliado]
+  [Entidad Importacion]
+  [Entidad ErrorValidacion]
+  [Reglas de Negocio]
+}
+
+package "Persistencia" {
+  [Repositorio Afiliado]
+  [Repositorio Importacion]
+  [Repositorio ErrorValidacion]
+  database "PostgreSQL"
+}
+
+package "Sistema Externo" {
+  [Google Sheets]
+}
+
+[Sistema Cliente] --> [Controladores REST]
+[Usuario Administrativo] --> [Controladores REST]
+
+[Controladores REST] --> [Servicio Importacion]
+[Controladores REST] --> [Servicio Afiliado]
+[Controladores REST] --> [Servicio Sincronizacion]
+
+[Servicio Importacion] --> [Reglas de Negocio]
+[Servicio Importacion] --> [Repositorio Afiliado]
+[Servicio Importacion] --> [Repositorio ErrorValidacion]
+[Servicio Importacion] --> [Repositorio Importacion]
+
+[Servicio Afiliado] --> [Repositorio Afiliado]
+
+[Servicio Sincronizacion] --> [Repositorio Afiliado]
+[Servicio Sincronizacion] --> [Google Sheets]
+
+[Repositorio Afiliado] --> [PostgreSQL]
+[Repositorio Importacion] --> [PostgreSQL]
+[Repositorio ErrorValidacion] --> [PostgreSQL]
+
+@enduml
