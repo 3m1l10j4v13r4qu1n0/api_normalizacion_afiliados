@@ -58,4 +58,6 @@ RN15 — La sincronización no debe modificar datos locales.
 
 RN16 — La eliminación de un afiliado debe realizarse mediante baja lógica, marcando su estado como inactivo.
 
+RN17 — Los atributos género, estado civil, nivel educativo, relación de dependencia y estado del afiliado
+deben pertenecer a valores controlados almacenados en entidades de dominio.
 

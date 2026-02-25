@@ -1,106 +1,215 @@
-# Modelo de Datos Conceptual
+# Modelo de Datos Conceptual  
 ## Sistema de Normalización de Datos de Afiliados
-
-### 1. Introducción
-Este documento describe el modelo de datos conceptual del sistema de normalización de datos de afiliados.
-
-El objetivo es identificar las entidades principales del sistema y sus atributos más relevantes.
 
 ---
 
-### 2. Entidades del sistema
+## 1. Introducción
+
+Este documento describe el modelo de datos conceptual del sistema de normalización de datos de afiliados.
+
+El objetivo es identificar las entidades principales del dominio, sus atributos relevantes y las relaciones entre ellas, manteniendo coherencia con el modelo lógico y el diseño arquitectónico del sistema.
+
+El modelo conceptual representa la estructura del dominio sin entrar en detalles técnicos de implementación.
+
+---
+
+## 2. Entidades del sistema
 
 ---
 
 ## Afiliado
 
-Descripción:
+**Descripción:**  
 Representa a una persona afiliada al sindicato.
 
-**Atributos:**
+**Atributos principales:**
 
-- id (PK): Identificador único
-- apellido (string, 50)
-- nombre (string, 50)
-- fecha_nacimiento (date)
-- dni (string, 20)
-- email (string, 150)
-- telefono (string, 20)
-- nacionalidad (string, 50)
-- genero (enum: masculino, femenino, otro)
-- estado_civil (string, 20)
-- provincia (string, 50)
-- localidad (string, 50)
-- direccion (string, 100)
-- codigo_postal (string, 20)
-- nivel_educativo (string, 50)
-- titulo_obtenido (string, 100, opcional)
-- numero_legajo (string, 50)
-- fecha_ingreso (date)
-- fecha_alta (date)
-- comuna_donde_trabaja (string, 50)
-- relacion_dependencia (string, 50)
-- marca_temporal_creacion (datetime)
-- marca_temporal_actualizacion (datetime)
-- estado (enum: activo, inactivo)
+- id (PK)
+- apellido
+- nombre
+- fecha_nacimiento
+- dni
+- email
+- telefono
+- numero_legajo
+- fecha_ingreso
+- fecha_alta
+- titulo_obtenido (opcional)
+- marca_temporal_creacion
+- marca_temporal_actualizacion
 
+**Relaciones:**
+
+- genero (relación con entidad Genero)
+- estado_civil (relación con entidad EstadoCivil)
+- nivel_educativo (relación con entidad NivelEducativo)
+- relacion_dependencia (relación con entidad RelacionDependencia)
+- estado_afiliado (relación con entidad EstadoAfiliado)
+- domicilio (relación con entidad Domicilio)
+- importacion (relación con entidad Importacion)
 
 **Reglas relacionadas:**
 
-- Nombre, apellido y DNI son obligatorios
-- DNI, email y número_legajo deben ser únicos
-- Relación laboral puede ser: `monotributista`, `planta_transitoria`, `planta_permanente`
-- Nivel educativo y género deben pertenecer a valores controlados
-- Los datos deben almacenarse normalizados
+- Nombre, apellido y DNI son obligatorios.
+- DNI, email y número_legajo deben ser únicos.
+- El afiliado debe tener un estado definido (activo/inactivo).
+- Los datos deben almacenarse normalizados.
 
 ---
 
-## ErrorValidacion
+## Domicilio
 
-Descripción:
-Representa un error detectado durante la importación de datos.
+**Descripción:**  
+Representa la información domiciliaria del afiliado.
 
 **Atributos:**
 
-- id
-- registro_origen: Identificador del registro de entrada que originó el error 
-  (fila, índice o identificador externo según la fuente de datos)
-- campo
-- descripcion_error
-- fecha_error
+- id (PK)
+- direccion
+- codigo_postal
 
-Reglas relacionadas:
-- Los errores deben registrarse
-- Los registros inválidos no deben persistirse
-- El registro_origen debe permitir identificar el registro de entrada con error
+**Relaciones:**
+
+- localidad (relación con entidad Localidad)
+
+---
+
+## Localidad
+
+**Descripción:**  
+Representa una ciudad o localidad.
+
+**Atributos:**
+
+- id (PK)
+- nombre
+
+**Relaciones:**
+
+- provincia (relación con entidad Provincia)
+
+---
+
+## Provincia
+
+**Descripción:**  
+Representa una provincia del país.
+
+**Atributos:**
+
+- id (PK)
+- nombre
 
 ---
 
 ## Importacion
 
-Descripción:
+**Descripción:**  
 Representa un proceso de importación de datos de afiliados.
 
 **Atributos:**
 
-- id
+- id (PK)
 - fecha_importacion
 - cantidad_registros
 - cantidad_errores
 - estado
 
-Reglas relacionadas:
-- La importación debe continuar aunque existan errores
-- Debe registrarse el resultado del proceso
+**Reglas relacionadas:**
+
+- La importación debe continuar aunque existan errores.
+- Debe registrarse el resultado del proceso.
+- Puede generar múltiples afiliados válidos y múltiples errores de validación.
 
 ---
 
-### 3. Relaciones conceptuales
+## ErrorValidacion
 
-Importacion
-    |
-    |--- procesa ---> Afiliado
-    |
-    |--- genera ----> ErrorValidacion
+**Descripción:**  
+Representa un error detectado durante la importación de datos.
 
-Un proceso de importación puede generar múltiples afiliados válidos y múltiples errores de validación.
+**Atributos:**
+
+- id (PK)
+- registro_origen
+- campo
+- descripcion_error
+- fecha_error
+
+**Relaciones:**
+
+- importacion (relación con entidad Importacion)
+
+**Reglas relacionadas:**
+
+- Los errores deben registrarse.
+- Los registros inválidos no deben persistirse.
+- Debe poder identificarse el registro de origen del error.
+
+---
+
+## Entidades de Dominio (Tablas de Valores Controlados)
+
+Estas entidades representan valores controlados utilizados por Afiliado.
+
+---
+
+### Genero
+
+- id (PK)
+- descripcion
+
+---
+
+### EstadoCivil
+
+- id (PK)
+- descripcion
+
+---
+
+### NivelEducativo
+
+- id (PK)
+- descripcion
+
+---
+
+### RelacionDependencia
+
+- id (PK)
+- descripcion
+
+---
+
+### EstadoAfiliado
+
+- id (PK)
+- descripcion
+
+---
+
+## 3. Relaciones Conceptuales Principales
+
+- Una Importacion puede generar múltiples Afiliados.
+- Una Importacion puede generar múltiples ErrorValidacion.
+- Un Afiliado tiene un único Genero.
+- Un Afiliado tiene un único EstadoCivil.
+- Un Afiliado tiene un único NivelEducativo.
+- Un Afiliado tiene una única RelacionDependencia.
+- Un Afiliado tiene un único EstadoAfiliado.
+- Un Afiliado tiene un único Domicilio.
+- Un Domicilio pertenece a una única Localidad.
+- Una Localidad pertenece a una única Provincia.
+
+---
+
+## 4. Consideraciones de Normalización
+
+El modelo conceptual refleja una estructura normalizada donde:
+
+- Los valores repetitivos o categóricos se representan como entidades de dominio.
+- La información geográfica se separa en entidades independientes.
+- La entidad Afiliado mantiene únicamente sus datos propios y relaciones.
+
+Este diseño garantiza consistencia, integridad referencial y alineación con el modelo lógico en tercera forma normal (3FN).

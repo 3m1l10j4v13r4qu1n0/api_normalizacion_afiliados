@@ -17,7 +17,9 @@ Todas las respuestas de la API se devuelven en formato JSON.
 ## Importar afiliados
 
 Endpoint:
+```
 POST /afiliados/import
+```
 
 Descripción:
 Permite importar múltiples registros de afiliados para su validación y normalización.
@@ -36,7 +38,9 @@ Respuesta esperada:
 ## Consultar afiliados
 
 Endpoint:
+```
 GET /afiliados
+```
 
 Descripción:
 Obtiene la lista de afiliados almacenados.
@@ -49,7 +53,9 @@ Lista de afiliados.
 ## Consultar afiliado por ID
 
 Endpoint:
+```
 GET /afiliados/{id}
+```
 
 Descripción:
 Obtiene la información de un afiliado específico.
@@ -62,7 +68,9 @@ Datos del afiliado.
 ## Actualizar afiliado
 
 Endpoint:
+```
 PUT /afiliados/{id}
+```
 
 Descripción:
 Actualiza los datos de un afiliado existente.
@@ -75,7 +83,9 @@ Afiliado actualizado correctamente.
 ## Eliminar afiliado
 
 Endpoint:
+```
 DELETE /afiliados/{id}
+```
 
 Descripción:
 Marca un afiliado como inactivo en el sistema (baja lógica).
@@ -88,13 +98,35 @@ Resultado esperado:
 
 ### 3. Sincronización
 
+Importar desde Google Sheets
+
+Endpoint:
+```
+POST /sync/sheets/import
+```
+Descripción: 
+Lee los registros de afiliados desde una hoja de cálculo de Google Sheets, los valida, normaliza y almacena en la base de datos.
+
+Resultado esperado:
+
+- Registros válidos almacenados
+- Errores registrados
+
+Respuesta esperada:
+
+- `cantidad_registros_procesados`
+- `cantidad_registros_validos`
+- `cantidad_errores`
+
 ---
 
 
 ## Sincronizar con Google Sheets
 
 Endpoint:
-POST /sync/sheets
+```
+POST /sync/sheets/export
+```
 
 Descripción:
 Sincroniza los datos de afiliados válidos con Google Sheets.
@@ -115,6 +147,8 @@ La API debe devolver mensajes de error cuando:
 
 Formato general de error:
 
+```
 {
   "error": "descripcion del error"
 }
+```

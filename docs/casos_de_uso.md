@@ -65,23 +65,24 @@ Afiliado actualizado.
 
 ---
 
-## UC4 — Sincronizar con Google Sheets
+## UC4 — Importar desde Google Sheets
 
 Actor principal:
 Usuario Administrativo
 
 Descripción:
-El usuario administrativo inicia la acción a través de un sistema cliente.
-Permite sincronizar los datos almacenados con Google Sheets.
+El usuario inicia la importación de datos desde una hoja de cálculo de Google Sheets. La API lee los registros, los valida, normaliza y almacena.
 
 Flujo principal:
-1. El usuario inicia la sincronización.
-2. El sistema obtiene afiliados válidos.
-3. El sistema envía los datos a Google Sheets.
-4. El sistema confirma la operación.
+1. El usuario dispara la importación.
+2. El sistema lee la hoja de calculo de Google Sheets.
+3. El sistema normaliza y valida los datos obtenidos.
+4. El sistema almasena los datos validados.
+5. El sistema registra si hay errores.
 
 Resultado:
-Datos sincronizados.
+Datos importados.
+
 
 ---
 
@@ -102,3 +103,19 @@ Flujo principal:
 Resultado:
 Afiliado dado de baja lógicamente.
 
+## UC6 — Sincronizar cambios hacia Google Sheets
+
+Actor principal: 
+Usuario Administrativo
+
+Descripción: 
+Cuando se modifican o actualizan afiliados en el sistema, el usuario puede sincronizar esos cambios de vuelta a la hoja de cálculo de Google Sheets para mantener consistencia.
+
+Flujo principal:
+1. El usuario inicia sync.
+2. El sistema obtiene los afiliados modificados.
+3. el sistema actualiza las filas correspondientes en Gogle Sheets.
+4. el sistema confirma la operación.
+
+Resultado:
+Datos sincronizados.

@@ -27,7 +27,7 @@ Actor humano
 
 #### Actor: Sistema Externo (Google Sheets)
 Descripción:
-Sistema utilizado para almacenar o visualizar información sincronizada de afiliados.
+Sistema externo que actúa como fuente de datos en el proceso de importación y como destino en el proceso de sincronización. La comunicación es bidireccional.
 
 Responsabilidades:
 - Recibir datos sincronizados desde la API

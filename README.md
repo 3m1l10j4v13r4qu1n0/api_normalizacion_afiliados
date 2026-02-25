@@ -93,37 +93,38 @@ Esto permite mantener el sistema modular y mantenible.
 ## Estructura del proyecto
 
 api_normalizacion_afiliados                      
-├── app
-├── docs
-│   ├── actores.md
-│   ├── alcance.md
-│   ├── api.md
-│   ├── casos_de_uso.md
-│   ├── diagramas
-│   │   ├── arquitectura
-│   │   │   ├── arquitectura_diagrama.png
-│   │   │   └── arquitectura_diagrama.puml
-│   │   ├── caso_uso
-│   │   │   ├── caso_uso_usuario.png
-│   │   │   └── caso_uso_usuario.puml
-│   │   ├── diagrama_clases
-│   │   │   ├── clases_diagrama.png
-│   │   │   └── clases_diagrama.puml
-│   │   ├── diagrama_objetos
-│   │   │   ├── objeto_diagrama.png
-│   │   │   └── objeto_diagrama.puml
-│   │   └── er
-│   │       ├── er_diagrama.png
-│   │       └── er_diagrama.puml
-│   ├── modelos_datos.md
-│   ├── pruebas.md
-│   ├── reglas_negocio.md
-│   ├── requerimientos.md
-│   └── vision.md
-├── face_1_cierre.md
-├── README.md
-├── requirements.txt
-└── tests
+├── app    
+├── docs          
+│   ├── actores.md        
+│   ├── alcance.md              
+│   ├── api.md                  
+│   ├── caso_de_uso_expandidos.md              
+│   ├── casos_de_uso.md                   
+│   ├── diagramas                 
+│   │   ├── arquitectura               
+│   │   │   ├── arquitectura_diagrama.png           
+│   │   │   └── arquitectura_diagrama.puml           
+│   │   ├── caso_uso              
+│   │   │   ├── caso_uso.png             
+│   │   │   └── caso_uso.puml            
+│   │   ├── diagrama_clases                  
+│   │   │   ├── clases_diagrama.png            
+│   │   │   └── clases_diagrama.puml            
+│   │   ├── diagrama_objetos             
+│   │   │   ├── objeto_diagrama.png            
+│   │   │   └── objeto_diagrama.puml              
+│   │   └── er                
+│   │       ├── er_diagrama.png                
+│   │       └── er_diagrama.puml                     
+│   ├── modelos_datos.md                       
+│   ├── pruebas.md                    
+│   ├── reglas_negocio.md               
+│   ├── requerimientos.md                     
+│   └── vision.md                
+├── face_1_cierre.md               
+├── README.md                     
+├── requirements.txt               
+└── tests                  
 
 
 ---

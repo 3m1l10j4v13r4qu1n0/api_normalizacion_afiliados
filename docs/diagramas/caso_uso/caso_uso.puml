@@ -1,0 +1,52 @@
+@startuml caso_uso
+left to right direction
+
+title Sistema de Normalización de Datos de Afiliados del Sindicato
+
+' Actores
+actor "Usuario\nAdministrativo" as Admin
+actor "Sistema\nCliente" as Cliente
+actor "Google Sheets" as GS
+
+rectangle "API REST de Normalización" {
+
+    usecase "UC1: Importar Afiliados\n(desde archivo/API)" as UC1
+    usecase "UC2: Consultar Afiliados" as UC2
+    usecase "UC3: Actualizar Afiliado" as UC3
+    usecase "UC4: Importar desde\nGoogle Sheets" as UC4
+    usecase "UC5: Dar de baja Afiliado" as UC5
+    usecase "UC6: Sincronizar cambios\nhacia Google Sheets" as UC6
+
+    usecase "Validar y Normalizar Datos" as VN
+    usecase "Registrar Errores\nde Validación" as RE
+}
+
+' Relaciones actores humanos/cliente
+Cliente --> UC1
+Admin --> UC2
+Cliente --> UC2
+Admin --> UC3
+Cliente --> UC3
+Admin --> UC4
+Admin --> UC5
+Cliente --> UC5
+Admin --> UC6
+
+' Google Sheets como fuente (importación)
+GS --> UC4 : provee datos
+
+' Google Sheets como destino (sincronización)
+UC6 --> GS : actualiza datos
+
+' Include internos
+UC1 ..> VN : <<include>>
+UC3 ..> VN : <<include>>
+UC4 ..> VN : <<include>>
+
+' Extend
+VN ..> RE : <<extend>>
+
+' UC3 puede disparar sincronización
+UC3 ..> UC6 : <<extend>>
+
+@enduml

@@ -18,7 +18,8 @@ El sistema incluirá las siguientes funcionalidades:
 - Almacenamiento de afiliados en base de datos PostgreSQL
 - Consulta de afiliados
 - Actualización de datos de afiliados
-- Sincronización de datos con Google Sheets
+- Importación de datos de afiliados desde Google Sheets 
+- Sincronización de cambios hacia Google Sheets
 - API REST para acceso a la información
 
 ---
@@ -50,5 +51,5 @@ El alcance del sistema se considerará cumplido cuando:
 - Los datos sean validados y normalizados correctamente
 - Los afiliados puedan consultarse y actualizarse
 - Los errores de validación sean registrados
-- Los datos puedan sincronizarse con Google Sheets
-
+- Los datos puedan importarse desde Google Sheets
+- Los cambios realizados en el sistema puedan sincronizarse de vuelta hacia Google Sheets
