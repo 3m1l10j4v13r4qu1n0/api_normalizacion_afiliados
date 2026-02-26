@@ -28,7 +28,8 @@ El sistema incluirá las siguientes funcionalidades:
 El sistema no incluirá:
 
 - Interfaz gráfica de usuario
-- Sistema de autenticación o autorización
+- Sistema de autenticación o autorización — será responsabilidad de un servicio externo. 
+- Esta API asume que las requests entrantes ya fueron autenticadas.
 - Integración con sistemas externos adicionales
 - Generación de reportes
 - Migración de datos históricos
