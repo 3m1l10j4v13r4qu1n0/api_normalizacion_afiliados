@@ -1,5 +1,5 @@
 from app.infrastructure.sheets.sheets_interface import ISheetsClient
-from app.application.services.sheets_service import importar_desde_sheets
+from app.application.services_sheets.sheets_service import importar_desde_sheets
 
 class MockSheetsClient(ISheetsClient):
     """Implementación falsa para tests — no necesita credenciales"""
