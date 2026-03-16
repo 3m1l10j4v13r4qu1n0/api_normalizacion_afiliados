@@ -9,7 +9,7 @@ class SheetDataFetcherPort(ABC):
     """
     
     @abstractmethod
-    async def fetch(self, sheet_id: str, range_name: str) -> Optional[RawData]:
+    async def fetch(self, range_name: str) -> Optional[RawData]:
         """
         Obtiene datos de una hoja de cálculo.
         Retorna RawData (modelo del dominio) o None si no hay datos.
