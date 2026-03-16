@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.infrastructure.sheets.sheets_interface import ISheetsClient
-from app.infrastructure.sheets.sheets_client import GspreadSheetsClient
+from app.infrastructure.google.google_sheets_client import ISheetsClient
+from app.infrastructure.google.google_sheets_client import GspreadSheetsClient
 from app.infrastructure.database.orm_models import AfiliadoORM
 from app.domain.models.importacion import Importacion
 from app.domain.exceptions import SincronizacionError

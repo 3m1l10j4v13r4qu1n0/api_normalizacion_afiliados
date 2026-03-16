@@ -1,2 +1,0 @@
-class FileJsonStorageAdapter:
-    pass
