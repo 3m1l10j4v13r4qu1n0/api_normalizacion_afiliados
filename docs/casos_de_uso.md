@@ -84,6 +84,41 @@ Resultado:
 Datos importados.
 
 
+
+## UC4a — El sistema lee la hoja de cálculo de Google Sheets.
+
+Descripción:
+El usuario inicia la importación de datos desde una hoja de cálculo de Google Sheets. La API lee los registros,
+verifica que los encabezados sean los mismos que las variables del modelo del sistema, si no. Los adapta al sistema,
+crea un array con las filas de los registros de la hoja y los enumera
+
+
+
+Flujo principal:
+1. El sistema importa  todos los valores de la hoja  con un rango específico conectándose a actor externo Google Sheets.
+2. El sistema define  los encabezados y las lista de valores
+3. El sistema adacta los encabezados a variables más pytonicas
+4. El sistema instacia el objeto SheetRow
+
+Resultado:
+Datos ordenados en un array que cada elemento del array es un objeto SheetRow que contiene la clave numbrer_row:int que
+contiene el índice para identificar la fila después la clave value:Any que contiene un diccionario que contiene los encabezados y valores.
+
+## UC4b — El sistema registra si hay errores
+
+
+Descripción:
+EN la Hoja de GoogleSheets el sitema agrega "FALSE" a la columna "ErrorValidacionAfiliado" a las filas que fueron agregadas correctamente y
+en su defecto agrega "TRUE" a las filas que no  fueron agregadas correctamen
+
+
+1. El sitema identifica las filas que no pudieron ser agradas a la base de datos del Array SheetRow
+2. El sistema agrega "TRUE" o "1" en el encabezado "ErrorValidacionAfilidado" en la hoja de GoogleSheets. Solo a las filas que no pudieron ser
+agregadas en la base de dato
+3. el sitema agrega "FALSE" o "0" en el encabezado "ErrorValidacionAfiliado" en la hoja de GoogleSheets
+
+Resultado:
+Identifica los datos
 ---
 
 ## UC5 — Dar de baja afiliado

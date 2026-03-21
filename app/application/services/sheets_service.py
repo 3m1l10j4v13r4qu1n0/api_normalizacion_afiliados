@@ -6,7 +6,7 @@ from app.infrastructure.google.google_sheets_client import GspreadSheetsClient
 from app.infrastructure.database.orm_models import AfiliadoORM
 from app.domain.models.importacion import Importacion
 from app.domain.exceptions import SincronizacionError
-from app.application.services.importacion_service import importar_afiliados
+from app.application.use_cases .importar_afiliado import importar_afiliados
 
 
 async def importar_desde_sheets(
