@@ -1,0 +1,23 @@
+# Mapeo de claves del afiliado
+mapping = {
+            "Marca temporal"                             : "marca_temporal_creacion",
+            "Apellido/s:"                                : "apellido",
+            "Nombre/s:"                                  : "nombre",
+            "Fecha de Nacimiento:"                       : "fecha_nacimiento",
+            "D.N.I:"                                     : "dni",
+            "Tel Contacto:"                              : "telefono",
+            "Email:"                                     : "email",
+            "Nacionalidad:"                              : "nacionalidad",
+            "Género:"                                    : "genero",
+            "Estado civil:"                              : "estado_civil",
+            "Domicilio (Calle y n°):"                    : "direccion",
+            "Localidad:"                                 : "localidad",
+            "Provincia:"                                 : "provincia",
+            "Codigo Postal:"                             : "codigo_postal",
+            "Estudios:"                                  : "nivel_educativo",
+            "Titulo / Carrera:"                          : "titulo_obtenido",
+            "N° De Legajo:"                              : "numero_legajo",
+            "Inicio Actividad en Prevención:"            : "fecha_ingreso",
+            "Relación de Dependencia:"                   : "relacion_dependencia",
+            "ErrorValidacionAfiliado"                    : "error_validacion_afiliado",
+            }

@@ -18,8 +18,8 @@ from app.domain.exceptions import (
     EmailDuplicadoError,
     DatoInvalidoError,
 )
-from app.domain.rules.validacion import validar_email
-from app.domain.rules.normalizacion import normalizar_afiliado
+from app.domain.services.validacion import validar_email
+from app.domain.services.normalizacion import normalizar_afiliado
 from app.infrastructure.database.orm_models import AfiliadoORM
 
 

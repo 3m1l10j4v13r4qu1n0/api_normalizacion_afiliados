@@ -1,8 +1,7 @@
 import gspread
+from typing import List, Any
 from google.oauth2.service_account import Credentials
-from typing import Any
-
-from app.domain.ports.outgoing.google_sheet_port import ISheetsClient
+#from app.domain.ports.google_sheet_port import ISheetsClient
 from app.infrastructure.core.config import settings
 from app.domain.exceptions import SincronizacionError
 
@@ -12,7 +11,9 @@ SCOPES = [
 ]
 
 
-class GspreadSheetsClient(ISheetsClient):
+
+    
+class GspreadSheetsClient:
     """Implementación concreta usando gspread"""
 
     def __init__(self,sheet_id,credentials_path):
@@ -40,32 +41,9 @@ class GspreadSheetsClient(ISheetsClient):
         except Exception as e:
             raise SincronizacionError(f"Error al conectar con Google Sheets: {str(e)}")
 
-    def get_all_records(self) -> list[dict]:
+    
+    def read_range(self, range_name: str) -> List[List[Any]]:
         try:
-            return self._hoja.get_all_records()
-        except Exception as e:
-            raise SincronizacionError(f"Error al leer registros: {str(e)}")
-
-    def read_range(self, range_name: str) -> list[list[Any]]:
-        try:
-            return self._hoja.get(range_name)
+            return self._hoja.get_values(range_name)
         except Exception as e:
             raise SincronizacionError(f"Error al leer rango {range_name}: {str(e)}")
-
-    def write_range(self, range_name: str, values: list[list[Any]]) -> None:
-        try:
-            self._hoja.update(values, range_name)
-        except Exception as e:
-            raise SincronizacionError(f"Error al escribir en rango {range_name}: {str(e)}")
-
-    def append_rows(self, range_name: str, values: list[list[Any]]) -> None:
-        try:
-            self._hoja.append_rows(values)
-        except Exception as e:
-            raise SincronizacionError(f"Error al agregar filas: {str(e)}")
-
-    def clear_range(self, range_name: str) -> None:
-        try:
-            self._hoja.clear()
-        except Exception as e:
-            raise SincronizacionError(f"Error al limpiar rango {range_name}: {str(e)}")

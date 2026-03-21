@@ -11,13 +11,13 @@ from app.presentation.schemas.importacion_schema import (
     ImportRequest,
     ImportResponse,
 )
-from app.application.services.afiliado_service import (
+from app.application.use_cases.lista_afiliado import (
     listar_afiliados,
     obtener_afiliado_por_id,
     actualizar_afiliado,
     dar_baja_afiliado,
 )
-from app.application.services.importacion_service import importar_afiliados
+from app.application.use_cases.importar_afiliado import importar_afiliados
 from app.domain.exceptions import DatoInvalidoError, ImportacionError
 
 router = APIRouter(prefix="/afiliados", tags=["Afiliados"])

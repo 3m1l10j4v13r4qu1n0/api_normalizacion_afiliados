@@ -19,8 +19,8 @@ from sqlalchemy import select
 
 from app.domain.models.importacion import Importacion
 from app.domain.models.error_validacion import ErrorValidacion
-from app.domain.rules.validacion import validar_afiliado, validar_dni_duplicado
-from app.domain.rules.normalizacion import normalizar_afiliado
+from app.domain.services.validacion import validar_afiliado, validar_dni_duplicado
+from app.domain.services.normalizacion import normalizar_afiliado
 from app.domain.exceptions import ImportacionError
 
 from app.infrastructure.database.orm_models import (
