@@ -17,7 +17,7 @@ from app.application.use_cases.lista_afiliado import (
     actualizar_afiliado,
     dar_baja_afiliado,
 )
-from app.application.use_cases.importar_afiliado import importar_afiliados
+from app.application.use_cases.importar_afiliado_core import ImportarAfiliadoUseCase
 from app.domain.exceptions import DatoInvalidoError, ImportacionError
 
 router = APIRouter(prefix="/afiliados", tags=["Afiliados"])
@@ -31,7 +31,7 @@ async def importar_afiliados_endpoint(
     if not datos.afiliados:
         raise DatoInvalidoError("La lista de afiliados no puede estar vacía")
     try:
-        resultado = await importar_afiliados(
+        resultado = await ImportarAfiliadoUseCase(
             db        = db,
             registros = [a.model_dump() for a in datos.afiliados]
         )

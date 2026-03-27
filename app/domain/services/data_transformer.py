@@ -1,6 +1,6 @@
-from typing import Dict, List, Any, Optional
-from domain.models.sheet_row import SheetRow
-from .data_key_mapper import DataKeyMapper
+from typing import List, Any
+from app.domain.models.input_row import InputRow
+from app.domain.services.data_key_mapper import DataKeyMapper
 
 
 class DataTransformer:
@@ -12,7 +12,7 @@ class DataTransformer:
         raw_data (List[List])
             → dicts con headers originales  
             → dicts con claves renombradas  (DataKeyMapper — inyectado)
-            → List[SheetRow]                (modelo de dominio)
+            → List[InputRow]                (modelo de dominio)
 
     El mapping específico del Sheet vive fuera de esta clase,
     en la capa de infraestructura (mapping.py), y se inyecta
@@ -22,8 +22,8 @@ class DataTransformer:
         _mapper : DataKeyMapper — renombrador de claves inyectado.
 
     Example:
-        from infrastructure.sheets.mapping import mapping
-        from infrastructure.sheets.data_key_mapper import DataKeyMapper
+        from app.domain.models.mapping import mapping
+        from app.domain.services.data_key_mapper import DataKeyMapper
 
         mapper      = DataKeyMapper(mapping)
         transformer = DataTransformer(mapper)
@@ -39,24 +39,24 @@ class DataTransformer:
         self,
         raw_data: List[List[Any]],
         headers:  List[str],
-    ) -> List[SheetRow]:
+    ) -> List[InputRow]:
         """
-        Transforma los datos crudos del Sheet en una lista de SheetRow.
+        Transforma los datos crudos del Sheet en una lista de InputRow.
 
         Pasos internos:
             1. Combina cada fila con los headers → dict con claves originales.
             2. Pasa el dict por DataKeyMapper    → dict con claves pytónicas.
-            3. Envuelve el resultado en SheetRow con row_number real del Sheet.
+            3. Envuelve el resultado en InputRow con row_number real del Sheet.
 
         Parameters:
             raw_data : List[List[Any]] — Filas de datos sin el header (raw[1:]).
             headers  : List[str]       — Headers crudos del Sheet     (raw[0]).
 
         Returns:
-            List[SheetRow] — Una entrada por fila, row_number base 2
+            List[InputRow] — Una entrada por fila, row_number base 2
                              (coincide con el número real de fila en Sheets).
         """
-        sheet_rows: List[SheetRow] = []
+        rows: List[InputRow] = []
 
         for index, row in enumerate(raw_data):
             raw_dict = dict(zip(headers, row))
@@ -64,11 +64,11 @@ class DataTransformer:
             self._mapper.set_data(raw_dict)
             renamed = self._mapper.remap()
 
-            sheet_rows.append(
-                SheetRow(
+            rows.append(
+                InputRow(
                     row_number=index + 2,   # +2: base 1 del Sheet + fila de header
                     values=renamed,
                 )
             )
 
-        return sheet_rows
+        return rows

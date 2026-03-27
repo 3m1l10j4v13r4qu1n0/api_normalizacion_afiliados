@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from domain.exceptions import (
@@ -8,6 +10,9 @@ from domain.exceptions import (
     SincronizacionError,
     FechaInvalidaError,
 )
+
+logger = logging.getLogger(__name__)
+
 
 def registrar_handlers(app: FastAPI):
 
@@ -41,9 +46,15 @@ def registrar_handlers(app: FastAPI):
 
     @app.exception_handler(ImportacionError)
     async def importacion_handler(request: Request, exc: ImportacionError):
+        logger.exception("Error en importación")
         return JSONResponse(
             status_code=500,
-            content={"error": str(exc)}
+            content={
+                "error": {
+                    "type": "ImportacionError",
+                    "message": str(exc)
+                }
+            }
         )
 
     @app.exception_handler(SincronizacionError)
