@@ -41,7 +41,13 @@ class Importacion:
 
     # ── Métodos de comportamiento ───────────────────────────
 
-    def registrar_error(self, campo: str, descripcion: str, registro_origen: str) -> None:
+    def registrar_error(
+        self,
+        campo: str,
+        descripcion: str,
+        registro_origen: str,
+        row_number: int
+    ) -> None:
         """
         RN12 — Los errores de validación deben registrarse
         RN13 — La importación continúa aunque haya errores
@@ -50,7 +56,8 @@ class Importacion:
             registro_origen   = registro_origen,
             campo             = campo,
             descripcion_error = descripcion,
-            id_importacion    = self.id
+            id_importacion    = self.id,
+            row_number        = row_number
         )
         self.errores.append(error)
         self.cantidad_errores += 1

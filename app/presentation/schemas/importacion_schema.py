@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr
 from datetime import date
-from typing import Optional
+from typing import List, Optional
 
 # ── ImportRequest — entrada para importación ─────────────────────────
 
@@ -12,7 +12,7 @@ class AfiliadoImportItem(BaseModel):
     numero_legajo    : Optional[str] = None
     fecha_nacimiento : Optional[date] = None
 
-    email            : Optional[str]  = None  # ← str, no EmailStr
+    email            : Optional[EmailStr]  = None  
     telefono         : Optional[str]  = None  #   el dominio valida el formato
     fecha_ingreso    : Optional[date] = None
     fecha_alta       : Optional[date] = None
@@ -27,7 +27,7 @@ class AfiliadoImportItem(BaseModel):
 
 class ImportRequest(BaseModel):
     """Body del POST /afiliados/import"""
-    afiliados: list[AfiliadoImportItem]
+    afiliados: List[AfiliadoImportItem]
 
 
 # ── ImportResponse — respuesta de importación ────────────────────────

@@ -1,11 +1,11 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 
 class DataKeyMapper:
     """
     Renombra las claves de un diccionario según un mapeo definido.
 
-    Procesa un dict por vez (una fila / SheetRow.values a la vez).
+    Procesa un dict por vez (una fila / InputRow.values a la vez).
     Claves del dict que no estén en el mapping se ignoran silenciosamente.
 
     Attributes:
@@ -14,8 +14,8 @@ class DataKeyMapper:
 
     Example:
         mapper = DataKeyMapper(mapping)
-        for sheet_row in sheet_rows:
-            mapper.set_data(sheet_row.values)
+        for row in rows:
+            mapper.set_data(ow.values)
             renamed = mapper.remap()
     """
 
