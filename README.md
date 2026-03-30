@@ -88,96 +88,206 @@ Esto permite mantener el sistema modular y mantenible.
 - Pydantic
 - Google Sheets API
 
+# 🏗️ Estructura del Proyecto — API Normalización de Afiliados
+
+Este proyecto implementa una arquitectura basada en **Clean Architecture + Hexagonal (Ports & Adapters)**, separando claramente responsabilidades entre capas.
+
 ---
 
-## Estructura del proyecto
+## 📦 Estructura General
+
 ```
 api-normalizacion/
+│
+├── alembic/  
+│   ├── versions/
+│   ├── env.py
+│   └── script.py.mako
+│   💬 Migraciones de base de datos (versionado del esquema)
+│
 ├── app/
-│   ├── main.py                          # Punto de entrada de FastAPI
+│
+│   ├── main.py  
+│   💬 Punto de entrada de la aplicación (FastAPI)
+│
+│   ├── presentation/  🟦 CAPA DE PRESENTACIÓN (Delivery)
+│   │   ├── routers/
+│   │   │   ├── afiliados.py
+│   │   │   └── sync.py
+│   │   │   💬 Define endpoints REST (HTTP → Use Cases)
+│   │   │
+│   │   ├── schemas/
+│   │   │   ├── afiliados_schema.py
+│   │   │   └── importacion_schema.py
+│   │   │   💬 DTOs de entrada/salida (Pydantic)
+│   │   │
+│   │   └── handlers.py
+│   │       💬 Orquesta requests → casos de uso (opcional desacople de routers)
 │   │
-│   ├── presentation/                    # CAPA 1 - Presentación
-│   │   ├── routers/                     # Endpoints HTTP
-│   │   │   ├── afiliados.py             # GET, POST, PUT, DELETE /afiliados
-│   │   │   └── sync.py                  # POST /sync/sheets/import y /export
-│   │   └── schemas/                     # Esquemas Pydantic (request/response)
-│   │       ├── afiliado_schema.py
-│   │       └── importacion_schema.py
+│   │   🎯 Responsabilidad:
+│   │   - Recibir requests HTTP
+│   │   - Validar formato (NO reglas de negocio)
+│   │   - Invocar casos de uso
+│
+│   ├── application/  🟩 CAPA DE APLICACIÓN (Use Cases)
+│   │   └── use_cases/
+│   │       ├── core_importar_afiliado.py
+│   │       ├── uc1_importar_afiliado.py
+│   │       ├── uc2_listar_afiliado.py
+│   │       ├── uc2_obtener_afiliado.py
+│   │       ├── uc3_actualizar_afiliado.py
+│   │       ├── uc4_importar_afiliado.py
+│   │       ├── uc4a_importar_afiliado.py
+│   │       └── uc5_dar_baja_afiliado.py
 │   │
-│   ├── application/                     # CAPA 2 - Casos de Uso
-│   │   ├── uc1_importar_afiliados.py
-│   │   ├── uc2_consultar_afiliados.py
-│   │   ├── uc3_actualizar_afiliado.py
-│   │   ├── uc4_importar_desde_sheets.py
-│   │   ├── uc5_dar_baja_afiliado.py
-│   │   └── uc6_sincronizar_hacia_sheets.py
+│   │       💬 Implementación de casos de uso del sistema
 │   │
-│   ├── domain/                          # CAPA 3 - Dominio
-│   │   ├── models/                      # Entidades del negocio
+│   │   🎯 Responsabilidad:
+│   │   - Orquestar la lógica de negocio
+│   │   - Coordinar servicios del dominio
+│   │   - Usar repositorios (a través de puertos)
+│   │   - NO depende de infraestructura concreta
+│
+│   ├── domain/  🟥 CAPA DE DOMINIO (Core del negocio)
+│   │
+│   │   ├── models/
 │   │   │   ├── afiliado.py
 │   │   │   ├── importacion.py
-│   │   │   └── error_validacion.py
-│   │   └── rules/                       # Reglas puras de negocio
-│   │       ├── validacion.py            # Qué es válido
-│   │       └── normalizacion.py         # Cómo se normalizan los datos
+│   │   │   ├── error_validacion.py
+│   │   │   ├── input_row.py
+│   │   │   └── mapping.py
+│   │   │   💬 Entidades y modelos del dominio (reglas puras)
+│   │   │
+│   │   ├── services/
+│   │   │   ├── normalizacion.py
+│   │   │   ├── validacion.py
+│   │   │   ├── data_transformer.py
+│   │   │   └── data_key_mapper.py
+│   │   │   💬 Lógica de negocio compleja desacoplada de entidades
+│   │   │
+│   │   ├── ports/
+│   │   │   ├── afiliado/
+│   │   │   │   ├── afiliado_command_port.py
+│   │   │   │   ├── afiliado_importacion_port.py
+│   │   │   │   └── afiliado_query_port.py
+│   │   │   │
+│   │   │   ├── importacion_repository_port.py
+│   │   │   ├── error_repository_port.py
+│   │   │   ├── domicilio_repository_port.py
+│   │   │   ├── dominio_repository_port.py
+│   │   │   └── sheet_data_port.py
+│   │   │   💬 Interfaces (contratos) → patrón Ports & Adapters
+│   │   │
+│   │   ├── exceptions.py
+│   │   │   💬 Excepciones propias del dominio
 │   │
-│   └── infrastructure/                  # CAPA 4 - Infraestructura
-│       ├── database/
-│       │   ├── connection.py            # Configuración PostgreSQL
-│       │   ├── orm_models/              # Modelos SQLAlchemy
-│       │   │   ├── afiliado_orm.py
-│       │   │   ├── importacion_orm.py
-│       │   │   ├── error_validacion_orm.py
-│       │   │   └── dominios_orm.py
-│       │   └── repositories/            # Acceso a base de datos
-│       │       ├── afiliado_repository.py
-│       │       ├── importacion_repository.py
-│       │       └── error_repository.py
-│       ├── sheets/
-│       │   └── sheets_client.py         # Cliente Google Sheets (gspread)
-│       └── core/
-│           └── config.py                # Variables de entorno
+│   │   🎯 Responsabilidad:
+│   │   - Contener las reglas de negocio
+│   │   - Ser independiente de frameworks
+│   │   - Definir contratos (ports)
 │
-├── alembic/                             # Migraciones
-├── tests/
-│   ├── test_uc1_importar_afiliados.py
-│   ├── test_uc4_importar_desde_sheets.py
-│   └── test_uc6_sincronizar_sheets.py
-├── .env
-├── .env.example
-├── docs/                                # Documentacion       
-│   ├── actores.md        
-│   ├── alcance.md              
-│   ├── api.md                  
-│   ├── caso_de_uso_expandidos.md              
-│   ├── casos_de_uso.md                   
-│   ├── diagramas/                       # Diagramas            
-│   │   ├── arquitectura/               
-│   │   │   ├── arquitectura_diagrama.png           
-│   │   │   └── arquitectura_diagrama.puml           
-│   │   ├── caso_uso/              
-│   │   │   ├── caso_uso.png             
-│   │   │   └── caso_uso.puml            
-│   │   ├── diagrama_clases/                  
-│   │   │   ├── clases_diagrama.png            
-│   │   │   └── clases_diagrama.puml            
-│   │   ├── diagrama_objetos/             
-│   │   │   ├── objeto_diagrama.png            
-│   │   │   └── objeto_diagrama.puml              
-│   │   └── er/                
-│   │       ├── er_diagrama.png                
-│   │       └── er_diagrama.puml                     
-│   ├── modelos_datos.md                       
-│   ├── pruebas.md                    
-│   ├── reglas_negocio.md               
-│   ├── requerimientos.md                     
-│   └── vision.md                
-├── face_1_cierre.md                     # Estado del proyecto
-├── requirements.txt
-└── README.md
+│   ├── infrastructure/  🟨 CAPA DE INFRAESTRUCTURA (Adapters)
+│   │
+│   │   ├── core/
+│   │   │   └── config.py
+│   │   │   💬 Configuración global (env, settings)
+│   │   │
+│   │   ├── database/
+│   │   │   ├── connection.py
+│   │   │   💬 Conexión a la base de datos
+│   │   │
+│   │   │   ├── orm_models/
+│   │   │   │   ├── afiliado_orm.py
+│   │   │   │   ├── domicilio_orm.py
+│   │   │   │   ├── dominios_orm.py
+│   │   │   │   ├── error_validacion_orm.py
+│   │   │   │   └── importacion_orm.py
+│   │   │   │   💬 Modelos ORM (SQLAlchemy)
+│   │   │   │
+│   │   │   ├── repositories/
+│   │   │   │   ├── afiliado_command_repository.py
+│   │   │   │   ├── afiliado_importacion_repository.py
+│   │   │   │   ├── afiliado_query_repository.py
+│   │   │   │   ├── importacion_repository.py
+│   │   │   │   ├── error_repository.py
+│   │   │   │   ├── domicilio_repository.py
+│   │   │   │   └── dominio_repository.py
+│   │   │   │   💬 Implementaciones de los ports (Adapters)
+│   │   │   │
+│   │   │   ├── seed.py / seed_runner.py
+│   │   │   💬 Datos iniciales para la BD
+│   │   │
+│   │   ├── google/
+│   │   │   ├── google_sheets_client.py
+│   │   │   └── google_sheets_adapter.py
+│   │   │   💬 Integración con Google Sheets (API externa)
+│   │   │
+│   │   ├── dependencies/
+│   │   │   └── dependency_injection.py
+│   │   │   💬 Inyección de dependencias (wiring de la app)
+│   │
+│   │   🎯 Responsabilidad:
+│   │   - Implementar detalles técnicos (DB, APIs externas)
+│   │   - Adaptar interfaces del dominio
+│   │   - NO contener lógica de negocio
+│
+│   └── requirements.txt
+│
+├── docs/  
+│   💬 Documentación completa del sistema:
+│   - Casos de uso
+│   - Reglas de negocio
+│   - Modelo de datos
+│   - Diagramas UML y ER
+│
+├── tests/  🧪 TESTING
+│   ├── unit/domain/services/
+│   │   💬 Tests unitarios del dominio (normalización, validación, etc.)
+│
+│   🎯 Responsabilidad:
+│   - Validar reglas de negocio
+│   - Asegurar comportamiento correcto del sistema
+│
+├── README.md  
+│   💬 Documentación principal del proyecto
+│
+└── alembic.ini  
+    💬 Configuración de migraciones
 ```
 
 ---
+
+## 🧠 Resumen de Arquitectura
+
+```
+Presentation (FastAPI)
+        ↓
+Application (Use Cases)
+        ↓
+Domain (Entities + Rules + Ports)
+        ↓
+Infrastructure (DB, APIs externas)
+```
+
+---
+
+## 🎯 Principios Aplicados
+
+* ✔️ Separación de responsabilidades
+* ✔️ Inversión de dependencias (DIP)
+* ✔️ Arquitectura Hexagonal (Ports & Adapters)
+* ✔️ Dominio desacoplado de frameworks
+* ✔️ Código testeable y mantenible
+
+---
+
+## 🚀 Beneficios
+
+* Escalable
+* Testeable
+* Independiente de tecnologías externas
+* Fácil de mantener y extender
+
 
 ---
 

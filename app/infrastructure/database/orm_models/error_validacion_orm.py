@@ -16,7 +16,7 @@ class ErrorValidacionORM(Base):
     campo             = Column(String(100), nullable=False)   # ← qué campo tiene el error
     descripcion_error = Column(String(500), nullable=False)  # ← por qué falló
     fecha_error       = Column(DateTime, server_default=func.now(), nullable=False)
-    row_number        = Column(Integer(4))
+    row_number        = Column(Integer)
     
     # Clave foránea — a qué importación pertenece este error
     id_importacion    = Column(Integer, ForeignKey("importaciones.id"), nullable=False)

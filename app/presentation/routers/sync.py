@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.presentation.schemas.importacion_schema import ImportResponse
-from app.application.use_cases.importar_afiliado_uc4 import ImportarDesdeSheetUseCase
+from app.application.use_cases.uc4_importar_afiliado import ImportarDesdeSheetUseCase
 
 from app.infrastructure.dependencies.dependency_injection import get_importar_afiliado_uc4
 
