@@ -1,8 +1,8 @@
 from typing import List
 from app.domain.models.input_row import InputRow
 
-from app.application.use_cases.importar_afiliado_uc4a import ImportSheetUseCase
-from app.application.use_cases.importar_afiliado_core import ImportarAfiliadoUseCase
+from app.application.use_cases.uc4a_importar_afiliado import ImportSheetUseCase
+from app.application.use_cases.core_importar_afiliado import ImportarAfiliadoUseCase
 
 
 class ImportarDesdeSheetUseCase:

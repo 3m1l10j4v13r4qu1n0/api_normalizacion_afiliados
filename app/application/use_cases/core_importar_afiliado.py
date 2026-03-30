@@ -16,7 +16,7 @@ RN13 — Importación continúa aunque haya errores
 
 from app.domain.models.importacion import Importacion
 from app.domain.models.input_row import InputRow
-from app.domain.ports.afiliado_repository_port import AfiliadoRepositoryPort
+from app.domain.ports.afiliado.afiliado_importacion_port import AfiliadoImportacionPort
 from app.domain.ports.importacion_repository_port import ImportacionRepositoryPort
 from app.domain.ports.error_repository_port import ErrorRepositoryPort
 from app.domain.ports.domicilio_repository_port import DomicilioRepositoryPort
@@ -56,7 +56,7 @@ class ImportarAfiliadoUseCase:
 
     def __init__(
         self,
-        afiliado_repo   : AfiliadoRepositoryPort,
+        afiliado_repo   : AfiliadoImportacionPort,
         importacion_repo: ImportacionRepositoryPort,
         error_repo      : ErrorRepositoryPort,
         domicilio_repo  : DomicilioRepositoryPort,
@@ -136,10 +136,10 @@ class ImportarAfiliadoUseCase:
             if errores:
                 # RN11 — no se persiste
                 # RN12 — se registra cada error
-                """Cantidad de registros con al menos un error"""
+                
                 for campo, descripcion in errores:
                     await self._error_repo.registrar_error(
-                        id_importacion    = self.id,
+                        id_importacion    = self.id_importacion,
                         registro_origen  =str(valores),
                         campo            =campo,
                         descripcion_error=descripcion,

@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Set
 
-
-class AfiliadoRepositoryPort(ABC):
+class AfiliadoImportacionPort(ABC):
     """
-    Puerto de salida para el repositorio de afiliados.
-
+    Puerto para Importacion.
     """
 
     @abstractmethod
@@ -20,7 +18,7 @@ class AfiliadoRepositoryPort(ABC):
         ...
 
     @abstractmethod
-    async def save(self, datos: dict, id_importacion: int) -> None:
+    async def save_importacion(self, datos: dict, id_importacion: int) -> None:
         """
         Persiste un afiliado validado y normalizado.
 

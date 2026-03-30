@@ -2,17 +2,15 @@ from typing import Set
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.ports.afiliado_repository_port import AfiliadoRepositoryPort
+from app.domain.ports.afiliado.afiliado_importacion_port import AfiliadoImportacionPort
 from app.infrastructure.database.orm_models.afiliado_orm import AfiliadoORM
 
 
-class AfiliadoRepository(AfiliadoRepositoryPort):
+class AfiliadoImportacionRepository(AfiliadoImportacionPort):
     """
-    Implementación concreta del repositorio de afiliados con SQLAlchemy async.
-    
-
-    Recibe AsyncSession por inyección — la sesión la gestiona el UseCase
-    o el contenedor de dependencias, nunca el repositorio.
+    Implementación del repositorio de afiliados para el pipeline de importación.
+    Solo implementa AfiliadoImportacionPort — no puede consultar ni actualizar.
+    La sesión se inyecta desde el contenedor de dependencias.
     """
 
     def __init__(self, session: AsyncSession) -> None:
@@ -57,4 +55,4 @@ class AfiliadoRepository(AfiliadoRepositoryPort):
             id_importacion          = id_importacion,
         )
         self._session.add(afiliado)
-        await self._session.flush()  # obtiene el id sin hacer commit
+        await self._session.flush()
