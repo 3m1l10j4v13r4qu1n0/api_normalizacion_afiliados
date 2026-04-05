@@ -28,4 +28,4 @@ async def importar_desde_sheets_endpoint(
 
 # @router.post("/sheets/export", status_code=200)
 # async def exportar_a_sheets_endpoint(db: AsyncSession = Depends(get_db)):
-#     """UC6 — Sincronizar afiliados activos hacia Google Sheets"""
+#     """UC6 — """

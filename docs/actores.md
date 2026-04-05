@@ -2,9 +2,11 @@
 ## Sistema de Normalización de Datos de Afiliados
 
 ### 1. Introducción
-Este documento describe los actores que interactúan con la API de normalización de datos de afiliados.
+Este documento describe los actores que interactúan con la API de 
+normalización de datos de afiliados.
 
-Un actor puede ser una persona, sistema externo o aplicación que utiliza el sistema.
+Un actor puede ser una persona, sistema externo o aplicación que 
+utiliza el sistema.
 
 ---
 
@@ -27,7 +29,9 @@ Actor humano
 
 #### Actor: Sistema Externo (Google Sheets)
 Descripción:
-Sistema externo que actúa como fuente de datos en el proceso de importación y como destino en el proceso de sincronización. La comunicación es bidireccional.
+Sistema externo que actúa como fuente de datos en el proceso de importación 
+y como destino en el proceso de sincronización. 
+La comunicación es bidireccional.
 
 Responsabilidades:
 - Recibir datos sincronizados desde la API
