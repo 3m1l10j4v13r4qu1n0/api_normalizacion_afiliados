@@ -139,7 +139,7 @@ class ImportarAfiliadoUseCase:
                 
                 for campo, descripcion in errores:
                     await self._error_repo.registrar_error(
-                        id_importacion    = self.id_importacion,
+                        id_importacion    = id_importacion,
                         registro_origen  =str(valores),
                         campo            =campo,
                         descripcion_error=descripcion,
