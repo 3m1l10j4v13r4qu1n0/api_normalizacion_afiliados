@@ -30,6 +30,14 @@ class ImportRequest(BaseModel):
     afiliados: List[AfiliadoImportItem]
 
 
+class AfiliadoCreate(AfiliadoImportItem):
+    """
+    Entrada para alta manual de un afiliado — UC1a
+    Hereda todos los campos de AfiliadoIportItem
+    """
+    pass
+
+
 # ── ImportResponse — respuesta de importación ────────────────────────
 
 class ImportResponse(BaseModel):

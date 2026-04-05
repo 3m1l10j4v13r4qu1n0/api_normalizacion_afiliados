@@ -56,10 +56,24 @@ RF14 — El sistema debe almacenar los datos en una base de datos PostgreSQL.
 #### Sincronización
 RF15 — El sistema debe permitir sincronizar los datos de afiliados con Google Sheets.
 
+RF16 — El sistema debe permitir generar una tabla de afiliados en Google Sheets a partir de los datos almacenados en la base de datos.
+
+RF17 — El sistema debe crear la hoja de cálculo si no existe o actualizarla si ya está creada.
+
+RF18 — El sistema debe ordenar los afiliados alfabéticamente por nombre y apellido antes de exportarlos.
+
+RF19 — El sistema debe calcular dinámicamente la edad de cada afiliado en base a su fecha de nacimiento.
+
+RF20 — El sistema debe mostrar el nombre y apellido concatenados en una única columna dentro de la tabla.
+
+RF21 — El sistema debe exportar únicamente datos relevantes para el usuario final.
+
+RF22 — El sistema debe sobrescribir o actualizar completamente la tabla en cada ejecución para garantizar consistencia.
+
 ---
 
 #### API REST
-RF16 — El sistema debe exponer endpoints REST para la gestión de afiliados.
+RF23 — El sistema debe exponer endpoints REST para la gestión de afiliados.
 
 
 

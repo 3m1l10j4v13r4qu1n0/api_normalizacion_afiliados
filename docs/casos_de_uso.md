@@ -8,24 +8,59 @@ Los casos de uso representan las interacciones entre los actores externos y el s
 
 ---
 
-## UC1 — Importar Afiliados
+## UC1 — Importar Afiliado/s
 
 Actor principal:
 Sistema Cliente
 
 Descripción:
-Permite importar datos de afiliados al sistema para su validación, normalización y almacenamiento.
+Permite importar datos de afiliado/s al sistema para su validación, normalización y almacenamiento.
 
 Flujo principal:
-1. El sistema cliente envía datos de afiliados.
+1. El sistema cliente envía datos de un afiliado o una lista de afiliados.
 2. El sistema valida los datos.
 3. El sistema normaliza la información.
 4. El sistema almacena los registros válidos.
 5. El sistema registra errores si existen.
 
 Resultado:
-Datos de afiliados almacenados correctamente.
+Datos de afiliado/s almacenados correctamente.
 
+## UC1a — Importar Afiliados desde API (lista)
+
+Actor principal:
+Sistema Cliente
+
+Descripción:
+Permite importar múltiples datos de afiliados al sistema mediante una API, para su validación, normalización y almacenamiento.
+
+Flujo principal:
+1. El sistema cliente envía una lista de afiliados.
+2. El sistema valida los datos de cada registro.
+3. El sistema normaliza la información.
+4. El sistema almacena los registros válidos.
+5. El sistema registra errores si existen.
+
+Resultado
+Datos de afiliados procesados y almacenados correctamente, con registro de errores en caso de existir.
+
+## UC1b — Registrar Afiliado manualmente
+
+Actor principal:
+Usuario Administrativo
+
+Descripción:
+Permite registrar manualmente un afiliado en el sistema mediante la carga individual de sus datos, para su validación, normalización y almacenamiento.
+
+Flujo principal
+1. El usuario ingresa los datos de un afiliado.
+2. El sistema valida los datos ingresados.
+3. El sistema normaliza la información.
+4. El sistema almacena el afiliado.
+5. El sistema informa si existen errores.
+
+Resultado
+Afiliado registrado correctamente en el sistema o notificación de errores en los datos ingresados.
 ---
 
 ## UC2 — Consultar Afiliados
@@ -104,21 +139,38 @@ Resultado:
 Datos ordenados en un array que cada elemento del array es un objeto SheetRow que contiene la clave numbrer_row:int que
 contiene el índice para identificar la fila después la clave value:Any que contiene un diccionario que contiene los encabezados y valores.
 
-## UC4b — El sistema registra si hay errores
+## UC4b — Marcar errores en Google Sheets.
+
+Actor principal:
+Sistema
+
+Actores secundarios:
+Google Sheets
 
 
 Descripción:
-EN la Hoja de GoogleSheets el sitema agrega "FALSE" a la columna "ErrorValidacionAfiliado" a las filas que fueron agregadas correctamente y
-en su defecto agrega "TRUE" a las filas que no  fueron agregadas correctamen
+Una vez finalizada la importación de datos (UC4), el sistema identifica los registros que presentaron errores de validación y realiza una actualización masiva sobre la hoja de cálculo de Google Sheets.
 
+El sistema marca visualmente las filas o celdas correspondientes a los registros con errores, aplicando un formato distintivo (por ejemplo, fondo rojo), facilitando su identificación por parte del usuario.
 
-1. El sitema identifica las filas que no pudieron ser agradas a la base de datos del Array SheetRow
-2. El sistema agrega "TRUE" o "1" en el encabezado "ErrorValidacionAfilidado" en la hoja de GoogleSheets. Solo a las filas que no pudieron ser
-agregadas en la base de dato
-3. el sitema agrega "FALSE" o "0" en el encabezado "ErrorValidacionAfiliado" en la hoja de GoogleSheets
+Flujo principal:
+1. El sistema finaliza la ejecución del proceso de importación (UC4).
+2. El sistema obtiene la lista de errores de validación generados durante el proceso.
+3. El sistema extrae los números de fila (row_number) asociados a cada error.
+4. El sistema agrupa las filas con errores para optimizar la operación.
+5. El sistema envía una actualización masiva a Google Sheets.
+6. El sistema aplica formato visual (color rojo) a las filas o celdas correspondientes.
+
+Flujo alternativo:
+A1 — Error al actualizar Google Sheets
+
+1. El sistema intenta aplicar el formato en Google Sheets.
+2. Ocurre un error en la comunicación o actualización.
+3. El sistema registra el error internamente.
+4. El sistema no interrumpe la importación ni revierte los datos procesados.
 
 Resultado:
-Identifica los datos
+Las filas que contienen errores de validación quedan visualmente marcadas en la hoja de cálculo (por ejemplo, con fondo rojo), permitiendo al usuario identificar rápidamente los registros problemáticos.
 ---
 
 ## UC5 — Dar de baja afiliado
@@ -138,19 +190,31 @@ Flujo principal:
 Resultado:
 Afiliado dado de baja lógicamente.
 
-## UC6 — Sincronizar cambios hacia Google Sheets
+## UC6 — Generar tabla de afiliados en Google Sheets
 
 Actor principal: 
-Usuario Administrativo
+Usuario Administrativo / Sistema Cliente
 
 Descripción: 
-Cuando se modifican o actualizan afiliados en el sistema, el usuario puede sincronizar esos cambios de vuelta a la hoja de cálculo de Google Sheets para mantener consistencia.
+El usuario puede generar una tabla en Google Sheets que contenga los afiliados almacenados en la base de datos.
+Si la hoja no existe, el sistema la crea; si ya existe, la actualiza mostrando los datos estructurados.
 
 Flujo principal:
-1. El usuario inicia sync.
-2. El sistema obtiene los afiliados modificados.
-3. el sistema actualiza las filas correspondientes en Gogle Sheets.
-4. el sistema confirma la operación.
+1. El usuario inicia la generación de la tabla.
+2. El sistema consulta los afiliados desde la base de datos.
+3. El sistema ordena los afiliados alfabéticamente por nombre y apellido.
+4. El sistema calcula la edad de cada afiliado a partir de su fecha de nacimiento y el año actual.
+5. El sistema verifica si la hoja existe en Google Sheets:
+    - Si no existe, la crea.
+    - Si existe, la limpia o actualiza.
+
+6. El sistema construye la tabla con la siguiente estructura:
+
+| Nombre y Apellido | Edad | Datos Relevantes |
+| ----------------- | ---- | ---------------- |
+
+7. El sistema inserta los afiliados en la hoja respetando el orden alfabético.
+8. El sistema confirma la operación.
 
 Resultado:
-Datos sincronizados.
+Se genera o actualiza una hoja en Google Sheets con los afiliados ordenados, mostrando información clara y útil, incluyendo la edad calculada.

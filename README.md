@@ -88,6 +88,43 @@ Esto permite mantener el sistema modular y mantenible.
 - Pydantic
 - Google Sheets API
 
+---
+
+## 🚀 Instalación y configuración
+```
+# Clonar el repo
+
+git clone ...
+
+
+# Crear entorno virtual
+python -m venv venv
+
+# Linux 
+source venv/bin/activate 
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Configurar variables de entorno
+cp .env.example .env
+
+# Correr migraciones
+
+# 1. inicializar alembic en el proyecto
+alembic init alembic
+
+# 2. genera una migración automática leyendo tus modelos
+alembic revision --autogenerate -m "crear tabla afiliados"
+
+# 3. aplica la migración en PostgreSQL
+alembic upgrade head
+
+# Levantar la API
+uvicorn app.main:app --reload
+```
+---
+
 # 🏗️ Estructura del Proyecto — API Normalización de Afiliados
 
 Este proyecto implementa una arquitectura basada en **Clean Architecture + Hexagonal (Ports & Adapters)**, separando claramente responsabilidades entre capas.
@@ -132,7 +169,8 @@ api-normalizacion/
 │   ├── application/  🟩 CAPA DE APLICACIÓN (Use Cases)
 │   │   └── use_cases/
 │   │       ├── core_importar_afiliado.py
-│   │       ├── uc1_importar_afiliado.py
+│   │       ├── uc1a_importar_afiliados.py
+│   │       ├── uc1b_importar_afiliado.py
 │   │       ├── uc2_listar_afiliado.py
 │   │       ├── uc2_obtener_afiliado.py
 │   │       ├── uc3_actualizar_afiliado.py
@@ -214,7 +252,8 @@ api-normalizacion/
 │   │   │   │   └── dominio_repository.py
 │   │   │   │   💬 Implementaciones de los ports (Adapters)
 │   │   │   │
-│   │   │   ├── seed.py / seed_runner.py
+│   │   │   ├── seed.py                 ← datos iniciales
+│   │   │   └── seed_runner.py          ← script para ejecutar el seed
 │   │   │   💬 Datos iniciales para la BD
 │   │   │
 │   │   ├── google/
@@ -233,7 +272,34 @@ api-normalizacion/
 │
 │   └── requirements.txt
 │
-├── docs/  
+├── docs/ 
+│    ├── actores.md
+│    ├── alcance.md
+│    ├── api.md
+│    ├── caso_de_uso_expandidos.md
+│    ├── casos_de_uso.md
+│    ├── decisiones_tecnicas.md
+│    ├── diagramas
+│    │   ├── arquitectura
+│    │   │   ├── arquitectura_diagrama.png
+│    │   │   └── arquitectura_diagrama.puml
+│    │   ├── caso_uso
+│    │   │   ├── caso_uso.png
+│    │   │   └── caso_uso.puml
+│    │   ├── diagrama_clases
+│    │   │   ├── clases_diagrama.png
+│    │   │   └── clases_diagrama.puml
+│    │   ├── diagrama_objetos
+│    │   │   ├── objeto_diagrama.png
+│    │   │   └── objeto_diagrama.puml
+│    │   └── er
+│    │       ├── er_diagrama.png
+│    │       └── er_diagrama.puml
+│    ├── modelos_datos.md
+│    ├── pruebas.md
+│    ├── reglas_negocio.md
+│    ├── requerimientos.md
+│    └── vision.md 
 │   💬 Documentación completa del sistema:
 │   - Casos de uso
 │   - Reglas de negocio
@@ -241,12 +307,21 @@ api-normalizacion/
 │   - Diagramas UML y ER
 │
 ├── tests/  🧪 TESTING
-│   ├── unit/domain/services/
-│   │   💬 Tests unitarios del dominio (normalización, validación, etc.)
+│   └──  unit/
+│        └── domian/
+│            └── services/
+│                ├── test_data_key_mapper.py
+│                ├── test_data_transformer.py
+│                ├── test_normalizacion.py
+│                └── test_validacion.py
+│   💬 Tests unitarios del dominio (normalización, validación, etc.)
 │
 │   🎯 Responsabilidad:
 │   - Validar reglas de negocio
 │   - Asegurar comportamiento correcto del sistema
+│
+├── face_1_cierre.md 
+│   💬 Documentación faces del proyecto
 │
 ├── README.md  
 │   💬 Documentación principal del proyecto

@@ -35,6 +35,27 @@ Respuesta esperada:
 
 ---
 
+## Importar afiliado
+
+Endpoint:
+```
+POST /afiliado/
+```
+
+Descripción:
+Permite agregar a un afiliado para su validación y normalización.
+
+Resultado esperado:
+- Registros válidos almacenados
+- Errores registrados
+
+Respuesta esperada:
+- cantidad_registros_procesados
+- cantidad_registros_validos
+- cantidad_errores
+
+---
+
 ## Consultar afiliados
 
 Endpoint:
@@ -119,8 +140,6 @@ Respuesta esperada:
 - `cantidad_errores`
 
 ---
-
-
 ## Sincronizar con Google Sheets
 
 Endpoint:
@@ -129,10 +148,12 @@ POST /sync/sheets/export
 ```
 
 Descripción:
-Sincroniza los datos de afiliados válidos con Google Sheets.
+El usuario puede generar una tabla en Google Sheets que contenga los afiliados almacenados en la base de datos.
+Si la hoja no existe, el sistema la crea; si ya existe, la actualiza mostrando los datos estructurados.
+
 
 Resultado esperado:
-Datos enviados correctamente al sistema externo.
+Se genera o actualiza una hoja en Google Sheets con los afiliados ordenados, mostrando información clara y útil, incluyendo la edad calculada.
 
 ---
 

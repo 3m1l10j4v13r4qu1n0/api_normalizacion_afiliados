@@ -7,15 +7,18 @@ from app.presentation.schemas.afiliados_schema import (
 )
 from app.presentation.schemas.importacion_schema import (
     ImportRequest,
+    AfiliadoCreate,
     ImportResponse,
 )
 
-from app.infrastructure.dependencies.dependency_injection import get_importar_desde_api_uc
+from app.infrastructure.dependencies.dependency_injection import get_importar_desde_api_uc1a
+from app.infrastructure.dependencies.dependency_injection import get_agregar_afiliado_uc1b
 from app.infrastructure.dependencies.dependency_injection import get_listar_afiliados_uc2
 from app.infrastructure.dependencies.dependency_injection import get_obtener_afiliado_por_id_uc2
 from app.infrastructure.dependencies.dependency_injection import get_actualizar_afiliado_uc3
-from app.infrastructure.dependencies.dependency_injection import get_dar_baja_afiliado_uc3
-from app.application.use_cases.uc1_importar_afiliado import ImportarDesdeAPIUseCase
+from app.infrastructure.dependencies.dependency_injection import get_dar_baja_afiliado_uc5
+from app.application.use_cases.uc1a_importar_lista_afiliados import ImportarDesdeAPIUseCase
+from app.application.use_cases.uc1b_agregar_afiliado import ImportarAfiliadoUseCase
 from app.application.use_cases.uc2_obtener_afiliado_por_id import ObtenerAfiliadoPorIdUseCase
 from app.application.use_cases.uc2_listar_afiliados import ListarAfiliadosUseCase
 from app.application.use_cases.uc3_actualizar_afiliado import ActualizarAfiliadoUseCase
@@ -27,17 +30,16 @@ router = APIRouter(prefix="/afiliados", tags=["Afiliados"])
 @router.post("/import", response_model=ImportResponse, status_code=201)
 async def importar_desde_api(
     request: ImportRequest,
-    uc: ImportarDesdeAPIUseCase = Depends(get_importar_desde_api_uc),
+    uc: ImportarDesdeAPIUseCase = Depends(get_importar_desde_api_uc1a),
 ):
     return await uc.execute(request.afiliados)
-    
-    # resultado = await uc.execute(request.afiliados)
 
-    # return ImportResponse(
-    #     cantidad_registros_procesados=resultado.cantidad_registros,
-    #     cantidad_registros_validos=resultado.cantidad_validos,
-    #     cantidad_errores=resultado.cantidad_errores,
-    # )
+@router.post("/", response_model=ImportResponse, status_code=201)
+async def agregar_afiliado(
+    request: AfiliadoCreate,
+    uc: ImportarAfiliadoUseCase = Depends(get_agregar_afiliado_uc1b)
+):
+    return await uc.execute(request.model_dump())
 
 
 @router.get("/", response_model=list[AfiliadoResponse])
@@ -67,6 +69,6 @@ async def actualizar_afiliado_endpoint(
 @router.delete("/{afiliado_id}", status_code=200)
 async def dar_baja_afiliado(
     afiliado_id: int,
-    uc: DarBajaAfiliadoUseCase = Depends(get_dar_baja_afiliado_uc3),
+    uc: DarBajaAfiliadoUseCase = Depends(get_dar_baja_afiliado_uc5),
 ):
     return await uc.execute(afiliado_id)

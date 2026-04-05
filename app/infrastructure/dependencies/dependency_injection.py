@@ -9,7 +9,8 @@ from app.domain.ports.sheet_data_port import SheetDataPort
 
 from app.application.use_cases.core_importar_afiliado import ImportarAfiliadoUseCase
 
-from app.application.use_cases.uc1_importar_afiliado import ImportarDesdeAPIUseCase
+from app.application.use_cases.uc1a_importar_lista_afiliados import ImportarDesdeAPIUseCase
+from app.application.use_cases.uc1b_agregar_afiliado import ImportarAfiliadoUseCase
 from app.application.use_cases.uc2_listar_afiliados import ListarAfiliadosUseCase
 from app.application.use_cases.uc2_obtener_afiliado_por_id import ObtenerAfiliadoPorIdUseCase
 from app.application.use_cases.uc3_actualizar_afiliado import ActualizarAfiliadoUseCase
@@ -28,8 +29,23 @@ from app.infrastructure.database.repositories.error_repository import ErrorRepos
 from app.infrastructure.database.repositories.domicilio_repository import DomicilioRepository
 from app.infrastructure.database.repositories.dominio_repository import DominioRepository
 
-# ── UC1 Dependencias ──────────────────────────────────────────────
-def get_importar_desde_api_uc(
+# ── UC1a Dependencias ──────────────────────────────────────────────
+def get_importar_desde_api_uc1a(
+        session: AsyncSession = Depends(get_db),
+) -> ImportarDesdeAPIUseCase:
+
+    core_uc = ImportarAfiliadoUseCase(
+        afiliado_repo   =AfiliadoImportacionRepository(session),
+        importacion_repo=ImportacionRepository(session),
+        error_repo      =ErrorRepository(session),
+        domicilio_repo  =DomicilioRepository(session),
+        dominio_repo    =DominioRepository(session),
+    )
+
+    return ImportarDesdeAPIUseCase(core_uc=core_uc)
+
+# ── UC1b Dependencias ──────────────────────────────────────────────
+def get_agregar_afiliado_uc1b(
         session: AsyncSession = Depends(get_db),
 ) -> ImportarDesdeAPIUseCase:
 
@@ -113,8 +129,8 @@ def get_importar_afiliado_uc4(
     )
 
 
-# ── UC4 Dependencias ──────────────────────────────────────────────
-def get_dar_baja_afiliado_uc3(
+# ── UC5 Dependencias ──────────────────────────────────────────────
+def get_dar_baja_afiliado_uc5(
     session: AsyncSession = Depends(get_db),
 ) -> DarBajaAfiliadoUseCase:
     repo = AfiliadoCommandRepository(session)
