@@ -7,7 +7,7 @@ UC1b — Agregar un afiliado manualmente
 RF1  — Importar datos desde fuente externa
 RF3  — Validar datos obligatorios
 RF4  — Validar formato de datos
-RN11 — Registros inválidos no se persisten
+AF-RN11 — Registros inválidos no se persisten
 """
 
 class AgregarAfiliadoUseCase:

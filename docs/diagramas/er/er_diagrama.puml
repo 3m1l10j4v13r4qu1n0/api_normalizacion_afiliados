@@ -1,130 +1,144 @@
-@startuml Diagrama ER Modelo 3FN Completo  Sistema de Normalización de Afiliados
-
-hide circle
+@startuml Diagrama ER
 skinparam linetype ortho
 
 ' =========================
-' ENTIDADES PRINCIPALES
+' ENTIDAD PRINCIPAL
 ' =========================
 
-entity Importacion {
-    + id : INTEGER <<PK>>
+entity "afiliado" as afiliado {
+    * id : SERIAL <<PK>>
     --
-    fecha_importacion : DATETIME
-    cantidad_registros : INTEGER
-    cantidad_errores : INTEGER
-    estado : VARCHAR(20)
-}
-
-entity Afiliado {
-    + id : INTEGER <<PK>>
-    --
-    dni : VARCHAR(20) <<UNIQUE>>
-    nombre : VARCHAR(50)>
-    apellido : VARCHAR(50)>
-    fecha_nacimiento : DATE
+    * dni : VARCHAR(20) <<UNIQUE>>
+    * nombre : VARCHAR(100)
+    * apellido : VARCHAR(100)
+    * fecha_nacimiento : DATE
     email : VARCHAR(150) <<UNIQUE>>
     telefono : VARCHAR(20)
-    numero_legajo : VARCHAR(50) <<UNIQUE>>
+    * numero_legajo : VARCHAR(50) <<UNIQUE>>
     fecha_ingreso : DATE
     fecha_alta : DATE
-    titulo_obtenido : VARCHAR(100)
-    marca_temporal_creacion : DATETIME
-    marca_temporal_actualizacion : DATETIME
-
-    genero_id : INTEGER <<FK>>
-    estado_civil_id : INTEGER <<FK>>
-    nivel_educativo_id : INTEGER <<FK>>
-    relacion_dependencia_id : INTEGER <<FK>>
-    estado_afiliado_id : INTEGER <<FK>>
-    domicilio_id : INTEGER <<FK>>
-    importacion_id : INTEGER <<FK>>
+    titulo_obtenido : VARCHAR(150)
+    * fecha_creacion : TIMESTAMP
+    * fecha_actualizacion : TIMESTAMP
+    --
+    * id_genero : INTEGER <<FK>>
+    * id_estado_civil : INTEGER <<FK>>
+    * id_nivel_educativo : INTEGER <<FK>>
+    * id_relacion_dependencia : INTEGER <<FK>>
+    * id_estado_afiliado : INTEGER <<FK>>
+    * id_domicilio : INTEGER <<FK>>
+    id_importacion : INTEGER <<FK>>
 }
 
-entity ErrorValidacion {
-    + id : INTEGER <<PK>>
+' =========================
+' IMPORTACION Y ERROR
+' =========================
+
+entity "importacion" as importacion {
+    * id : SERIAL <<PK>>
+    --
+    * fecha_importacion : TIMESTAMP
+    * cantidad_registros : INTEGER
+    * cantidad_errores : INTEGER
+    * estado : VARCHAR(50)
+}
+
+entity "error_validacion" as error {
+    * id : SERIAL <<PK>>
     --
     registro_origen : VARCHAR(100)
     campo : VARCHAR(100)
-    descripcion_error : TEXT
-    fecha_error : DATETIME
-    importacion_id : INTEGER <<FK>>
+    * descripcion_error : TEXT
+    * fecha_error : TIMESTAMP
+    * row_number : INTEGER
+    --
+    * id_importacion : INTEGER <<FK>>
 }
 
 ' =========================
-' TABLAS DE DOMINIO
+' DOMICILIO
 ' =========================
 
-entity Genero {
-    + id : INTEGER <<PK>>
+entity "domicilio" as domicilio {
+    * id : SERIAL <<PK>>
     --
-    descripcion : VARCHAR(50)
+    direccion : VARCHAR(200)
+    codigo_postal : VARCHAR(10)
+    --
+    * id_localidad : INTEGER <<FK>>
 }
 
-entity EstadoCivil {
-    + id : INTEGER <<PK>>
+entity "localidad" as localidad {
+    * id : SERIAL <<PK>>
     --
-    descripcion : VARCHAR(50)
+    * nombre : VARCHAR(100)
+    --
+    * id_provincia : INTEGER <<FK>>
 }
 
-entity NivelEducativo {
-    + id : INTEGER <<PK>>
+entity "provincia" as provincia {
+    * id : SERIAL <<PK>>
     --
-    descripcion : VARCHAR(50)
-}
-
-entity RelacionDependencia {
-    + id : INTEGER <<PK>>
-    --
-    descripcion : VARCHAR(50)
-}
-
-entity EstadoAfiliado {
-    + id : INTEGER <<PK>>
-    --
-    descripcion : VARCHAR(20)
+    * nombre : VARCHAR(100)
 }
 
 ' =========================
-' NORMALIZACIÓN DE DOMICILIO
+' ENTIDADES DE DOMINIO
+' (valores controlados)
 ' =========================
 
-entity Provincia {
-    + id : INTEGER <<PK>>
+entity "genero" as genero {
+    * id : SERIAL <<PK>>
     --
-    nombre : VARCHAR(100)
+    * descripcion : VARCHAR(50)
 }
 
-entity Localidad {
-    + id : INTEGER <<PK>>
+entity "estado_civil" as estado_civil {
+    * id : SERIAL <<PK>>
     --
-    nombre : VARCHAR(100)
-    provincia_id : INTEGER <<FK>>
+    * descripcion : VARCHAR(50)
 }
 
-entity Domicilio {
-    + id : INTEGER <<PK>>
+entity "nivel_educativo" as nivel_educativo {
+    * id : SERIAL <<PK>>
     --
-    direccion : VARCHAR(150)
-    codigo_postal : VARCHAR(20)
-    localidad_id : INTEGER <<FK>>
+    * descripcion : VARCHAR(100)
+}
+
+entity "relacion_dependencia" as relacion_dependencia {
+    * id : SERIAL <<PK>>
+    --
+    * descripcion : VARCHAR(100)
+}
+
+entity "estado_afiliado" as estado_afiliado {
+    * id : SERIAL <<PK>>
+    --
+    * descripcion : VARCHAR(50)
 }
 
 ' =========================
 ' RELACIONES
 ' =========================
 
-Importacion ||--o{ Afiliado
-Importacion ||--o{ ErrorValidacion
+' Importacion → Afiliado (1 importacion genera muchos afiliados)
+importacion ||--o{ afiliado : "genera"
 
-Afiliado }o--|| Genero
-Afiliado }o--|| EstadoCivil
-Afiliado }o--|| NivelEducativo
-Afiliado }o--|| RelacionDependencia
-Afiliado }o--|| EstadoAfiliado
-Afiliado }o--|| Domicilio
+' Importacion → ErrorValidacion (1 importacion genera muchos errores)
+importacion ||--o{ error : "registra"
 
-Domicilio }o--|| Localidad
-Localidad }o--|| Provincia
+' Afiliado → Domicilio (1 a 1)
+afiliado ||--|| domicilio : "tiene"
+
+' Domicilio → Localidad → Provincia
+domicilio }o--|| localidad : "pertenece a"
+localidad }o--|| provincia : "pertenece a"
+
+' Afiliado → Entidades de dominio
+afiliado }o--|| genero : "tiene"
+afiliado }o--|| estado_civil : "tiene"
+afiliado }o--|| nivel_educativo : "tiene"
+afiliado }o--|| relacion_dependencia : "tiene"
+afiliado }o--|| estado_afiliado : "tiene"
 
 @enduml

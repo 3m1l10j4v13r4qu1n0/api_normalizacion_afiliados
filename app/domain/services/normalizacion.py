@@ -1,15 +1,14 @@
 """
 Reglas de normalización
-RN7  — Nombres en mayúsculas
-RN8  — Sin espacios al inicio ni al final
-RN9  — Nulos se transforman en valores por defecto
-RN10 — DNI sin puntos ni guiones
+AF-RN08 — Los nombres deben almacenarse en mayúsculas
+AF-RN09 — Los textos no deben contener espacios al inicio ni al final
+AF-RN10 — Los DNI deben almacenarse sin puntos ni guiones
 
 """
 
 
 def normalizar_texto(valor: str | None) -> str | None:
-    """RN8 — Elimina espacios al inicio y al final"""
+    """AF-RN09 — Los textos no deben contener espacios al inicio ni al final"""
     if valor is None:
         return None
     return valor.strip()
@@ -17,8 +16,8 @@ def normalizar_texto(valor: str | None) -> str | None:
 
 def normalizar_nombre(nombre: str | None) -> str | None:
     """
-    RN7 — Nombres en mayúsculas
-    RN8 — Sin espacios al inicio ni al final
+    AF-RN08 — Los nombres deben almacenarse en mayúsculas
+    AF-RN09 — Los textos no deben contener espacios al inicio ni al final
     """
     if nombre is None:
         return None
@@ -27,8 +26,8 @@ def normalizar_nombre(nombre: str | None) -> str | None:
 
 def normalizar_dni(dni: str | None) -> str | None:
     """
-    RN8  — Sin espacios al inicio ni al final
-    RN10 — DNI sin puntos ni guiones
+    AF-RN09 — Los textos no deben contener espacios al inicio ni al final
+    AF-RN10 — Los DNI deben almacenarse sin puntos ni guiones
     """
     if dni is None:
         return None
@@ -38,7 +37,7 @@ def normalizar_dni(dni: str | None) -> str | None:
 def normalizar_afiliado(datos: dict) -> dict:
     """
     Aplica todas las reglas de normalización sobre un registro.
-    RN9 — Nulos se transforman en valores por defecto cuando corresponda.
+    Datos nulos se transforman en valores por defecto cuando corresponda.
     """
     return {
         "apellido"        : normalizar_nombre(datos.get("apellido")),

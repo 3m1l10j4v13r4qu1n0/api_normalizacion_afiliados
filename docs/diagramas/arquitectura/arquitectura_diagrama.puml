@@ -1,58 +1,165 @@
 @startuml Diagrama de Arquitectura
 title Arquitectura - Sistema de Normalización de Datos de Afiliados
 
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+' =========================
+' CLIENTES EXTERNOS
+' =========================
+
 package "Clientes Externos" {
   [Sistema Cliente]
   [Usuario Administrativo]
 }
 
-package "API REST" {
-  [Controladores REST]
+' =========================
+' PRESENTACIÓN
+' =========================
+
+package "Capa de Presentación (API REST)" {
+  [Controladores REST\n(routers/afiliados, routers/sync)]
+  [Schemas Pydantic\n(DTOs entrada/salida)]
 }
 
-package "Capa de Aplicación" {
-  [Servicio Importacion]
-  [Servicio Afiliado]
-  [Servicio Sincronizacion]
+' =========================
+' APLICACIÓN
+' =========================
+
+package "Capa de Aplicación (Use Cases)" {
+  [UC1a — Importar afiliados desde API]
+  [UC1b — Registrar afiliado manualmente]
+  [UC2 — Consultar Afiliados]
+  [UC3 — Actualizar Afiliado]
+  [UC4 — Importar desde Google Sheets]
+  [UC5 — Dar de baja Afiliado]
+  [UC6 — Exportar a Google Sheets]
 }
+
+' =========================
+' DOMINIO
+' =========================
 
 package "Capa de Dominio" {
-  [Entidad Afiliado]
-  [Entidad Importacion]
-  [Entidad ErrorValidacion]
-  [Reglas de Negocio]
+
+  package "Entidades" {
+    [Entidad Afiliado]
+    [Entidad Importacion]
+    [Entidad ErrorValidacion]
+    [Entidad Domicilio]
+  }
+
+  package "Servicios de Dominio" {
+    [Servicio Normalizacion]
+    [Servicio Validacion]
+    [Data Transformer]
+    [Data Key Mapper]
+  }
+
+  package "Ports (interfaces)" {
+    [AfiliadoCommandPort]
+    [AfiliadoQueryPort]
+    [AfiliadoImportacionPort]
+    [ImportacionRepositoryPort]
+    [ErrorRepositoryPort]
+    [DomicilioRepositoryPort]
+    [DominioRepositoryPort]
+    [SheetDataPort]
+  }
 }
 
-package "Persistencia" {
-  [Repositorio Afiliado]
-  [Repositorio Importacion]
-  [Repositorio ErrorValidacion]
-  database "PostgreSQL"
+' =========================
+' INFRAESTRUCTURA
+' =========================
+
+package "Capa de Infraestructura (Adapters)" {
+
+  package "Repositorios (DB)" {
+    [Repositorio Afiliado]
+    [Repositorio Importacion]
+    [Repositorio ErrorValidacion]
+    [Repositorio Domicilio]
+    [Repositorio Dominio]
+    database "PostgreSQL"
+  }
+
+  package "Google Sheets" {
+    [Google Sheets Adapter]
+    [Google Sheets Client]
+  }
+
 }
+
+' =========================
+' SISTEMA EXTERNO
+' =========================
 
 package "Sistema Externo" {
-  [Google Sheets]
+  [Google Sheets API]
 }
 
-[Sistema Cliente] --> [Controladores REST]
-[Usuario Administrativo] --> [Controladores REST]
+' =========================
+' RELACIONES
+' =========================
 
-[Controladores REST] --> [Servicio Importacion]
-[Controladores REST] --> [Servicio Afiliado]
-[Controladores REST] --> [Servicio Sincronizacion]
+' Clientes → Presentación
+[Sistema Cliente]          --> [Controladores REST\n(routers/afiliados, routers/sync)]
+[Usuario Administrativo]   --> [Controladores REST\n(routers/afiliados, routers/sync)]
 
-[Servicio Importacion] --> [Reglas de Negocio]
-[Servicio Importacion] --> [Repositorio Afiliado]
-[Servicio Importacion] --> [Repositorio ErrorValidacion]
-[Servicio Importacion] --> [Repositorio Importacion]
+' Presentación → Aplicación
+[Controladores REST\n(routers/afiliados, routers/sync)] --> [UC1a — Importar afiliados desde API]
+[Controladores REST\n(routers/afiliados, routers/sync)] --> [UC1b — Registrar afiliado manualmente]
+[Controladores REST\n(routers/afiliados, routers/sync)] --> [UC2 — Consultar Afiliados]
+[Controladores REST\n(routers/afiliados, routers/sync)] --> [UC3 — Actualizar Afiliado]
+[Controladores REST\n(routers/afiliados, routers/sync)] --> [UC4 — Importar desde Google Sheets]
+[Controladores REST\n(routers/afiliados, routers/sync)] --> [UC5 — Dar de baja Afiliado]
+[Controladores REST\n(routers/afiliados, routers/sync)] --> [UC6 — Exportar a Google Sheets]
 
-[Servicio Afiliado] --> [Repositorio Afiliado]
+' Aplicación → Servicios de Dominio
+[UC1a — Importar afiliados desde API]    --> [Servicio Normalizacion]
+[UC1a — Importar afiliados desde API]    --> [Servicio Validacion]
+[UC1b — Registrar afiliado manualmente]  --> [Servicio Normalizacion]
+[UC1b — Registrar afiliado manualmente]  --> [Servicio Validacion]
+[UC4 — Importar desde Google Sheets]     --> [Data Transformer]
+[UC4 — Importar desde Google Sheets]     --> [Data Key Mapper]
+[UC4 — Importar desde Google Sheets]     --> [Servicio Validacion]
+[UC4 — Importar desde Google Sheets]     --> [Servicio Normalizacion]
 
-[Servicio Sincronizacion] --> [Repositorio Afiliado]
-[Servicio Sincronizacion] --> [Google Sheets]
+' Aplicación → Ports
+[UC1a — Importar afiliados desde API]    --> [AfiliadoImportacionPort]
+[UC1a — Importar afiliados desde API]    --> [ImportacionRepositoryPort]
+[UC1a — Importar afiliados desde API]    --> [ErrorRepositoryPort]
+[UC1b — Registrar afiliado manualmente]  --> [AfiliadoImportacionPort]
+[UC2 — Consultar Afiliados]              --> [AfiliadoQueryPort]
+[UC3 — Actualizar Afiliado]              --> [AfiliadoCommandPort]
+[UC4 — Importar desde Google Sheets]     --> [SheetDataPort]
+[UC4 — Importar desde Google Sheets]     --> [AfiliadoImportacionPort]
+[UC4 — Importar desde Google Sheets]     --> [ErrorRepositoryPort]
+[UC5 — Dar de baja Afiliado]             --> [AfiliadoCommandPort]
+[UC6 — Exportar a Google Sheets]         --> [AfiliadoQueryPort]
+[UC6 — Exportar a Google Sheets]         --> [SheetDataPort]
 
-[Repositorio Afiliado] --> [PostgreSQL]
-[Repositorio Importacion] --> [PostgreSQL]
+' Ports → Repositorios (implementaciones)
+[AfiliadoCommandPort]       --> [Repositorio Afiliado]
+[AfiliadoQueryPort]         --> [Repositorio Afiliado]
+[AfiliadoImportacionPort]   --> [Repositorio Afiliado]
+[ImportacionRepositoryPort] --> [Repositorio Importacion]
+[ErrorRepositoryPort]       --> [Repositorio ErrorValidacion]
+[DomicilioRepositoryPort]   --> [Repositorio Domicilio]
+[DominioRepositoryPort]     --> [Repositorio Dominio]
+
+' Ports → Google Sheets Adapter
+[SheetDataPort] --> [Google Sheets Adapter]
+
+' Repositorios → PostgreSQL
+[Repositorio Afiliado]        --> [PostgreSQL]
+[Repositorio Importacion]     --> [PostgreSQL]
 [Repositorio ErrorValidacion] --> [PostgreSQL]
+[Repositorio Domicilio]       --> [PostgreSQL]
+[Repositorio Dominio]         --> [PostgreSQL]
+
+' Google Sheets Adapter → Client → API externa
+[Google Sheets Adapter] --> [Google Sheets Client]
+[Google Sheets Client]  --> [Google Sheets API]
 
 @enduml

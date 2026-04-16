@@ -1,16 +1,16 @@
 """
 Reglas de validación
-RN1  — DNI único en el sistema
-RN2  — No afiliados duplicados
-RN3  — DNI solo valores numéricos
-RN4  — Nombre obligatorio
-RN5  — DNI obligatorio
-RN6  — Estado definido
-RF4  — Validar formato de datos
-RF5  — Detectar duplicados por DNI
-RN11 — Registros inválidos no se persisten
-RN12 — Errores de validación se registran
-RN13 — Importación continúa aunque haya errores
+AF-RN01 — DNI único en el sistema
+AF-RN02 — No afiliados duplicados
+AF-RN03 — DNI solo valores numéricos
+AF-RN04 — Email con formato válido
+AF-RN05 — Campos obligatorios no pueden estar vacíos
+AF-RN06 — El afiliado debe tener un estado definido
+RF4     — Validar formato de datos
+RF5     — Detectar duplicados por DNI
+AF-RN11 — Registros inválidos no se persisten
+AF-RN12 — Errores se registran con referencia a fila/índice
+AF-RN13 — Importación continúa aunque haya errores
 """
 
 from email_validator import validate_email, EmailNotValidError
@@ -18,21 +18,21 @@ from app.domain.exceptions import DatoInvalidoError
 
 
 def validar_nombre(nombre: str | None) -> None:
-    """RN4 — El nombre es obligatorio"""
+    """AF-RN05 — Los campos obligatorios no pueden estar vacíos"""
     if not nombre or not nombre.strip():
         raise DatoInvalidoError("El nombre es obligatorio")
 
 
 def validar_apellido(apellido: str | None) -> None:
-    """RN4 — El apellido es obligatorio"""
+    """AF-RN05 — Los campos obligatorios no pueden estar vacíos"""
     if not apellido or not apellido.strip():
         raise DatoInvalidoError("El apellido es obligatorio")
 
 
 def validar_dni(dni: str | None) -> None:
     """
-    RN5 — El DNI es obligatorio
-    RN3 — El DNI debe contener solo valores numéricos
+    AF-RN05 — Los campos obligatorios no pueden estar vacíos
+    AF-RN03 — El DNI debe contener solo valores numéricos
     """
     if not dni or not dni.strip():
         raise DatoInvalidoError("El DNI es obligatorio")
@@ -44,22 +44,25 @@ def validar_dni(dni: str | None) -> None:
 
 def validar_dni_duplicado(dni: str, dnis_existentes: set[str]) -> None:
     """
-    RF5 — Detectar registros duplicados por DNI
-    RN1 — DNI único en el sistema
-    RN2 — No afiliados duplicados
+    RF5     — Detectar registros duplicados por DNI
+    AF-RN01 — El DNI debe ser único en el sistema
+    AF-RN02 — No se deben almacenar afiliados duplicados
     """
     if dni in dnis_existentes:
         raise DatoInvalidoError(f"El DNI '{dni}' ya existe en el sistema")
 
 
 def validar_estado_afiliado(id_estado_afiliado: int | None) -> None:
-    """RN6 — El afiliado debe tener un estado definido"""
+    """AF-RN06 — El afiliado debe tener un estado definido"""
     if id_estado_afiliado is None:
         raise DatoInvalidoError("El estado del afiliado es obligatorio")
 
 
 def validar_email(email: str | None) -> None:
-    """RF4 — Validar formato del email"""
+    """
+    AF-RN04 — El email debe tener un formato válido
+    RF4     — Validar formato de datos
+    """
     if email is None:
         return  # ← opcional, se permite nulo
 

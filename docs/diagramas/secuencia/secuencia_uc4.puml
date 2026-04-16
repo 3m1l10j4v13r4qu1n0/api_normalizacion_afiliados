@@ -1,0 +1,149 @@
+@startuml Diagrama de Secuencia — UC4 Importar desde Google Sheets
+skinparam sequenceArrowThickness 2
+skinparam sequenceGroupBorderThickness 1
+skinparam sequenceLifeLineBorderColor gray
+
+title UC4 — Importar desde Google Sheets
+
+' =========================
+' PARTICIPANTES
+' =========================
+
+actor       "Usuario\nAdministrativo"   as admin
+participant "Controlador REST\n(sync.py)"             as router       #LightBlue
+participant "UC4\nImportarDesdeSheets"                as uc4          #LightGreen
+participant "UC4a\nLeerTransformarSheets"             as uc4a         #LightGreen
+participant "DataKeyMapper"                            as mapper       #LightYellow
+participant "DataTransformer"                          as transformer  #LightYellow
+participant "ServicioValidacion"                       as validacion   #LightYellow
+participant "ServicioNormalizacion"                    as normalizacion #LightYellow
+participant "GoogleSheetsAdapter\n(SheetDataPort)"    as adapter      #LightCoral
+participant "GoogleSheetsClient"                       as client       #LightCoral
+participant "AfiliadoImportacionRepo"                  as afilRepo     #LightCoral
+participant "ImportacionRepo"                          as impRepo      #LightCoral
+participant "ErrorRepo"                                as errRepo      #LightCoral
+database    "PostgreSQL"                               as db           #LightGray
+entity      "Google Sheets API"                        as sheets       #Orange
+
+' =========================
+' FLUJO PRINCIPAL
+' =========================
+
+admin -> router : POST /sync/sheets/import
+
+activate router
+router -> uc4 : ejecutar()
+activate uc4
+
+' --- Registrar importacion ---
+uc4 -> impRepo : crear(importacion)
+activate impRepo
+impRepo -> db : INSERT importacion
+db --> impRepo : id_importacion
+impRepo --> uc4 : importacion
+deactivate impRepo
+
+' --- Leer datos desde Sheets (UC4a) ---
+uc4 -> uc4a : leerYTransformar()
+activate uc4a
+
+uc4a -> adapter : obtenerDatos(rango)
+activate adapter
+adapter -> client : get_values(sheet_id, rango)
+activate client
+client -> sheets : GET spreadsheet values
+activate sheets
+sheets --> client : [[encabezados], [fila1], [fila2], [fila3]]
+deactivate sheets
+client --> adapter : valores crudos
+deactivate client
+
+adapter --> uc4a : datos crudos
+deactivate adapter
+
+uc4a -> mapper : mapearEncabezados(encabezados)
+activate mapper
+mapper --> uc4a : encabezados normalizados (snake_case)
+deactivate mapper
+
+uc4a -> transformer : transformarFilas(filas, encabezados)
+activate transformer
+transformer --> uc4a : List[InputRow]
+deactivate transformer
+
+uc4a --> uc4 : List[InputRow]
+deactivate uc4a
+
+' --- Procesar cada registro ---
+loop por cada InputRow
+
+    uc4 -> validacion : validar(inputRow.value)
+    activate validacion
+
+    alt datos válidos
+
+        validacion --> uc4 : OK
+        deactivate validacion
+
+        uc4 -> normalizacion : normalizar(datos)
+        activate normalizacion
+        normalizacion --> uc4 : datos normalizados
+        deactivate normalizacion
+
+        uc4 -> afilRepo : guardar(afiliado)
+        activate afilRepo
+        afilRepo -> db : INSERT afiliado
+        db --> afilRepo : id_afiliado
+        afilRepo --> uc4 : afiliado guardado
+        deactivate afilRepo
+
+    else datos inválidos o DNI duplicado
+
+        validacion --> uc4 : error
+        deactivate validacion
+
+        uc4 -> errRepo : registrar(errorValidacion)
+        activate errRepo
+        errRepo -> db : INSERT error_validacion
+        db --> errRepo : OK
+        errRepo --> uc4 : error registrado
+        deactivate errRepo
+
+    end
+
+end
+
+' --- UC4b: Marcar errores en Sheets ---
+group UC4b — Marcar errores en Google Sheets [si existen errores]
+
+    uc4 -> adapter : marcarErrores(List[row_number])
+    activate adapter
+    adapter -> client : batch_update(rangos con errores, formato rojo)
+    activate client
+    client -> sheets : POST batchUpdate
+    activate sheets
+    sheets --> client : OK
+    deactivate sheets
+    client --> adapter : OK
+    deactivate client
+    adapter --> uc4 : OK
+    deactivate adapter
+
+end
+
+' --- Actualizar importacion con resultados ---
+uc4 -> impRepo : actualizar(cantidad_registros, cantidad_errores, estado)
+activate impRepo
+impRepo -> db : UPDATE importacion
+db --> impRepo : OK
+impRepo --> uc4 : OK
+deactivate impRepo
+
+' --- Respuesta final ---
+uc4 --> router : {cantidad_registros_procesados, cantidad_registros_validos, cantidad_errores}
+deactivate uc4
+
+router --> admin : 200 OK\n{cantidad_registros_procesados,\ncantidad_registros_validos,\ncantidad_errores}
+deactivate router
+
+@enduml

@@ -1,7 +1,7 @@
 import gspread
-from typing import List, Any
+
+from app.domain.models.sheet_raw_data import SheetRawData
 from google.oauth2.service_account import Credentials
-#from app.domain.ports.google_sheet_port import ISheetsClient
 from app.infrastructure.core.config import settings
 from app.domain.exceptions import SincronizacionError
 
@@ -42,7 +42,7 @@ class GspreadSheetsClient:
             raise SincronizacionError(f"Error al conectar con Google Sheets: {str(e)}")
 
     
-    def read_range(self, range_name: str) -> List[List[Any]]:
+    def read_range(self, range_name: str) -> SheetRawData:
         try:
             return self._hoja.get_values(range_name)
         except Exception as e:

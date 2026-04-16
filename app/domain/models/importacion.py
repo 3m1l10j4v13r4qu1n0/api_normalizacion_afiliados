@@ -49,8 +49,8 @@ class Importacion:
         row_number: int
     ) -> None:
         """
-        RN12 — Los errores de validación deben registrarse
-        RN13 — La importación continúa aunque haya errores
+        AF-RN12 — Los errores deben registrarse con referencia a la fila o índice
+        AF-RN13 — La importación debe continuar aunque existan registros inválidos
         """
         error = ErrorValidacion(
             registro_origen   = registro_origen,

@@ -4,14 +4,14 @@ from app.domain.exceptions import AfiliadoNoEncontradoError
 """
 UC5  — Dar de baja afiliado
 RF13 — Permitir dar de baja afiliados
-RN16 — Baja lógica marcando estado como inactivo
+AF-RN16 — La eliminación debe realizarse mediante baja lógica, marcando estado 
+como inactivo
 """
 
 class DarBajaAfiliadoUseCase:
     """
     UC5 — Baja lógica de un afiliado.
-    No elimina el registro — marca id_estado_afiliado = 2 (Inactivo).
-
+    AF-RN16 — Marca id_estado_afiliado = 2 (Inactivo — seed)
     Attributes:
         _repo : AfiliadoCommandPort
     """

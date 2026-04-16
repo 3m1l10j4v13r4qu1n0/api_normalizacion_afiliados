@@ -48,7 +48,7 @@ class AfiliadoCommandRepository(AfiliadoCommandPort):
     async def dar_baja(self, afiliado_id: int) -> Optional[AfiliadoORM]:
         """
         UC5  — Baja lógica del afiliado
-        RN16 — Marca id_estado_afiliado = 2 (Inactivo — seed)
+        AF-RN16 — La eliminación debe realizarse mediante baja lógica
         """
         afiliado = await self._session.get(AfiliadoORM, afiliado_id)
         if afiliado is None:

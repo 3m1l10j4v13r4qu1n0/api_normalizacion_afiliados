@@ -28,4 +28,7 @@ async def importar_desde_sheets_endpoint(
 
 # @router.post("/sheets/export", status_code=200)
 # async def exportar_a_sheets_endpoint(db: AsyncSession = Depends(get_db)):
-#     """UC6 — """
+#     """UC6 — 
+#       AF-RN14 — Solo se sincronizan afiliados válidos.
+#       AF-RN15 — La sincronización no debe modificar datos locales.
+#     """
