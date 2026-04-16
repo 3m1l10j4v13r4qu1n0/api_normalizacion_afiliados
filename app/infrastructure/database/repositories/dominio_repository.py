@@ -4,7 +4,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 
 from app.domain.ports.dominio_repository_port import DominioRepositoryPort
+"""
+AF-RN17 — Los atributos género, estado civil, nivel educativo, 
+relación de dependencia y estado del afiliado deben pertenecer a 
+valores controlados almacenados en entidades de dominio.
 
+"""
 
 class DominioRepository(DominioRepositoryPort):
     """

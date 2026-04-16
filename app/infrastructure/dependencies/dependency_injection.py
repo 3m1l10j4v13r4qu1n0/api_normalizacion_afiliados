@@ -10,7 +10,7 @@ from app.domain.ports.sheet_data_port import SheetDataPort
 from app.application.use_cases.core_importar_afiliado import ImportarAfiliadoUseCase
 
 from app.application.use_cases.uc1a_importar_lista_afiliados import ImportarDesdeAPIUseCase
-from app.application.use_cases.uc1b_agregar_afiliado import ImportarAfiliadoUseCase
+from app.application.use_cases.uc1b_agregar_afiliado import AgregarAfiliadoUseCase
 from app.application.use_cases.uc2_listar_afiliados import ListarAfiliadosUseCase
 from app.application.use_cases.uc2_obtener_afiliado_por_id import ObtenerAfiliadoPorIdUseCase
 from app.application.use_cases.uc3_actualizar_afiliado import ActualizarAfiliadoUseCase
@@ -47,7 +47,7 @@ def get_importar_desde_api_uc1a(
 # ── UC1b Dependencias ──────────────────────────────────────────────
 def get_agregar_afiliado_uc1b(
         session: AsyncSession = Depends(get_db),
-) -> ImportarDesdeAPIUseCase:
+) -> AgregarAfiliadoUseCase:
 
     core_uc = ImportarAfiliadoUseCase(
         afiliado_repo   =AfiliadoImportacionRepository(session),
@@ -57,7 +57,7 @@ def get_agregar_afiliado_uc1b(
         dominio_repo    =DominioRepository(session),
     )
 
-    return ImportarDesdeAPIUseCase(core_uc=core_uc)
+    return AgregarAfiliadoUseCase(core_uc=core_uc)
 
 
 

@@ -12,9 +12,6 @@ class Importacion {
     - cantidadRegistros : Integer
     - cantidadErrores : Integer
     - estado : String
-
-    + procesar()
-    + registrarError()
 }
 
 class Afiliado {
@@ -31,10 +28,6 @@ class Afiliado {
     - tituloObtenido : String
     - fechaCreacion : DateTime
     - fechaActualizacion : DateTime
-
-    + actualizarDatos()
-    + darDeBaja()
-    + normalizarDatos()
 }
 
 class ErrorValidacion {
@@ -43,10 +36,73 @@ class ErrorValidacion {
     - campo : String
     - descripcionError : String
     - fechaError : DateTime
+    - row_number : Integer
 }
 
 ' =========================
-' CLASES DE DOMINIO
+' MODELOS DE INTEGRACIÒN EXTERNA
+' (Google Sheets)
+' =========================
+
+class GspreadSheetsClient {
+    
+    + read_range(range_name: str) : SheetRawData:
+}
+
+class GoogleSheetsAdapter {
+
+    + fetch_rows(range_name: str) : SheetRawData
+}
+
+
+' =========================
+' MODELOS DE DOMINIO
+' (usados en integración con Google Sheets)
+' =========================
+
+class SheetRawData {
+    - value : List
+}
+
+class InputRow {
+    - row_number : Integer
+    - value : Dict
+}
+
+class Mapping {
+    - clave_origen : String
+    - clave_interna : String
+}
+
+' =========================
+' SERVICIOS DE DOMINIO
+' (lógica desacoplada de las entidades)
+' =========================
+
+class ServicioNormalizacion {
+    + normalizarTexto(valor : String) : String
+    + normalizarDni(dni : String) : String
+    + normalizarNombre(nombre : String) : String
+}
+
+class ServicioValidacion {
+    + validarCamposObligatorios(datos : Dict) : Boolean
+    + validarFormatoEmail(email : String) : Boolean
+    + validarDni(dni : String) : Boolean
+}
+
+class DataTransformer {
+    + transformarFilas(filas : List) : List[InputRow]
+}
+
+class DataKeyMapper {
+    + mapearEncabezados(encabezados : List) : List[Mapping]
+    + adaptarClaves(datos : Dict) : Dict
+}
+
+' =========================
+' ENTIDADES DE DOMINIO
+' (valores controlados)
 ' =========================
 
 class Genero {
@@ -98,17 +154,38 @@ class Provincia {
 ' RELACIONES
 ' =========================
 
-Importacion "1" -- "0..*" Afiliado
-Importacion "1" -- "0..*" ErrorValidacion
+' Composición: ErrorValidacion e Importacion no existen por separado
+Importacion "1" *-- "0..*" ErrorValidacion
+' Composición: Domicilio no existe sin Afiliado
+Afiliado "1" *-- "1" Domicilio
 
+' Agregación: Importacion agrupa Afiliados pero no los posee exclusivamente
+Importacion "1" o-- "0..*" Afiliado
+
+' Asociaciones simples: entidades de dominio existen independientemente
 Afiliado "1" -- "1" Genero
 Afiliado "1" -- "1" EstadoCivil
 Afiliado "1" -- "1" NivelEducativo
 Afiliado "1" -- "1" RelacionDependencia
 Afiliado "1" -- "1" EstadoAfiliado
-Afiliado "1" -- "1" Domicilio
 
+' Jerarquía geográfica
 Domicilio "1" -- "1" Localidad
 Localidad "1" -- "1" Provincia
+
+' integración con Google Sheets
+GoogleSheetsAdapter ..> SheetRawData
+GoogleSheetsAdapter ..> InputRow
+GoogleSheetsAdapter ..> DataTransformer
+GoogleSheetsAdapter ..> DataKeyMapper
+
+GspreadSheetsClient ..> GoogleSheetsAdapter
+
+' Servicios de dominio usan los modelos
+ServicioNormalizacion ..> Afiliado : normaliza
+ServicioValidacion ..> Afiliado : valida
+DataTransformer ..> InputRow : produce
+DataKeyMapper ..> Mapping : produce
+DataKeyMapper ..> InputRow : transforma
 
 @enduml

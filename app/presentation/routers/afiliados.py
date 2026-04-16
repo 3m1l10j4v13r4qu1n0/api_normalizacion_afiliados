@@ -1,4 +1,3 @@
-# presentation/routers/afiliados.py
 from fastapi import APIRouter, Depends
 
 from app.presentation.schemas.afiliados_schema import (
@@ -18,7 +17,7 @@ from app.infrastructure.dependencies.dependency_injection import get_obtener_afi
 from app.infrastructure.dependencies.dependency_injection import get_actualizar_afiliado_uc3
 from app.infrastructure.dependencies.dependency_injection import get_dar_baja_afiliado_uc5
 from app.application.use_cases.uc1a_importar_lista_afiliados import ImportarDesdeAPIUseCase
-from app.application.use_cases.uc1b_agregar_afiliado import ImportarAfiliadoUseCase
+from app.application.use_cases.uc1b_agregar_afiliado import AgregarAfiliadoUseCase
 from app.application.use_cases.uc2_obtener_afiliado_por_id import ObtenerAfiliadoPorIdUseCase
 from app.application.use_cases.uc2_listar_afiliados import ListarAfiliadosUseCase
 from app.application.use_cases.uc3_actualizar_afiliado import ActualizarAfiliadoUseCase
@@ -37,7 +36,7 @@ async def importar_desde_api(
 @router.post("/", response_model=ImportResponse, status_code=201)
 async def agregar_afiliado(
     request: AfiliadoCreate,
-    uc: ImportarAfiliadoUseCase = Depends(get_agregar_afiliado_uc1b)
+    uc: AgregarAfiliadoUseCase = Depends(get_agregar_afiliado_uc1b)
 ):
     return await uc.execute(request.model_dump())
 

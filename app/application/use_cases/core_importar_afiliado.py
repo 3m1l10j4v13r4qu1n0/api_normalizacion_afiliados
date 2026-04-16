@@ -9,9 +9,9 @@ RF6  — Registrar errores de validación
 RF7  — Normalizar nombres
 RF8  — Normalizar formatos de texto
 RF9  — Almacenar datos normalizados
-RN11 — Registros inválidos no se persisten
-RN12 — Errores se registran
-RN13 — Importación continúa aunque haya errores
+AF-RN11 — Registros inválidos no se persisten
+AF-RN12 — Errores se registran con referencia a la fila o índice
+AF-RN13 — Importación continúa aunque haya errores
 """
 
 from app.domain.models.importacion import Importacion
@@ -134,8 +134,9 @@ class ImportarAfiliadoUseCase:
                     errores.append(("dni", str(e)))
 
             if errores:
-                # RN11 — no se persiste
-                # RN12 — se registra cada error
+                # AF-RN07 — El registro debe ser atómico (todo o nada).
+                # AF-RN11 — no se persiste
+                # AF-RN12 — se registra con referencia a la fila
                 
                 for campo, descripcion in errores:
                     await self._error_repo.registrar_error(
@@ -150,7 +151,7 @@ class ImportarAfiliadoUseCase:
                     descripcion=errores[0][1],
                     origen     =str(valores),
                 )
-                # RN13 — continúa con la siguiente fila
+                # AF-RN13 — continúa con la siguiente fila
 
             else:
                 # RF9 — persistir afiliado válido

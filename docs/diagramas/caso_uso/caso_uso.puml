@@ -1,52 +1,73 @@
-@startuml caso_uso
+@startuml Diagrama de Casos de Uso
+skinparam linetype ortho
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
 left to right direction
 
-title Sistema de Normalización de Datos de Afiliados del Sindicato
+' =========================
+' ACTORES
+' =========================
 
-' Actores
-actor "Usuario\nAdministrativo" as Admin
-actor "Sistema\nCliente" as Cliente
-actor "Google Sheets" as GS
+actor "Usuario\nAdministrativo" as admin
+actor "Sistema\nCliente" as cliente
+actor "Google\nSheets" as sheets <<system>>
 
-rectangle "API REST de Normalización" {
+' =========================
+' SISTEMA
+' =========================
 
-    usecase "UC1: Importar Afiliados\n(desde archivo/API)" as UC1
-    usecase "UC2: Consultar Afiliados" as UC2
-    usecase "UC3: Actualizar Afiliado" as UC3
-    usecase "UC4: Importar desde\nGoogle Sheets" as UC4
-    usecase "UC5: Dar de baja Afiliado" as UC5
-    usecase "UC6: Sincronizar cambios\nhacia Google Sheets" as UC6
+rectangle "Sistema de Normalización de Datos de Afiliados" {
 
-    usecase "Validar y Normalizar Datos" as VN
-    usecase "Registrar Errores\nde Validación" as RE
+    ' --- Gestión de Afiliados ---
+    package "Gestión de Afiliados" {
+        usecase "UC1 — Importar Afiliado/s" as UC1
+        usecase "UC1a — Importar afiliados\ndesde API (lista)" as UC1a
+        usecase "UC1b — Registrar afiliado\nmanualmente" as UC1b
+        usecase "UC2 — Consultar Afiliados" as UC2
+        usecase "UC3 — Actualizar Afiliado" as UC3
+        usecase "UC5 — Dar de baja Afiliado" as UC5
+    }
+
+    ' --- Sincronización ---
+    package "Sincronización con Google Sheets" {
+        usecase "UC4 — Importar desde\nGoogle Sheets" as UC4
+        usecase "UC4a — Leer y transformar\ndatos desde Google Sheets" as UC4a
+        usecase "UC4b — Marcar errores\nen Google Sheets" as UC4b
+        usecase "UC6 — Generar tabla de\nafiliados en Google Sheets" as UC6
+    }
+
 }
 
-' Relaciones actores humanos/cliente
-Cliente --> UC1
-Admin --> UC2
-Cliente --> UC2
-Admin --> UC3
-Cliente --> UC3
-Admin --> UC4
-Admin --> UC5
-Cliente --> UC5
-Admin --> UC6
+' =========================
+' RELACIONES — ACTORES
+' =========================
 
-' Google Sheets como fuente (importación)
-GS --> UC4 : provee datos
+admin --> UC1b
+admin --> UC2
+admin --> UC3
+admin --> UC4
+admin --> UC5
+admin --> UC6
 
-' Google Sheets como destino (sincronización)
-UC6 --> GS : actualiza datos
+cliente --> UC1a
+cliente --> UC2
+cliente --> UC3
+cliente --> UC5
+cliente --> UC6
 
-' Include internos
-UC1 ..> VN : <<include>>
-UC3 ..> VN : <<include>>
-UC4 ..> VN : <<include>>
+UC4a --> sheets
+UC4b --> sheets
+UC6  --> sheets
 
-' Extend
-VN ..> RE : <<extend>>
+' =========================
+' RELACIONES — CASOS DE USO
+' =========================
 
-' UC3 puede disparar sincronización
-UC3 ..> UC6 : <<extend>>
+UC1a ..|> UC1 : <<extends>>
+UC1b ..|> UC1 : <<extends>>
+
+UC4 ..> UC4a : <<include>>
+UC4 ..> UC4b : <<include>>
 
 @enduml

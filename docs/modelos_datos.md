@@ -135,7 +135,7 @@ Representa un error detectado durante la importación de datos.
 - campo
 - descripcion_error
 - fecha_error
-- row_numbre
+- row_number
 
 **Relaciones:**
 

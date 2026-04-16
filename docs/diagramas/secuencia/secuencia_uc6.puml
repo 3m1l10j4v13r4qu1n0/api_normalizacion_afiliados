@@ -1,0 +1,125 @@
+@startuml Diagrama de Secuencia — UC6 Generar tabla de afiliados en Google Sheets
+skinparam sequenceArrowThickness 2
+skinparam sequenceGroupBorderThickness 1
+skinparam sequenceLifeLineBorderColor gray
+
+title UC6 — Generar tabla de afiliados en Google Sheets
+
+' =========================
+' PARTICIPANTES
+' =========================
+
+actor       "Usuario\nAdministrativo"               as admin
+participant "Controlador REST\n(sync.py)"           as router       #LightBlue
+participant "UC6\nGenerarTablaSheets"               as uc6          #LightGreen
+participant "ServicioNormalizacion"                  as normalizacion #LightYellow
+participant "AfiliadoQueryRepo"                      as afilRepo     #LightCoral
+participant "GoogleSheetsAdapter\n(SheetDataPort)"  as adapter      #LightCoral
+participant "GoogleSheetsClient"                     as client       #LightCoral
+database    "PostgreSQL"                             as db           #LightGray
+entity      "Google Sheets API"                      as sheets       #Orange
+
+' =========================
+' FLUJO PRINCIPAL
+' =========================
+
+admin -> router : POST /sync/sheets/export
+activate router
+
+router -> uc6 : ejecutar()
+activate uc6
+
+' --- Obtener afiliados activos ---
+uc6 -> afilRepo : obtenerActivos()
+activate afilRepo
+afilRepo -> db : SELECT afiliados WHERE estado = ACTIVO
+db --> afilRepo : List[Afiliado]
+afilRepo --> uc6 : List[Afiliado]
+deactivate afilRepo
+
+' --- Verificar si hay datos ---
+alt no hay afiliados activos
+
+    uc6 --> router : {mensaje: "No hay datos para exportar"}
+    router --> admin : 200 OK\n{mensaje: "No hay datos para exportar"}
+
+else hay afiliados activos
+
+    ' --- Ordenar alfabéticamente (AF-RN21) ---
+    uc6 -> uc6 : ordenar por apellido y nombre
+
+    ' --- Calcular edad y construir tabla (AF-RN19, AF-RN18) ---
+    loop por cada Afiliado
+
+        uc6 -> normalizacion : calcularEdad(fecha_nacimiento)
+        activate normalizacion
+        normalizacion --> uc6 : edad
+        deactivate normalizacion
+
+        uc6 -> uc6 : construir fila\n{nombre_apellido, edad, datos_relevantes}
+
+    end
+
+    ' --- Verificar si la hoja existe ---
+    uc6 -> adapter : verificarHoja(sheet_id)
+    activate adapter
+    adapter -> client : hoja_existe(sheet_id)
+    activate client
+    client -> sheets : GET spreadsheet metadata
+    activate sheets
+    sheets --> client : metadata
+    deactivate sheets
+    client --> adapter : Boolean
+    deactivate client
+
+    alt la hoja NO existe
+
+        adapter -> client : crearHoja(sheet_id)
+        activate client
+        client -> sheets : POST addSheet
+        activate sheets
+        sheets --> client : OK
+        deactivate sheets
+        client --> adapter : hoja creada
+        deactivate client
+
+    else la hoja YA existe
+
+        adapter -> client : limpiarHoja(sheet_id)
+        activate client
+        client -> sheets : POST clearSheet
+        activate sheets
+        sheets --> client : OK
+        deactivate sheets
+        client --> adapter : hoja limpiada
+        deactivate client
+
+    end
+
+    adapter --> uc6 : hoja lista
+    deactivate adapter
+
+    ' --- Insertar datos en la hoja (AF-RN22) ---
+    uc6 -> adapter : escribirTabla(encabezados, filas)
+    activate adapter
+    adapter -> client : batch_update(valores)
+    activate client
+    client -> sheets : POST batchUpdate
+    activate sheets
+    sheets --> client : OK
+    deactivate sheets
+    client --> adapter : OK
+    deactivate client
+    adapter --> uc6 : OK
+    deactivate adapter
+
+    ' --- Respuesta final ---
+    uc6 --> router : {cantidad_registros_exportados}
+    router --> admin : 200 OK\n{cantidad_registros_exportados}
+
+end
+
+deactivate uc6
+deactivate router
+
+@enduml
