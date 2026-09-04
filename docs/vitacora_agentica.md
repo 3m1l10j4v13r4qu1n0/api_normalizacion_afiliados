@@ -59,3 +59,19 @@
 - `docs/vitacora_agentica.md` — creado.
 
 **Estado resultante:** working tree limpio; quedó definido el mecanismo de actualización del estado y la vitácora para las próximas sesiones.
+
+---
+
+## 2026-09-04 — Regla SOLID para Python integrada al proyecto
+
+**Qué se hizo:** se creó `.agents/rules/reglas-solid.md` replicando la matriz de `.opencode/rules/reglas-solid.md` del frontend `web_ifts12_frontend`, adaptada a Python y al stack de este proyecto (Clean Architecture + Hexagonal, FastAPI, SQLAlchemy async, dataclasses, typing). Se referenció en `AGENTS.md` (Convenciones), se actualizó el estado del proyecto (sección 8) y se corrigió la nota obsoleta del skill `di-architect-scaffold` (ya adaptado, ya no describe SGVIR). El usuario optó por `.agents/rules/` en lugar de `.opencode/rules/`.
+
+**Decisiones de arquitectura:** misma matriz del frontend (SRP, OCP, LSP, ISP, DIP, reglas específicas del lenguaje, cuándo no aplicar, smells, verificación), pero con smells propios del repo (import de frameworks en `domain/`, SQL en use cases, `try/except` de negocio fuera de `handlers.py`).
+
+**Archivos/módulos tocados:**
+- `.agents/rules/reglas-solid.md` — creado.
+- `AGENTS.md` — referencia a la regla y corrección de nota SGVIR.
+- `docs/estado_actual_proyecto.md` — sección 8 actualizada.
+- `docs/vitacora_agentica.md` — esta entrada.
+
+**Estado resultante:** la regla queda como convención vigente a aplicar en futuras implementaciones de casos de uso/HUs.

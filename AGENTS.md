@@ -33,13 +33,14 @@ Convenciones:
 - Todo caso de uso nuevo debe cablearse en `dependency_injection.py` (función `get_*` con `Depends(get_db)`) e inyectarse en el router con `Depends`.
 - Excepciones de dominio se mapean a HTTP solo en `handlers.py`; no usar `try/except` de negocio en routers/use cases.
 - Tests unitarios usan `FakeRepository`/in-memory para aislar el dominio, sin BD (ver `tests/unit/domian/`; la carpeta se llama `domian` — tipeo original).
+- Reglas SOLID aplicadas al escribir código Python: ver `.agents/rules/reglas-solid.md` (misma matriz que `.opencode/rules/reglas-solid.md` de web_ifts12_frontend).
 
 ## Notas
 
 - `app/domain/models/mapping.py` + `data_key_mapper.py`/`data_transformer.py` manejan el mapeo de columnas de Google Sheets.
 - `alembic/env.py` deriva la URL de `settings.DATABASE_URL`, no de `alembic.ini`.
 - Commit messages del repo en español, descriptivos (ej. `USECASE: ...`, `DOCUMENTACION: ...`).
-- El skill `di-architect-scaffold` en `.agents/skills/` describe **otro proyecto (SGVIR)** — sus reglas de negocio y versiones de Python no aplican aquí directamente.
+- El skill `di-architect-scaffold` en `.agents/skills/` define el flujo de 6 pasos para implementar casos de uso/HUs en este proyecto (ya adaptado; originalmente describía otro proyecto).
 
 ## Memoria del proyecto (docs/estado_actual_proyecto.md y docs/vitacora_agentica.md)
 

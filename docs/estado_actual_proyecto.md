@@ -72,5 +72,6 @@ Convenciones: todo caso de uso nuevo se cablea en `dependency_injection.py` y se
 - `docs/` en formato Benn backend-only: `01_global`, `02_tecnico` (con `diagramas/`), `03_procesos`, `04_historias_usuario/HU-01..HU-08` (5 archivos c/u), `07_metodologia_agil`. No hay carpetas `05_mockups/` ni `06_uso_ia/`.
 - Commit messages en español, descriptivos, con prefijo MAYÚSCULAS (ej. `USECASE: ...`, `DOCUMENTACION: ...`); commits atómicos por unidad lógica.
 - El skill `di-architect-scaffold` describe el flujo de 6 pasos para implementar HUs (ya adaptado a este proyecto).
+- Reglas SOLID para escribir código Python: `.agents/rules/reglas-solid.md` (misma matriz que `.opencode/rules/reglas-solid.md` del frontend web_ifts12).
 - `.agents/skills/pdf-to-markdown` y `virtualizacion`... no aplican como convención de producto; el skill `apa-software-doc`/`apa-formato` son plantillas de documentación.
 - Al terminar trabajo relevante, actualizar este archivo (in-place) y agregar entrada a `vitacora_agentica.md` (append-only).
