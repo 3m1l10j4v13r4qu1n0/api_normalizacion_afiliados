@@ -1,137 +1,72 @@
-# API Normalización de Afiliados
-
-🔄 API REST para normalización de datos de afiliados  
-📊 Sincronización con Google Sheets  
-🏗️ Clean Architecture  
-⚡ FastAPI  
-🐍 Python  
+# Decisiones Técnicas
+## Sistema de Normalización de Datos de Afiliados
 
 ---
 
-## 📌 Descripción general
+### 1. Stack tecnológico
 
-Este proyecto implementa una API REST para la importación, validación, normalización y gestión de datos de afiliados.
-
-El sistema actúa como una capa intermedia entre fuentes de datos externas y sistemas de consulta, garantizando la consistencia y calidad de la información almacenada.
-
-El proyecto está diseñado como ejercicio práctico de **análisis funcional + desarrollo backend**, simulando un sistema real de gestión de datos administrativos.
-
-El sistema actúa como una capa intermedia entre fuentes de datos externas y sistemas de consulta, garantizando la consistencia y calidad de la información almacenada.
-
-**El alcance del proyecto se limita a la normalización, validación y persistencia de datos, sin reemplazar a un sistema completo de gestión de afiliados.**
-
-
----
-
-## 🎯 Objetivos del proyecto
-
-- Normalizar datos de afiliados
-- Validar información obligatoria
-- Detectar duplicados
-- Centralizar la gestión de datos normalizados de afiliados
-- Sincronizar datos con Google Sheets
-- Exponer funcionalidades mediante una API REST
+| Componente | Tecnología | Motivo |
+|---|---|---|
+| Lenguaje | Python 3.11+ | Amplio ecosistema para APIs y manejo de datos |
+| Framework | FastAPI | Moderno, rápido, validación automática con Pydantic |
+| Base de datos | PostgreSQL | Robusto, relacional, alineado con el modelo de datos definido |
+| ORM | SQLAlchemy | Estándar en proyectos Python, compatible con Alembic |
+| Migraciones | Alembic | Manejo de versiones del esquema de base de datos |
+| Integración Google Sheets | gspread + Service Account | Simple de implementar, no requiere login manual, ideal para APIs |
+| Validación de datos | Pydantic | Incluido en FastAPI, permite definir esquemas de entrada y salida |
+| Variables de entorno | python-dotenv | Manejo seguro de credenciales y configuración |
 
 ---
 
-## Documentación funcional
+### 2. Autenticación y autorización
 
-La documentación del análisis funcional se encuentra en la carpeta `docs/`.
+Esta API es un **microservicio** que forma parte de un sistema más grande de administración de afiliados.
 
-Incluye:
+La autenticación y autorización de usuarios es responsabilidad de un **servicio externo** dentro de ese sistema. Esta API asume que todas las requests entrantes ya fueron autenticadas y autorizadas antes de llegar acá.
 
-- Documento de visión
-- Alcance del sistema
-- Actores
-- Requerimientos funcionales
-- Reglas de negocio
-- Casos de uso
-- Modelo de datos conceptual
-- Especificación de API
-- Casos de prueba
+#### Lo que esta API NO hace:
+- No maneja login ni sesiones de usuario
+- No valida tokens JWT
+- No gestiona roles ni permisos de usuarios
 
-Esto simula la documentación generada por un **analista funcional junior en un proyecto real**.
+#### Lo que esta API SÍ hace para integrarse con el sistema mayor:
+- Acepta headers como `X-User-ID` y `X-User-Role` enviados por el servicio de autenticación externo
+- Registra en los logs quién ejecutó cada operación usando esos headers
 
 ---
 
-## Funcionalidades principales
+### 3. Autenticación con Google Sheets
 
-- Importación de afiliados
-- Validación de datos
-- Normalización de información
-- Persistencia en base de datos PostgreSQL
-- Consulta de afiliados
-- Actualización de afiliados
-- Baja lógica de afiliados
-- Sincronización con Google Sheets
+Se optó por **Service Account** en lugar de OAuth2 por los siguientes motivos:
 
----
+- OAuth2 requiere intervención manual del usuario para autorizar el acceso cada vez que el token expira, lo cual es incompatible con una API que corre en servidor.
+- Service Account es un usuario de servicio de Google que no expira y no requiere login interactivo.
+- La integración se realiza compartiendo la hoja de cálculo con el email de la Service Account desde Google Drive.
+- La librería `gspread` tiene soporte nativo para Service Account y simplifica la implementación.
 
-## Arquitectura
-
-El proyecto sigue principios de **Clean Architecture**, separando:
-
-- Capa de dominio
-- Capa de aplicación
-- Capa de infraestructura
-- Capa de API
-
-Esto permite mantener el sistema modular y mantenible.
+> Nota: Service Account es exclusivamente para la integración con Google Sheets. No tiene relación con el sistema de login de usuarios del sistema mayor.
 
 ---
 
-## Tecnologías utilizadas
+### 4. Arquitectura del proyecto
 
-- Python
-- FastAPI
-- PostgreSQL
-- Pydantic
-- Google Sheets API
+Se adoptó **Clean Architecture** (también conocida como Arquitectura Hexagonal), consistente con otros proyectos del sistema mayor. Este enfoque separa claramente las responsabilidades y permite que el dominio del negocio sea independiente de frameworks y servicios externos.
 
----
-
-## 🚀 Instalación y configuración
+El flujo de una request es unidireccional:
 ```
-# Clonar el repo
-
-git clone ...
-
-
-# Crear entorno virtual
-python -m venv venv
-
-# Linux 
-source venv/bin/activate 
-
-# Instalar dependencias
-pip install -r requirements.txt
-
-# Configurar variables de entorno
-cp .env.example .env
-
-# Correr migraciones
-
-# 1. inicializar alembic en el proyecto
-alembic init alembic
-
-# 2. genera una migración automática leyendo tus modelos
-alembic revision --autogenerate -m "crear tabla afiliados"
-
-# 3. aplica la migración en PostgreSQL
-alembic upgrade head
-
-# Levantar la API
-uvicorn app.main:app --reload
+Presentation → Application → Domain → Infrastructure
 ```
----
 
-# 🏗️ Estructura del Proyecto — API Normalización de Afiliados
+Cada capa solo conoce a la de abajo, nunca al revés.
 
-Este proyecto implementa una arquitectura basada en **Clean Architecture + Hexagonal (Ports & Adapters)**, separando claramente responsabilidades entre capas.
+| Capa | Carpeta | Responsabilidad |
+|---|---|---|
+| Presentación | `presentation/` | Recibe requests HTTP, define schemas de entrada/salida |
+| Aplicación | `application/` | Orquesta los casos de uso |
+| Dominio | `domain/` | Modelos y reglas puras del negocio, sin dependencias externas |
+| Infraestructura | `infrastructure/` | Base de datos, Google Sheets, configuración |
 
----
-
-## 📦 Estructura General
+### 5. Estructura de carpetas del proyecto
 
 ```
 api-normalizacion/
@@ -252,8 +187,7 @@ api-normalizacion/
 │   │   │   │   └── dominio_repository.py
 │   │   │   │   💬 Implementaciones de los ports (Adapters)
 │   │   │   │
-│   │   │   ├── seed.py                 ← datos iniciales
-│   │   │   └── seed_runner.py          ← script para ejecutar el seed
+│   │   │   ├── seed.py / seed_runner.py
 │   │   │   💬 Datos iniciales para la BD
 │   │   │
 │   │   ├── google/
@@ -272,30 +206,36 @@ api-normalizacion/
 │
 │   └── requirements.txt
 │
-├── docs/  formato Benn (backend-only)
-│    ├── 01_global
-│    │   ├── vision.md
-│    │   ├── actores.md
-│    │   ├── reglas_negocio.md
-│    │   └── alcance.md
-│    ├── 02_tecnico
-│    │   ├── modelo_datos_global.md
-│    │   ├── decisiones_tecnicas.md
-│    │   └── diagramas
-│    │       ├── arquitectura
-│    │       ├── caso_uso
-│    │       ├── diagrama_clases
-│    │       ├── diagrama_objetos
-│    │       ├── er
-│    │       └── secuencia
-│    ├── 03_procesos
-│    │   └── definicion_listo.md
-│    ├── 04_historias_usuario
-│    │   ├── HU-01 .. HU-08 (5 archivos c/u: HU-0X, caso_uso_expandido, api, modelos_datos, pruevas)
-│    └── 07_metodologia_agil
-│        └── metodoKanban.md
+├── docs/ 
+│    ├── actores.md
+│    ├── alcance.md
+│    ├── api.md
+│    ├── caso_de_uso_expandidos.md
+│    ├── casos_de_uso.md
+│    ├── decisiones_tecnicas.md
+│    ├── diagramas
+│    │   ├── arquitectura
+│    │   │   ├── arquitectura_diagrama.png
+│    │   │   └── arquitectura_diagrama.puml
+│    │   ├── caso_uso
+│    │   │   ├── caso_uso.png
+│    │   │   └── caso_uso.puml
+│    │   ├── diagrama_clases
+│    │   │   ├── clases_diagrama.png
+│    │   │   └── clases_diagrama.puml
+│    │   ├── diagrama_objetos
+│    │   │   ├── objeto_diagrama.png
+│    │   │   └── objeto_diagrama.puml
+│    │   └── er
+│    │       ├── er_diagrama.png
+│    │       └── er_diagrama.puml
+│    ├── modelos_datos.md
+│    ├── pruebas.md
+│    ├── reglas_negocio.md
+│    ├── requerimientos.md
+│    └── vision.md
 │   💬 Documentación completa del sistema:
-│   - 8 historias de usuario (formato Benn)
+│   - Casos de uso
 │   - Reglas de negocio
 │   - Modelo de datos
 │   - Diagramas UML y ER
@@ -326,82 +266,29 @@ api-normalizacion/
 
 ---
 
-## 🧠 Resumen de Arquitectura
+### 6. Variables de entorno necesarias
 
+```env
+# Base de datos
+DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/afiliados_db
+
+# Google Sheets
+GOOGLE_SERVICE_ACCOUNT_FILE=credentials/service_account.json
+GOOGLE_SHEET_ID=id_de_la_hoja_de_calculo
 ```
-Presentation (FastAPI)
-        ↓
-Application (Use Cases)
-        ↓
-Domain (Entities + Rules + Ports)
-        ↓
-Infrastructure (DB, APIs externas)
+
+---
+
+### 7. Dependencias principales
+
+```txt
+fastapi
+uvicorn
+sqlalchemy
+alembic
+psycopg2-binary
+pydantic
+python-dotenv
+gspread
+google-auth
 ```
-
----
-
-## 🎯 Principios Aplicados
-
-* ✔️ Separación de responsabilidades
-* ✔️ Inversión de dependencias (DIP)
-* ✔️ Arquitectura Hexagonal (Ports & Adapters)
-* ✔️ Dominio desacoplado de frameworks
-* ✔️ Código testeable y mantenible
-
----
-
-## 🚀 Beneficios
-
-* Escalable
-* Testeable
-* Independiente de tecnologías externas
-* Fácil de mantener y extender
-
-
----
-
-## ✅ Estado del proyecto
-
-✔ Fase 1 — Documentación funcional: FINALIZADA
-
-La documentación fue revisada y validada asegurando coherencia entre visión, alcance, reglas de negocio, casos de uso, API y modelo de datos.
-
-📄 Ver detalle del cierre: [fase_1_cierre.md](face_1_cierre.md)
-
-
----
-
-## 🗺️ Roadmap
-
-- Fase 1: Documentación funcional ✔
-
-- Fase 2: Diseño técnico y arquitectura (pendiente)
-
-- Fase 3: Implementación API REST (pendiente)
-
-- Fase 4: Pruebas y validación (pendiente)
-
----
-
-## 🧠 Perfil objetivo
-
-Este proyecto está pensado como material demostrativo para:
-
-- Analista Funcional Jr
-
-- Analista Técnico Funcional
-
-- Primeros roles en proyectos de software administrativo
-
-El foco está puesto en análisis, documentación, trazabilidad y coherencia funcional.
-
----
-
-## Autor
-
-Emilio Javier Aquino   
-Estudiante de Analista de Sistemas
-
-## 📄 Licencia
-
-Proyecto de uso educativo y demostrativo.
