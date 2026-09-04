@@ -52,7 +52,7 @@ GET    /api/user/123  (inconsistent singular/plural)
 Detailed implementations in the `references/` directory:
 
 | Guide | Contents |
-|---|---|
+|---|---|---|
 | [Resource Naming](references/resource-naming.md) | Resource Naming, HTTP Methods & Operations |
 | [Request Examples](references/request-examples.md) | Request Examples |
 | [Query Parameters](references/query-parameters.md) | Query Parameters |
@@ -60,6 +60,11 @@ Detailed implementations in the `references/` directory:
 | [HTTP Status Codes](references/http-status-codes.md) | HTTP Status Codes, API Versioning, Authentication & Security, Rate Limiting Headers |
 | [OpenAPI Documentation](references/openapi-documentation.md) | OpenAPI Documentation |
 | [Complete Example: Express.js](references/complete-example-expressjs.md) | const express = require("express"); |
+| [FastAPI Conventions (this project)](references/fastapi-conventions.md) | Convenciones y status codes aplicados a este repo (FastAPI + Clean Architecture); template en `templates/endpoint_fastapi.py` |
+
+## Applying to FastAPI (this project)
+
+Este repositorio (`api_normalizacion_afiliados`) es una API REST FastAPI con Clean Architecture + Hexagonal. Antes de diseñar endpoints nuevos, leer `references/fastapi-conventions.md`: ahí está el mapeo excepción de dominio → HTTP del `handlers.py` real, el naming vigente (`/afiliados`, `/sync/sheets/import`) y las inconsistencias detectadas. Usar `templates/endpoint_fastapi.py` como scaffold de endpoint y seguir `.agents/rules/reglas-solid.md` (SRP, ports, DI).
 
 ## Best Practices
 

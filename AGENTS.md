@@ -41,6 +41,7 @@ Convenciones:
 - `alembic/env.py` deriva la URL de `settings.DATABASE_URL`, no de `alembic.ini`.
 - Commit messages del repo en español, descriptivos (ej. `USECASE: ...`, `DOCUMENTACION: ...`).
 - El skill `di-architect-scaffold` en `.agents/skills/` define el flujo de 6 pasos para implementar casos de uso/HUs en este proyecto (ya adaptado; originalmente describía otro proyecto).
+- El skill `rest-api-design` (instalado de `aj-geddes/useful-ai-prompts`) tiene una guía local: `.agents/skills/rest-api-design/references/fastapi-conventions.md` + template `templates/endpoint_fastapi.py` (mapeo de status codes por excepción de dominio, naming vigente, convenciones REST para endpoints nuevos).
 
 ## Memoria del proyecto (docs/estado_actual_proyecto.md y docs/vitacora_agentica.md)
 

@@ -75,3 +75,20 @@
 - `docs/vitacora_agentica.md` — esta entrada.
 
 **Estado resultante:** la regla queda como convención vigente a aplicar en futuras implementaciones de casos de uso/HUs.
+
+---
+
+## 2026-09-04 — Instalación y adaptación del skill rest-api-design
+
+**Qué se hizo:** se instaló el skill `rest-api-design` (aj-geddes/useful-ai-prompts, vía `npx skills add --yes`) en `.agents/skills/rest-api-design/` con su `skills-lock.json` y el symlink de Claude Code. Se revisó todo el skill (SKILL.md + 9 referencias) y se adaptó a este proyecto: nueva guía local `references/fastapi-conventions.md` (mapeo excepción de dominio → status code del `handlers.py` real, naming vigente `/afiliados`, `/sync/sheets/import`, inconsistencias detectadas), template nuevo `templates/endpoint_fastapi.py` con convenciones del repo, y sección "Applying to FastAPI (this project)" en el SKILL.md. Se referenció en AGENTS.md y en el estado del proyecto.
+
+**Decisiones de arquitectura:** no modificar las referencias originales (Express/JS); agregarlas/adaptarlas con artefactos locales del proyecto (FastAPI + Clean Architecture + DI con `Depends(get_*)`). Se documentó la inconsistencia de `ImportacionError` (payload anidado vs `{"error": str}`) para unificar a futuro.
+
+**Archivos/módulos tocados:**
+- `.agents/skills/rest-api-design/references/fastapi-conventions.md` — nueva guía local.
+- `.agents/skills/rest-api-design/templates/endpoint_fastapi.py` — nuevo scaffold.
+- `.agents/skills/rest-api-design/SKILL.md` — tabla de guías y sección de aplicación al proyecto.
+- `AGENTS.md` y `docs/estado_actual_proyecto.md` — referencias al skill adaptado.
+- `.agents/skills/rest-api-design/` (instalación), `skills-lock.json`, `.claude/skills/rest-api-design` — commit previo `2baabc6`.
+
+**Estado resultante:** el skill queda listo para diseñar endpoints nuevos del backend siguiendo convenciones REST y el mapeo real de errores del proyecto.
