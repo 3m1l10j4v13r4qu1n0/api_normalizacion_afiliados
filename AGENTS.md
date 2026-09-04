@@ -40,3 +40,12 @@ Convenciones:
 - `alembic/env.py` deriva la URL de `settings.DATABASE_URL`, no de `alembic.ini`.
 - Commit messages del repo en español, descriptivos (ej. `USECASE: ...`, `DOCUMENTACION: ...`).
 - El skill `di-architect-scaffold` en `.agents/skills/` describe **otro proyecto (SGVIR)** — sus reglas de negocio y versiones de Python no aplican aquí directamente.
+
+## Memoria del proyecto (docs/estado_actual_proyecto.md y docs/vitacora_agentica.md)
+
+- Antes de tocar código, leer `docs/estado_actual_proyecto.md` completo para tener el contexto actual del proyecto.
+- Al terminar una implementación, eliminación o edición relevante (nueva entidad, caso de uso, endpoint, refactor de arquitectura, dependencia core):
+  1. Actualizar la sección correspondiente de `docs/estado_actual_proyecto.md` (editar in-place, no reescribir todo el archivo).
+  2. Agregar una entrada nueva al final de `docs/vitacora_agentica.md` con: fecha, qué se hizo, decisiones tomadas, archivos tocados, estado resultante. Nunca editar entradas previas de la vitácora.
+- No generar entradas de vitácora por cambios triviales (typos, formateo, renames cosméticos).
+- Si el código real contradice lo que dice `estado_actual_proyecto.md`, avisar antes de asumir cuál es la fuente de verdad.
