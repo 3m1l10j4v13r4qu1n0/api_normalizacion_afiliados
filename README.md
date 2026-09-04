@@ -272,36 +272,30 @@ api-normalizacion/
 │
 │   └── requirements.txt
 │
-├── docs/ 
-│    ├── actores.md
-│    ├── alcance.md
-│    ├── api.md
-│    ├── caso_de_uso_expandidos.md
-│    ├── casos_de_uso.md
-│    ├── decisiones_tecnicas.md
-│    ├── diagramas
-│    │   ├── arquitectura
-│    │   │   ├── arquitectura_diagrama.png
-│    │   │   └── arquitectura_diagrama.puml
-│    │   ├── caso_uso
-│    │   │   ├── caso_uso.png
-│    │   │   └── caso_uso.puml
-│    │   ├── diagrama_clases
-│    │   │   ├── clases_diagrama.png
-│    │   │   └── clases_diagrama.puml
-│    │   ├── diagrama_objetos
-│    │   │   ├── objeto_diagrama.png
-│    │   │   └── objeto_diagrama.puml
-│    │   └── er
-│    │       ├── er_diagrama.png
-│    │       └── er_diagrama.puml
-│    ├── modelos_datos.md
-│    ├── pruebas.md
-│    ├── reglas_negocio.md
-│    ├── requerimientos.md
-│    └── vision.md 
+├── docs/  formato Benn (backend-only)
+│    ├── 01_global
+│    │   ├── vision.md
+│    │   ├── actores.md
+│    │   ├── reglas_negocio.md
+│    │   └── alcance.md
+│    ├── 02_tecnico
+│    │   ├── modelo_datos_global.md
+│    │   ├── decisiones_tecnicas.md
+│    │   └── diagramas
+│    │       ├── arquitectura
+│    │       ├── caso_uso
+│    │       ├── diagrama_clases
+│    │       ├── diagrama_objetos
+│    │       ├── er
+│    │       └── secuencia
+│    ├── 03_procesos
+│    │   └── definicion_listo.md
+│    ├── 04_historias_usuario
+│    │   ├── HU-01 .. HU-08 (5 archivos c/u: HU-0X, caso_uso_expandido, api, modelos_datos, pruevas)
+│    └── 07_metodologia_agil
+│        └── metodoKanban.md
 │   💬 Documentación completa del sistema:
-│   - Casos de uso
+│   - 8 historias de usuario (formato Benn)
 │   - Reglas de negocio
 │   - Modelo de datos
 │   - Diagramas UML y ER
