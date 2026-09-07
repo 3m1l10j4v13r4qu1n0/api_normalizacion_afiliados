@@ -186,3 +186,31 @@
 **Bug latente detectado (preexistente, fuera de F3):** `normalizar_afiliado` no incluye `id_domicilio` en su dict de salida, por lo que el domicilio resuelto no se persiste con el afiliado. Se preservó este comportamiento en el refactor (no cambia semántica en F3); queda como deuda para F4/HU corrección.
 
 **Estado resultante:** suite 86/86 tests OK; pipeline validado (fila válida, inválida y duplicada); app completa carga con todos los endpoints. Pendientes: F4 (agregar deps a requirements, unificar env Google, arreglar test_data_transformer.py, bug domicilio, desacoplar DATABASE_URL de tests puros), F5, F6.
+
+---
+
+## 2026-09-07 — F4: Deuda operativa
+
+**Qué se hizo:** se implementó la **Fase 4** del plan, resolviendo la deuda operativa documentada en el estado del proyecto y el AGENTS.md.
+
+**Cambios resueltos:**
+1. **Deps de Google en requirements:** se agregaron `gspread==6.2.1` y `google-auth==2.57.1` a `app/requirements.txt` (antes el código los importaba pero no estaban listados; los endpoints de sync no cargaban).
+2. **Env de Google alineado:** `.env.example` ahora define `GOOGLE_CREDENTIALS_PATH` y `GOOGLE_SHEETS_ID` (coincide con `config.py` y `google_sheets_client.py`). Se eliminó el desincronismo previo (`GOOGLE_SERVICE_ACCOUNT_FILE`/`GOOGLE_SHEET_ID`).
+3. **Test roto preexistente arreglado:** `test_data_transformer.py` importaba `SheetRow` (renombrado a `InputRow`). Se actualizó el import y el `isinstance` de verificación.
+4. **Bug latente de domicilio corregido:** `normalizar_afiliado` no incluía `id_domicilio` en su dict de salida, por lo que el domicilio resuelto se perdía al persistir el afiliado. Se agregó `id_domicilio` a la normalización; se actualizó/amplió `test_normalizacion.py` (claves esperadas + propagación del ID).
+5. **`DATABASE_URL` desacoplada de tests puros:** nuevo `tests/conftest.py` que setea un `DATABASE_URL` por defecto antes de importar módulos, evitando que un import transitivo a `config.py` falle sin `.env`.
+
+**Decisiones de arquitectura:**
+- El desacople de `DATABASE_URL` se resolvió a nivel de `conftest.py` (fallback global) en lugar de modificar `config.py`, preservando el comportamiento productivo de requerir la var obligatoria.
+- El bug de `id_domicilio` se corrigió en el servicio de dominio (`normalizar_afiliado`), que es el punto único por donde pasa todo dato normalizado — beneficiando a todos los puntos de importación.
+
+**Archivos/módulos tocados:**
+- `app/requirements.txt` — agregados `gspread` y `google-auth`.
+- `.env.example` — renombradas vars de Google para alinear con código.
+- `tests/unit/domian/services/test_data_transformer.py` — `SheetRow` → `InputRow`.
+- `app/domain/services/normalizacion.py` — `id_domicilio` en la salida.
+- `tests/unit/domian/services/test_normalizacion.py` — claves esperadas + nuevo test de propagación de domicilio.
+- `tests/conftest.py` — creado (fallback de `DATABASE_URL`).
+- `docs/estado_actual_proyecto.md` — secciones 5/6/7 actualizadas.
+
+**Estado resultante:** suite completa **100/100 tests OK** (incluye el anteriormente roto); app carga con todos los endpoints; env de Google coherente; deps de instalación completa. Pendientes: F5 (endpoints), F6 (doc final).

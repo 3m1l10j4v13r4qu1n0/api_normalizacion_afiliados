@@ -53,23 +53,24 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 | GET | `/afiliados/{afiliado_id}` | Obtener afiliado por ID (UC2) | ✅ |
 | PATCH | `/afiliados/{afiliado_id}` | Actualizar afiliado (UC3) | ✅ |
 | DELETE | `/afiliados/{afiliado_id}` | Dar de baja afiliado (UC5) | ✅ |
-| POST | `/sync/sheets/import` | Importar desde Google Sheets (UC4) | ⚠️ requiere deps |
+| POST | `/sync/sheets/import` | Importar desde Google Sheets (UC4) | ⚠️ requiere credenciales reales |
 | POST | `/sync/sheets/export` | Generar tabla en Sheets (UC6) | ❌ comentado |
 
 ## 6. Infraestructura / Integraciones
 
 - PostgreSQL async (`DATABASE_URL`, var obligatoria; Alembic inicializado, `alembic upgrade head`).
-- Google Sheets (`gspread` + `google-auth`): el código usa `GOOGLE_SHEETS_ID` y `GOOGLE_CREDENTIALS_PATH`, pero `.env.example` define `GOOGLE_SHEET_ID` y `GOOGLE_SERVICE_ACCOUNT_FILE`. **Desincronismo a corregir** antes de usar `GET /sync/sheets/import`.
-- `requirements.txt` en `app/requirements.txt` (no en la raíz). `gspread`/`google-auth` NO están listados.
+- Google Sheets (`gspread` + `google-auth`, ya listados en `app/requirements.txt`): el código usa `GOOGLE_SHEETS_ID` y `GOOGLE_CREDENTIALS_PATH`, alineado con `.env.example`.
+- `requirements.txt` en `app/requirements.txt` (no en la raíz).
 - Seed de datos iniciales: `python -m app.infrastructure.database.seed_runner`.
+- Tests puros desacoplados de `DATABASE_URL` vía `tests/conftest.py` (setea un valor por defecto antes de importar módulos).
 
 ## 7. Pendientes / TODO conocidos
 
-1. Agregar `gspread` y `google-auth` a `app/requirements.txt` y unificar nombres de env de Google Sheets (HU-05/06/08).
-2. Activar e implementar `POST /sync/sheets/export` (HU-08).
-3. Arreglar `tests/unit/domian/services/test_data_transformer.py`: `ImportError: cannot import name 'SheetRow'` (test desactualizado, preexistente). Suite: 86 tests OK, 1 falla.
-4. Mantener migraciones de Alembic al día con el modelo.
-5. Revisar semántica de baja lógica (seed: 1=Activo, 2=Inactivo).
+1. Activar e implementar `POST /sync/sheets/export` (HU-08).
+2. Mantener migraciones de Alembic al día con el modelo.
+3. Revisar semántica de baja lógica (seed: 1=Activo, 2=Inactivo).
+4. Vº `ImportacionError` payload anidado → unificar a `{"error": str}` (F5).
+5. Verificar `alembic upgrade head` en entorno con BD (migración `a1f2b3c4d5e6` de F2 no pudo correrse localmente).
 
 ## 8. Decisiones y convenciones vigentes
 
