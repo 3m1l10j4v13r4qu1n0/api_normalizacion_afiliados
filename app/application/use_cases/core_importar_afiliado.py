@@ -14,6 +14,7 @@ AF-RN12 — Errores se registran con referencia a la fila o índice
 AF-RN13 — Importación continúa aunque haya errores
 """
 
+from app.domain.models.dominio import Dominio
 from app.domain.models.importacion import Importacion
 from app.domain.models.input_row import InputRow
 from app.domain.ports.afiliado.afiliado_importacion_port import AfiliadoImportacionPort
@@ -23,13 +24,6 @@ from app.domain.ports.domicilio_repository_port import DomicilioRepositoryPort
 from app.domain.ports.dominio_repository_port import DominioRepositoryPort
 from app.domain.services.validacion import validar_afiliado, validar_dni_duplicado
 from app.domain.services.normalizacion import normalizar_afiliado
-from app.infrastructure.database.orm_models.dominios_orm import (
-    GeneroORM,
-    EstadoCivilORM,
-    NivelEducativoORM,
-    RelacionDependenciaORM,
-    EstadoAfiliadoORM,
-)
 
 
 class ImportarAfiliadoUseCase:
@@ -97,11 +91,11 @@ class ImportarAfiliadoUseCase:
             valores = row.values
 
             # Paso 3a — Resolver dominios (strings → IDs)
-            id_genero               = await self._dominio_repo.resolver_o_crear(GeneroORM,               valores.get("genero"))
-            id_estado_civil         = await self._dominio_repo.resolver_o_crear(EstadoCivilORM,          valores.get("estado_civil"))
-            id_nivel_educativo      = await self._dominio_repo.resolver_o_crear(NivelEducativoORM,       valores.get("nivel_educativo"))
-            id_relacion_dependencia = await self._dominio_repo.resolver_o_crear(RelacionDependenciaORM,  valores.get("relacion_dependencia"))
-            id_estado_afiliado      = await self._dominio_repo.resolver_o_crear(EstadoAfiliadoORM,       valores.get("estado_afiliado")) or 1
+            id_genero               = await self._dominio_repo.resolver_o_crear(Dominio.GENERO,               valores.get("genero"))
+            id_estado_civil         = await self._dominio_repo.resolver_o_crear(Dominio.ESTADO_CIVIL,         valores.get("estado_civil"))
+            id_nivel_educativo      = await self._dominio_repo.resolver_o_crear(Dominio.NIVEL_EDUCATIVO,      valores.get("nivel_educativo"))
+            id_relacion_dependencia = await self._dominio_repo.resolver_o_crear(Dominio.RELACION_DEPENDENCIA, valores.get("relacion_dependencia"))
+            id_estado_afiliado      = await self._dominio_repo.resolver_o_crear(Dominio.ESTADO_AFILIADO,      valores.get("estado_afiliado")) or 1
 
             # Paso 3b — Resolver domicilio
             id_domicilio = await self._domicilio_repo.resolver_o_crear(

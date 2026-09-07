@@ -18,7 +18,7 @@ class AfiliadoImportacionPort(ABC):
         ...
 
     @abstractmethod
-    async def save_importacion(self, datos: dict, id_importacion: int) -> None:
+    async def save(self, datos: dict, id_importacion: int) -> None:
         """
         Persiste un afiliado validado y normalizado.
 
