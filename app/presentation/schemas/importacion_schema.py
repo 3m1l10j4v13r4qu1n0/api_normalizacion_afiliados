@@ -1,7 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import date
 from typing import List, Optional
-
 # ── ImportRequest — entrada para importación ─────────────────────────
 
 class AfiliadoImportItem(BaseModel):
@@ -40,8 +39,33 @@ class AfiliadoCreate(AfiliadoImportItem):
 
 # ── ImportResponse — respuesta de importación ────────────────────────
 
+class ErrorValidacionResponse(BaseModel):
+    """Un error de validación de una fila de la importación (AF-RN12)."""
+    campo             : str
+    descripcion_error : str
+    row_number        : int
+
+
 class ImportResponse(BaseModel):
     """Resumen del proceso de importación — UC1 paso 6"""
     cantidad_registros_procesados : int
     cantidad_registros_validos    : int
     cantidad_errores              : int
+    errores                       : list[ErrorValidacionResponse] = []
+
+
+def import_response_from_importacion(importacion) -> ImportResponse:
+    """Proyecta el modelo de dominio Importacion al schema de respuesta."""
+    return ImportResponse(
+        cantidad_registros_procesados=importacion.cantidad_registros,
+        cantidad_registros_validos   =importacion.cantidad_validos,
+        cantidad_errores             =importacion.cantidad_errores,
+        errores=[
+            ErrorValidacionResponse(
+                campo            =error.campo,
+                descripcion_error=error.descripcion_error,
+                row_number       =error.row_number,
+            )
+            for error in importacion.errores
+        ],
+    )

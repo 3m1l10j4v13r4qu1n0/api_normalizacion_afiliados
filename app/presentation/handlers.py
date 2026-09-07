@@ -49,12 +49,7 @@ def registrar_handlers(app: FastAPI):
         logger.exception("Error en importación")
         return JSONResponse(
             status_code=500,
-            content={
-                "error": {
-                    "type": "ImportacionError",
-                    "message": str(exc)
-                }
-            }
+            content={"error": str(exc)}
         )
 
     @app.exception_handler(SincronizacionError)

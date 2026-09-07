@@ -8,6 +8,7 @@ from app.presentation.schemas.importacion_schema import (
     ImportRequest,
     AfiliadoCreate,
     ImportResponse,
+    import_response_from_importacion,
 )
 
 from app.infrastructure.dependencies.dependency_injection import get_importar_afiliado_core
@@ -30,14 +31,16 @@ async def importar_desde_api(
     core_uc: ImportarAfiliadoUseCase = Depends(get_importar_afiliado_core),
 ):
     datos = [afiliado.model_dump() for afiliado in request.afiliados]
-    return await core_uc.importar_desde_dicts(datos)
+    importacion = await core_uc.importar_desde_dicts(datos)
+    return import_response_from_importacion(importacion)
 
 @router.post("/", response_model=ImportResponse, status_code=201)
 async def agregar_afiliado(
     request: AfiliadoCreate,
     core_uc: ImportarAfiliadoUseCase = Depends(get_importar_afiliado_core),
 ):
-    return await core_uc.agregar_afiliado(request.model_dump())
+    importacion = await core_uc.agregar_afiliado(request.model_dump())
+    return import_response_from_importacion(importacion)
 
 
 @router.get("/", response_model=list[AfiliadoResponse])

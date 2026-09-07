@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends
 
-from app.presentation.schemas.importacion_schema import ImportResponse
+from app.presentation.schemas.importacion_schema import (
+    ImportResponse,
+    import_response_from_importacion,
+)
 from app.application.use_cases.core_importar_afiliado import ImportarAfiliadoUseCase
 from app.application.use_cases.uc4a_importar_afiliado import ImportSheetUseCase
 
@@ -25,11 +28,7 @@ async def importar_desde_sheets_endpoint(
     # 🔹 CORE — lógica de negocio
     resultado = await core_uc.execute(sheet_rows)
 
-    return ImportResponse(
-        cantidad_registros_procesados=resultado.cantidad_registros,
-        cantidad_registros_validos=resultado.cantidad_validos,
-        cantidad_errores=resultado.cantidad_errores,
-    )
+    return import_response_from_importacion(resultado)
 
 
 
