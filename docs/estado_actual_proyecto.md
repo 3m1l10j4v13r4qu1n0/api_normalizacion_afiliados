@@ -31,13 +31,17 @@ Convenciones: todo caso de uso nuevo se cablea en `dependency_injection.py` y se
 
 ## 4. Casos de uso / Servicios implementados
 
-- [x] UC1a — importar afiliados por archivo (HU-01)
-- [x] UC1b — registrar afiliado manual (HU-02)
+El pipeline de importación es un **UC único** (`core_importar_afiliado.py` → `ImportarAfiliadoUseCase`) que absorbe UC1a (import por archivo, `importar_desde_dicts`), UC1b (alta manual, `agregar_afiliado`) y UC4 (import desde Sheets, `execute(InputRow)`). Se apoya en el servicio de dominio puro `importacion_pipeline.procesar_fila`. La lectura/transformación del Sheet vive en `uc4a_importar_afiliado.py` (`ImportSheetUseCase`, no wrapper del core).
+
+- [x] UC1a — importar afiliados por archivo (HU-01) — vía core
+- [x] UC1b — registrar afiliado manual (HU-02) — vía core
 - [x] UC2 — consultar afiliados, listado y por ID (HU-03)
 - [x] UC3 — actualizar afiliado (HU-04)
 - [x] UC4a/4b — importar desde Google Sheets + marcar errores en la hoja (HU-05/06, requiere `gspread`/`google-auth`)
 - [x] UC5 — dar de baja afiliado (HU-07)
 - [ ] UC6 — generar tabla en Google Sheets (HU-08, endpoint comentado en router)
+
+> Nota: los wrappers de importación `uc1a_importar_lista_afiliados.py`, `uc1b_agregar_afiliado.py` y `uc4_importar_afiliado.py` fueron **eliminados** en F3 (indirección redundante). `uc4a_importar_afiliado.py` se conserva (lectura de Sheet, no es wrapper del core).
 
 ## 5. Endpoints / Interfaces expuestas
 

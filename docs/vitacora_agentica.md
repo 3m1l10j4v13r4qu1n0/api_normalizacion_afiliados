@@ -160,3 +160,29 @@
 - `docs/estado_actual_proyecto.md` — nota AF-RN12 en entidad `ErrorValidacion`.
 
 **Estado resultante:** AF-RN12 corregido; el número de fila original ahora persiste. Suite 86/86 tests OK; imports del repositorio verificados. Sin BD local no se pudo correr `alembic upgrade head` (queda pendiente verificarlo en entorno con BD). Pendientes: F3, F4, F5, F6.
+---
+
+## 2026-09-07 — F3: Split del core/SRP (pipeline de dominio puro + UC único)
+
+**Qué se hizo:** se implementó la **Fase 3** del plan: se extrajo la lógica de pipeline de importación a un servicio de dominio puro, se convirtió `core_importar_afiliado.py` en el orquestador/UC único, y se eliminaron los wrappers de UC que agregaban indirección redundante.
+
+**Decisiones de arquitectura (vale la opción "Core como UC único + pipeline puro"):**
+- Nuevo `app/domain/services/importacion_pipeline.py` → `procesar_fila()`: función pura del dominio que recibe los valores crudos + IDs de dominio/domicilio ya resueltos + DNIs, y devuelve `(dato_normalizado, errores)`. Encapsula normalización (RF7/RF8), validación (RF3/RF4) y dedupe por DNI (RF5). No toca repositorios ni frameworks.
+- `core_importar_afiliado.py` (`ImportarAfiliadoUseCase`) queda como **orquestador único**: resuelve dominios y domicilio vía ports, delega la lógica por fila en `procesar_fila`, y persiste/ registra errores. Absorbe la conversión de input: `importar_desde_dicts()` (UC1a), `agregar_afiliado()` (UC1b), `execute(rows)` (UC4, recibe InputRow del Sheet).
+- **Se eliminaron** `uc1a_importar_lista_afiliados.py`, `uc1b_agregar_afiliado.py`, `uc4_importar_afiliado.py`. **Se conservó** `uc4a_importar_afiliado.py` (`ImportSheetUseCase`): es el caso de uso de lectura/transformación del Sheet, NO un wrapper del core (el plan original lo listaba mal).
+- `dependency_injection.py` recalibrado: `get_importar_afiliado_core` (fábrica única del core), `get_import_sheet_uc4a` (lectura del Sheet), y alias `get_importar_afiliado_uc4 = get_importar_afiliado_core`.
+- Routers: `/afiliados/import` y `/afiliados/` apuntan al core (con `model_dump()`); `/sync/sheets/import` inyecta `ImportSheetUseCase` + core y los combina en el endpoint.
+
+**Instalación de deps (anticipo de F4):** se instalaron `gspread` y `google-auth` en el venv para poder validar la app completa (antes el import de `dependency_injection.py` fallaba por no tenerlos). Aún NO se agregaron a `app/requirements.txt`.
+
+**Archivos/módulos tocados:**
+- `app/domain/services/importacion_pipeline.py` — creado (función pura `procesar_fila`).
+- `app/application/use_cases/core_importar_afiliado.py` — reescrito como orquestador único.
+- `app/application/use_cases/uc1a_importar_lista_afiliados.py`, `uc1b_agregar_afiliado.py`, `uc4_importar_afiliado.py` — eliminados.
+- `app/infrastructure/dependencies/dependency_injection.py` — recalibrado.
+- `app/presentation/routers/afiliados.py`, `sync.py` — recalibrados al core.
+- `docs/estado_actual_proyecto.md` — sección 4 actualizada.
+
+**Bug latente detectado (preexistente, fuera de F3):** `normalizar_afiliado` no incluye `id_domicilio` en su dict de salida, por lo que el domicilio resuelto no se persiste con el afiliado. Se preservó este comportamiento en el refactor (no cambia semántica en F3); queda como deuda para F4/HU corrección.
+
+**Estado resultante:** suite 86/86 tests OK; pipeline validado (fila válida, inválida y duplicada); app completa carga con todos los endpoints. Pendientes: F4 (agregar deps a requirements, unificar env Google, arreglar test_data_transformer.py, bug domicilio, desacoplar DATABASE_URL de tests puros), F5, F6.
