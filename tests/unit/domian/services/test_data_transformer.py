@@ -10,7 +10,7 @@ Cubre:
 import pytest
 from unittest.mock import MagicMock
 from app.domain.services.data_transformer import DataTransformer
-from app.domain.models.input_row import SheetRow
+from app.domain.models.input_row import InputRow
 
 
 # ---------------------------------------------------------------------------
@@ -86,7 +86,7 @@ class TestTransformSheetRow:
         headers  = ["Apellido/s:"]
         raw_data = [["García"]]
         resultado = transformer.transform(raw_data, headers)
-        assert all(isinstance(r, SheetRow) for r in resultado)
+        assert all(isinstance(r, InputRow) for r in resultado)
 
     def test_values_es_dict(self, transformer):
         headers  = ["Apellido/s:"]
