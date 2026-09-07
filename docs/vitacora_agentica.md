@@ -92,3 +92,54 @@
 - `.agents/skills/rest-api-design/` (instalación), `skills-lock.json`, `.claude/skills/rest-api-design` — commit previo `2baabc6`.
 
 **Estado resultante:** el skill queda listo para diseñar endpoints nuevos del backend siguiendo convenciones REST y el mapeo real de errores del proyecto.
+
+---
+
+## 2026-09-04 — Plan de refactorización del proyecto (feedback + hoja de ruta)
+
+**Qué se hizo:** se revisó el repo completo siguiendo las reglas del proyecto (`AGENTS.md`, skill `di-architect-scaffold`, `reglas-solid.md`, `estado_actual_proyecto.md`) y se entregó feedback con hallazgos ordenados por severidad, más un plan de refactorización en 6 fases. Se consensuaron tres decisiones clave con el usuario.
+
+**Hallazgos críticos detectados:**
+- Violación de pureza del dominio: `app/domain/ports/dominio_repository_port.py` importa `sqlalchemy.orm.DeclarativeBase`; además `core_importar_afiliado.py` instancia los ORMs (`GeneroORM`, etc.) dentro de la capa de aplicación.
+- Bug AF-RN12: `ErrorRepository.registrar_error` no implementa el parámetro `row_number` exigido por `ErrorRepositoryPort`, por lo que se pierde el número de fila al persistir.
+- LSP rota: `AfiliadoImportacionPort` define `save_importacion()` pero la implementación y el use case usan `save()`.
+- Duplicación de arquitectura: dos `ImportarAfiliadoUseCase` "core" + wrappers triviales (`uc1a`, `uc1b`, `uc4`, `uc4a`) que solo agregan indirección.
+- `gspread` y `google-auth` ausentes de `app/requirements.txt`; env de Google desincronizado entre `config.py` y `.env.example`.
+- Test roto preexistente: `test_data_transformer.py` importa `SheetRow` (renombrado a `InputRow`).
+
+**Decisiones de arquitectura:**
+- Purificar el port de dominio usando un **enum `Dominio`** (Genero, EstadoCivil, NivelEducativo, RelacionDependencia, EstadoAfiliado) en lugar de recibir la clase ORM; el adapter mapea enum → ORM internamente.
+- **Fusionar los wrappers** `uc1a/uc1b/uc4/uc4a` en los UCs core, eliminando la indirección redundante.
+- Reordenar la prioridad: Fases 1+2 (puertos y bug) → Fase 3 (split del core/SRP) → Fase 4 (deuda operativa) → Fase 5 (endpoints) → Fase 6 (documentación).
+
+**Plan de fases acordado (pendiente de implementar en una nueva sesión):**
+- **F1 — Purificar dominio y alinear contratos:** enum `Dominio`, reescribir `resolver_o_crear(dominio, descripcion)`, quitar ORMs del use case, renombrar `save_importacion`→`save`.
+- **F2 — Fix AF-RN12:** implementar `row_number` en `ErrorRepository` y verificar migración.
+- **F3 — Split del core (SRP):** nuevo servicio de dominio puro `app/domain/services/importacion_pipeline.py`; `core_importar_afiliado` como orquestador; eliminar los wrappers de UC duplicados y recalibrar `dependency_injection.py` y routers.
+- **F4 — Deuda operativa:** agregar `gspread`/`google-auth` a requirements; unificar env de Google; arreglar `test_data_transformer.py`; desacoplar `DATABASE_URL` de los tests puros; constantes de estados y limpieza de código muerto.
+- **F5 — Endpoints:** uniformar payload de errores a `{"error": str}` (quitar anidado de `ImportacionError`); exponer lista de errores en `ImportResponse`.
+- **F6 — Documentación:** actualizar `docs/estado_actual_proyecto.md` y agregar entrada de vitácora al finalizar.
+
+**Estado resultante:** plan registrado y quedó listo para implementarse en una nueva sesión. **No se tocó código de aplicación** en esta entrada; solo documentación. Working tree sin cambios de código.
+
+---
+
+## 2026-09-07 — F1: Purificación del dominio y alineación de contratos
+
+**Qué se hizo:** se implementó la **Fase 1** del plan de refactorización sobre la rama nueva `feature/refactorizacion-arquitectonica` (creada desde `develop`). Se purificó el dominio eliminando la dependencia de SQLAlchemy del port de valores controlados y se alineó el contrato de persistencia de afiliados.
+
+**Decisiones de arquitectura:**
+- Nuevo enum puro `app/domain/models/dominio.py` (`Dominio`: GENERO, ESTADO_CIVIL, NIVEL_EDUCATIVO, RELACION_DEPENDENCIA, ESTADO_AFILIADO) que identifica las tablas de valores controlados de forma abstracta.
+- `DominioRepositoryPort.resolver_o_crear` ahora recibe `Dominio` en lugar de `Type[DeclarativeBase]`; esto elimina el import de `sqlalchemy.orm` del dominio. El adapter `DominioRepository` mapea enum → ORM internamente (dict `_ORM_POR_DOMINIO`), dejando los ORMs solo en infraestructura.
+- `core_importar_afiliado.py` ya no importa ni instancia ORMs; llama `resolver_o_crear(Dominio.X, ...)`.
+- Fix LSP: `AfiliadoImportacionPort.save_importacion()` se renombró a `save()`, alineando el contrato con la implementación (`AfiliadoImportacionRepository.save`) y el use case core, que ya usaba `save()`.
+
+**Archivos/módulos tocados:**
+- `app/domain/models/dominio.py` — creado (enum `Dominio`).
+- `app/domain/ports/dominio_repository_port.py` — purificado (enum en vez de ORM).
+- `app/infrastructure/database/repositories/dominio_repository.py` — mapeo enum → ORM.
+- `app/application/use_cases/core_importar_afiliado.py` — quitados ORMs, usa enum.
+- `app/domain/ports/afiliado/afiliado_importacion_port.py` — rename `save_importacion`→`save`.
+- `docs/estado_actual_proyecto.md` — secciones 1, 3 actualizadas (rama activa, enum `Dominio`).
+
+**Estado resultante:** dominio 100% puro (sin `sqlalchemy.orm.DeclarativeBase` fuera de infraestructura); suite 86/86 tests OK (excluyendo el `test_data_transformer.py` roto preexistente); imports de F1 verificados. Quedan pendientes F2 (fix AF-RN12 `row_number`), F3 (split core/SRP + eliminar wrappers), F4 (deuda operativa), F5 (endpoints), F6 (doc final).

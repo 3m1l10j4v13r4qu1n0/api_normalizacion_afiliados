@@ -1,12 +1,12 @@
 # Estado Actual del Proyecto
 
-> Última actualización: 2026-09-04
+> Última actualización: 2026-09-07
 > Este archivo es una FOTO del presente, no un historial. Para el historial de cambios ver `vitacora_agentica.md`.
 > El agente debe leer este archivo completo al iniciar cualquier tarea sobre el proyecto.
 
 ## 1. Resumen del proyecto
 
-API REST en Python/FastAPI para la normalización, validación y gestión de datos de afiliados de un sindicato. Actúa como capa intermedia entre fuentes externas (importación manual, Google Sheets y scripts clientes) y los sistemas de consulta. Stack: FastAPI + SQLAlchemy 2.0 async (asyncpg) + pydantic-settings, Python 3.13.5 (`app/.python-version`, venv en `./venv`). Rama activa: `feature/docs-formato-benn`.
+API REST en Python/FastAPI para la normalización, validación y gestión de datos de afiliados de un sindicato. Actúa como capa intermedia entre fuentes externas (importación manual, Google Sheets y scripts clientes) y los sistemas de consulta. Stack: FastAPI + SQLAlchemy 2.0 async (asyncpg) + pydantic-settings, Python 3.13.5 (`app/.python-version`, venv en `./venv`). Rama activa: `feature/refactorizacion-arquitectonica`.
 
 ## 2. Arquitectura
 
@@ -26,6 +26,7 @@ Convenciones: todo caso de uso nuevo se cablea en `dependency_injection.py` y se
 - `SheetRawData` — estructura de lectura de la hoja (encabezados + datos).
 - `Importacion` — registro de un proceso de importación.
 - `ErrorValidacion` — error de validación por registro/campo, asociado a `row_number`.
+- `Dominio` — enum puro que identifica las tablas de valores controlados (GENERO, ESTADO_CIVIL, NIVEL_EDUCATIVO, RELACION_DEPENDENCIA, ESTADO_AFILIADO). Se inyecta al port `DominioRepositoryPort` en lugar de la clase ORM.
 - Valores controlados (tablas de dominio en BD vía seed): estado afiliado, género, estado civil, nivel educativo, relación de dependencia.
 
 ## 4. Casos de uso / Servicios implementados
