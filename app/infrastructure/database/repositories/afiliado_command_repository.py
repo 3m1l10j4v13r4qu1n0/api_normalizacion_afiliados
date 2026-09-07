@@ -15,7 +15,7 @@ class AfiliadoCommandRepository(AfiliadoCommandPort):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def update_afiliado(
+    async def update_afiliado( # type: ignore
         self, afiliado_id: int, datos: Dict[str, Any]
     ) -> Optional[AfiliadoORM]:
         """
@@ -31,7 +31,7 @@ class AfiliadoCommandRepository(AfiliadoCommandPort):
         await self._session.flush()
         return afiliado
 
-    async def buscar_por_email_excluyendo_id(
+    async def buscar_por_email_excluyendo_id( # type: ignore
         self, email: str, afiliado_id: int
     ) -> Optional[AfiliadoORM]:
         """
@@ -45,7 +45,7 @@ class AfiliadoCommandRepository(AfiliadoCommandPort):
         return resultado.scalar_one_or_none()
     
 
-    async def dar_baja(self, afiliado_id: int) -> Optional[AfiliadoORM]:
+    async def dar_baja(self, afiliado_id: int) -> Optional[AfiliadoORM]: # type: ignore
         """
         UC5  — Baja lógica del afiliado
         AF-RN16 — La eliminación debe realizarse mediante baja lógica
@@ -53,6 +53,6 @@ class AfiliadoCommandRepository(AfiliadoCommandPort):
         afiliado = await self._session.get(AfiliadoORM, afiliado_id)
         if afiliado is None:
             return None
-        afiliado.id_estado_afiliado = 2
+        afiliado.id_estado_afiliado = 2 # type: ignore
         await self._session.flush()
         return afiliado
