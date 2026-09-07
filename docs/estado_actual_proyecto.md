@@ -79,6 +79,6 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 - Commit messages en español, descriptivos, con prefijo MAYÚSCULAS (ej. `USECASE: ...`, `DOCUMENTACION: ...`); commits atómicos por unidad lógica.
 - El skill `di-architect-scaffold` describe el flujo de 6 pasos para implementar HUs (ya adaptado a este proyecto).
 - Reglas SOLID para escribir código Python: `.agents/rules/reglas-solid.md` (misma matriz que `.opencode/rules/reglas-solid.md` del frontend web_ifts12).
-- Skill `rest-api-design` adaptado a este repo: guía local en `references/fastapi-conventions.md` (mapeo status codes por excepción de dominio, naming vigente) + template `templates/endpoint_fastapi.py`. Inconsistencia detectada: `ImportacionError` usa payload anidado, el resto `{"error": str}`.
+- Skill `rest-api-design` adaptado a este repo: guía local en `references/fastapi-conventions.md` (mapeo status codes por excepción de dominio, naming vigente) + template `templates/endpoint_fastapi.py`. Payload de errores unificado: todas las excepciones de dominio usan `{"error": str}` (se eliminó el anidado de `ImportacionError` en F5).
 - `.agents/skills/pdf-to-markdown` y `virtualizacion`... no aplican como convención de producto; el skill `apa-software-doc`/`apa-formato` son plantillas de documentación.
 - Al terminar trabajo relevante, actualizar este archivo (in-place) y agregar entrada a `vitacora_agentica.md` (append-only).

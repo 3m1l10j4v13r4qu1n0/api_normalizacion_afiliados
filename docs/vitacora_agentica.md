@@ -214,3 +214,21 @@
 - `docs/estado_actual_proyecto.md` — secciones 5/6/7 actualizadas.
 
 **Estado resultante:** suite completa **100/100 tests OK** (incluye el anteriormente roto); app carga con todos los endpoints; env de Google coherente; deps de instalación completa. Pendientes: F5 (endpoints), F6 (doc final).
+
+---
+
+## 2026-09-07 — F5: Endpoints (payload de errores unificado + lista de errores en respuesta)
+
+**Qué se hizo:** se implementó la **Fase 5** del plan: se uniformó el payload de errores de las excepciones de dominio a `{"error": str}` y se expuso la lista de errores de validación en `ImportResponse`.
+
+**Cambios:**
+1. **Handler `ImportacionError`:** se eliminó el payload anidado (`{"error": {"type", "message"}}`); ahora devuelve `{"error": str(exc)}`, coherente con el resto de excepciones (`AfiliadoNoEncontradoError`, `DatoInvalidoError`, etc.).
+2. **`ImportResponse`:** nuevos `ErrorValidacionResponse` (campo, descripcion_error, row_number — AF-RN12) y campo `errores: list[...]`.
+3. **Helper `import_response_from_importacion(importacion)`:** proyección explícita del modelo de dominio `Importacion` al schema de respuesta, reutilizada en los 3 endpoints (`/afiliados/import`, `/afiliados/`, `/sync/sheets/import`). Antes `afiliados.py` devolvía el objeto `Importacion` directo con `response_model=ImportResponse` (los nombres de campo no coincidían con el schema); ahora se construye `ImportResponse` explícitamente en todos lados.
+
+**Archivos/módulos tocados:**
+- `app/presentation/handlers.py` — handler `ImportacionError` unificado a `{"error": str}`.
+- `app/presentation/schemas/importacion_schema.py` — `ErrorValidacionResponse`, campo `errores` en `ImportResponse`, helper de proyección.
+- `app/presentation/routers/afiliados.py`, `sync.py` — usan `import_response_from_importacion`.
+
+**Estado resultante:** payload de errores 100% uniforme; los endpoints de importación exponen el detalle de errores con número de fila. Suite 100/100 tests OK; app carga con todos los endpoints. Pendientes: F6 (documentación final + merge).
