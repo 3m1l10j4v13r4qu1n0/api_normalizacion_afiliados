@@ -45,13 +45,13 @@ class ImportSheetUseCase:
 
     async def execute(self, range_name: str) -> List[InputRow]:
         """
-        Ejecuta UC4a: lee el Sheet y devuelve los datos como List[SheetRow].
+        Ejecuta UC4a: lee el Sheet y devuelve los datos como List[InputRow].
 
         Parameters:
             range_name : str — Rango de Sheets a leer (ej: "Respuestas!A1:Z").
 
         Returns:
-            List[SheetRow] — Una entrada por fila, con claves pytónicas
+            List[InputRow] — Una entrada por fila, con claves pytónicas
                              y row_number real del Sheet (base 2).
 
         Raises:

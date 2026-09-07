@@ -1,5 +1,5 @@
 """
-Core — Importar Afiliados caso de uso principal (core)
+Core — Importar Afiliados caso de uso principal (orquestador único)
 RF1  — Importar datos desde fuente externa
 RF2  — Procesar múltiples registros
 RF3  — Validar datos obligatorios
@@ -14,6 +14,7 @@ AF-RN12 — Errores se registran con referencia a la fila o índice
 AF-RN13 — Importación continúa aunque haya errores
 """
 
+from app.domain.models.dominio import Dominio
 from app.domain.models.importacion import Importacion
 from app.domain.models.input_row import InputRow
 from app.domain.ports.afiliado.afiliado_importacion_port import AfiliadoImportacionPort
@@ -21,29 +22,24 @@ from app.domain.ports.importacion_repository_port import ImportacionRepositoryPo
 from app.domain.ports.error_repository_port import ErrorRepositoryPort
 from app.domain.ports.domicilio_repository_port import DomicilioRepositoryPort
 from app.domain.ports.dominio_repository_port import DominioRepositoryPort
-from app.domain.services.validacion import validar_afiliado, validar_dni_duplicado
-from app.domain.services.normalizacion import normalizar_afiliado
-from app.infrastructure.database.orm_models.dominios_orm import (
-    GeneroORM,
-    EstadoCivilORM,
-    NivelEducativoORM,
-    RelacionDependenciaORM,
-    EstadoAfiliadoORM,
-)
+from app.domain.services.importacion_pipeline import procesar_fila
 
 
 class ImportarAfiliadoUseCase:
     """
-    Core — Orquesta el pipeline completo de importación.
+    Core — Orquesta el pipeline completo de importación (UC único).
+
+    Es el caso de uso único para importar afiliados desde cualquier fuente
+    (archivo/API, alta manual o Google Sheets). Se apoya en el servicio de
+    dominio puro `procesar_fila` para la lógica por fila y delega la
+    persistencia en los repositorios (ports).
 
     Pipeline por fila:
         InputRow.values
             → resolver dominios        (DominioRepositoryPort)
             → resolver domicilio       (DomicilioRepositoryPort)
-            → normalizar_afiliado()    (RN7, RN8, RN9, RN10)
-            → validar_afiliado()       (RF3, RF4)
-            → validar_dni_duplicado()  (RN1, RN2, RF5)
-            → save()        si válido  (AfiliadoRepositoryPort)
+            → procesar_fila()          (importacion_pipeline: normalizar + validar + dup)
+            → save()         si válido (AfiliadoRepositoryPort)
             → registrar_error() si no  (ErrorRepositoryPort)
 
     Attributes:
@@ -68,9 +64,31 @@ class ImportarAfiliadoUseCase:
         self._domicilio_repo   = domicilio_repo
         self._dominio_repo     = dominio_repo
 
+    async def importar_desde_dicts(self, datos: list[dict]) -> Importacion:
+        """
+        Importa una lista de registros crudos (UC1a — importación por archivo/API).
+
+        Convertimos cada dict a un InputRow manteniendo el índice real
+        (row_number = i + 1) y delegamos en el pipeline.
+        """
+        rows = [
+            InputRow(row_number=i + 1, values=dato)
+            for i, dato in enumerate(datos)
+        ]
+        return await self.execute(rows)
+
+    async def agregar_afiliado(self, datos: dict) -> Importacion:
+        """
+        Alta manual de un único afiliado (UC1b), reutilizando el pipeline completo.
+
+        El registro se envuelve en un InputRow con row_number = 1.
+        """
+        row = InputRow(row_number=1, values=datos)
+        return await self.execute([row])
+
     async def execute(self, rows: list[InputRow]) -> Importacion:
         """
-        Ejecuta el pipeline completo de importación.
+        Ejecuta el pipeline completo de importación (UC4 — source ya listo del sheet).
 
         Parameters:
             rows : List[InputRow] — Salida de ImportSheetUseCase.execute().
@@ -97,11 +115,13 @@ class ImportarAfiliadoUseCase:
             valores = row.values
 
             # Paso 3a — Resolver dominios (strings → IDs)
-            id_genero               = await self._dominio_repo.resolver_o_crear(GeneroORM,               valores.get("genero"))
-            id_estado_civil         = await self._dominio_repo.resolver_o_crear(EstadoCivilORM,          valores.get("estado_civil"))
-            id_nivel_educativo      = await self._dominio_repo.resolver_o_crear(NivelEducativoORM,       valores.get("nivel_educativo"))
-            id_relacion_dependencia = await self._dominio_repo.resolver_o_crear(RelacionDependenciaORM,  valores.get("relacion_dependencia"))
-            id_estado_afiliado      = await self._dominio_repo.resolver_o_crear(EstadoAfiliadoORM,       valores.get("estado_afiliado")) or 1
+            ids_dominio = {
+                "id_genero"              : await self._dominio_repo.resolver_o_crear(Dominio.GENERO,               valores.get("genero")),
+                "id_estado_civil"        : await self._dominio_repo.resolver_o_crear(Dominio.ESTADO_CIVIL,         valores.get("estado_civil")),
+                "id_nivel_educativo"     : await self._dominio_repo.resolver_o_crear(Dominio.NIVEL_EDUCATIVO,      valores.get("nivel_educativo")),
+                "id_relacion_dependencia": await self._dominio_repo.resolver_o_crear(Dominio.RELACION_DEPENDENCIA, valores.get("relacion_dependencia")),
+                "id_estado_afiliado"     : await self._dominio_repo.resolver_o_crear(Dominio.ESTADO_AFILIADO,      valores.get("estado_afiliado")) or 1,
+            }
 
             # Paso 3b — Resolver domicilio
             id_domicilio = await self._domicilio_repo.resolver_o_crear(
@@ -111,33 +131,20 @@ class ImportarAfiliadoUseCase:
                 codigo_postal=valores.get("codigo_postal"),
             )
 
-            # Paso 3c — Normalizar con IDs ya resueltos
-            dato_normalizado = normalizar_afiliado({
-                **valores,
-                "id_genero"              : id_genero,
-                "id_estado_civil"        : id_estado_civil,
-                "id_nivel_educativo"     : id_nivel_educativo,
-                "id_relacion_dependencia": id_relacion_dependencia,
-                "id_estado_afiliado"     : id_estado_afiliado,
-                "id_domicilio"           : id_domicilio,
-            })
-
-            # Paso 3d — Validar campos obligatorios y formato (RF3, RF4)
-            errores = validar_afiliado(dato_normalizado)
-
-            # Paso 3e — Validar duplicados solo si pasó validaciones previas
-            dni = dato_normalizado.get("dni")
-            if dni and not errores:
-                try:
-                    validar_dni_duplicado(dni, dnis_existentes | dnis_en_lote)
-                except Exception as e:
-                    errores.append(("dni", str(e)))
+            # Paso 3c — Lógica de dominio pura por fila (normalizar + validar + dup)
+            dato_normalizado, errores = procesar_fila(
+                valores        =valores,
+                ids_dominio    =ids_dominio,
+                id_domicilio   =id_domicilio,
+                dnis_existentes=dnis_existentes,
+                dnis_en_lote   =dnis_en_lote,
+            )
 
             if errores:
                 # AF-RN07 — El registro debe ser atómico (todo o nada).
                 # AF-RN11 — no se persiste
                 # AF-RN12 — se registra con referencia a la fila
-                
+
                 for campo, descripcion in errores:
                     await self._error_repo.registrar_error(
                         id_importacion    = id_importacion,
@@ -159,13 +166,14 @@ class ImportarAfiliadoUseCase:
                     datos         = dato_normalizado,
                     id_importacion = id_importacion,
                 )
-                dnis_en_lote.add(dni)
+                dni = dato_normalizado.get("dni")
+                if dni:
+                    dnis_en_lote.add(dni)
 
         # Paso 4 — Cerrar importación con resultado final
         await self._importacion_repo.completar_importacion(
-            id_importacion  = id_importacion,
+            id_importacion   = id_importacion,
             cantidad_errores = importacion.cantidad_errores,
-            
         )
         importacion.completar()
 

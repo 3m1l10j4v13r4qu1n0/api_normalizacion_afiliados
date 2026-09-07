@@ -55,6 +55,9 @@ def normalizar_afiliado(datos: dict) -> dict:
         "id_nivel_educativo"      : datos.get("id_nivel_educativo"),
         "id_relacion_dependencia" : datos.get("id_relacion_dependencia"),
 
+        # Domicilio — se propaga el ID ya resuelto (se persiste con el afiliado)
+        "id_domicilio"            : datos.get("id_domicilio"),
+
         # Fechas — sin normalización, se pasan tal cual
         "fecha_nacimiento" : datos.get("fecha_nacimiento"),
         "fecha_ingreso"    : datos.get("fecha_ingreso"),

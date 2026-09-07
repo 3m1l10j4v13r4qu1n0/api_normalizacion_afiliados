@@ -19,15 +19,17 @@ class ErrorRepository(ErrorRepositoryPort):
         registro_origen  : str,
         campo            : str,
         descripcion_error: str,
+        row_number       : int,
     ) -> None:
         """
-        Persiste un error de validación asociado a la importación.
+        Persiste un error de validación asociado a la importación (AF-RN12).
         """
         error = ErrorValidacionORM(
             id_importacion   =id_importacion,
             registro_origen  =registro_origen,
             campo            =campo,
             descripcion_error=descripcion_error,
+            row_number       =row_number,
         )
         self._session.add(error)
         await self._session.flush()

@@ -92,3 +92,170 @@
 - `.agents/skills/rest-api-design/` (instalación), `skills-lock.json`, `.claude/skills/rest-api-design` — commit previo `2baabc6`.
 
 **Estado resultante:** el skill queda listo para diseñar endpoints nuevos del backend siguiendo convenciones REST y el mapeo real de errores del proyecto.
+
+---
+
+## 2026-09-04 — Plan de refactorización del proyecto (feedback + hoja de ruta)
+
+**Qué se hizo:** se revisó el repo completo siguiendo las reglas del proyecto (`AGENTS.md`, skill `di-architect-scaffold`, `reglas-solid.md`, `estado_actual_proyecto.md`) y se entregó feedback con hallazgos ordenados por severidad, más un plan de refactorización en 6 fases. Se consensuaron tres decisiones clave con el usuario.
+
+**Hallazgos críticos detectados:**
+- Violación de pureza del dominio: `app/domain/ports/dominio_repository_port.py` importa `sqlalchemy.orm.DeclarativeBase`; además `core_importar_afiliado.py` instancia los ORMs (`GeneroORM`, etc.) dentro de la capa de aplicación.
+- Bug AF-RN12: `ErrorRepository.registrar_error` no implementa el parámetro `row_number` exigido por `ErrorRepositoryPort`, por lo que se pierde el número de fila al persistir.
+- LSP rota: `AfiliadoImportacionPort` define `save_importacion()` pero la implementación y el use case usan `save()`.
+- Duplicación de arquitectura: dos `ImportarAfiliadoUseCase` "core" + wrappers triviales (`uc1a`, `uc1b`, `uc4`, `uc4a`) que solo agregan indirección.
+- `gspread` y `google-auth` ausentes de `app/requirements.txt`; env de Google desincronizado entre `config.py` y `.env.example`.
+- Test roto preexistente: `test_data_transformer.py` importa `SheetRow` (renombrado a `InputRow`).
+
+**Decisiones de arquitectura:**
+- Purificar el port de dominio usando un **enum `Dominio`** (Genero, EstadoCivil, NivelEducativo, RelacionDependencia, EstadoAfiliado) en lugar de recibir la clase ORM; el adapter mapea enum → ORM internamente.
+- **Fusionar los wrappers** `uc1a/uc1b/uc4/uc4a` en los UCs core, eliminando la indirección redundante.
+- Reordenar la prioridad: Fases 1+2 (puertos y bug) → Fase 3 (split del core/SRP) → Fase 4 (deuda operativa) → Fase 5 (endpoints) → Fase 6 (documentación).
+
+**Plan de fases acordado (pendiente de implementar en una nueva sesión):**
+- **F1 — Purificar dominio y alinear contratos:** enum `Dominio`, reescribir `resolver_o_crear(dominio, descripcion)`, quitar ORMs del use case, renombrar `save_importacion`→`save`.
+- **F2 — Fix AF-RN12:** implementar `row_number` en `ErrorRepository` y verificar migración.
+- **F3 — Split del core (SRP):** nuevo servicio de dominio puro `app/domain/services/importacion_pipeline.py`; `core_importar_afiliado` como orquestador; eliminar los wrappers de UC duplicados y recalibrar `dependency_injection.py` y routers.
+- **F4 — Deuda operativa:** agregar `gspread`/`google-auth` a requirements; unificar env de Google; arreglar `test_data_transformer.py`; desacoplar `DATABASE_URL` de los tests puros; constantes de estados y limpieza de código muerto.
+- **F5 — Endpoints:** uniformar payload de errores a `{"error": str}` (quitar anidado de `ImportacionError`); exponer lista de errores en `ImportResponse`.
+- **F6 — Documentación:** actualizar `docs/estado_actual_proyecto.md` y agregar entrada de vitácora al finalizar.
+
+**Estado resultante:** plan registrado y quedó listo para implementarse en una nueva sesión. **No se tocó código de aplicación** en esta entrada; solo documentación. Working tree sin cambios de código.
+
+---
+
+## 2026-09-07 — F1: Purificación del dominio y alineación de contratos
+
+**Qué se hizo:** se implementó la **Fase 1** del plan de refactorización sobre la rama nueva `feature/refactorizacion-arquitectonica` (creada desde `develop`). Se purificó el dominio eliminando la dependencia de SQLAlchemy del port de valores controlados y se alineó el contrato de persistencia de afiliados.
+
+**Decisiones de arquitectura:**
+- Nuevo enum puro `app/domain/models/dominio.py` (`Dominio`: GENERO, ESTADO_CIVIL, NIVEL_EDUCATIVO, RELACION_DEPENDENCIA, ESTADO_AFILIADO) que identifica las tablas de valores controlados de forma abstracta.
+- `DominioRepositoryPort.resolver_o_crear` ahora recibe `Dominio` en lugar de `Type[DeclarativeBase]`; esto elimina el import de `sqlalchemy.orm` del dominio. El adapter `DominioRepository` mapea enum → ORM internamente (dict `_ORM_POR_DOMINIO`), dejando los ORMs solo en infraestructura.
+- `core_importar_afiliado.py` ya no importa ni instancia ORMs; llama `resolver_o_crear(Dominio.X, ...)`.
+- Fix LSP: `AfiliadoImportacionPort.save_importacion()` se renombró a `save()`, alineando el contrato con la implementación (`AfiliadoImportacionRepository.save`) y el use case core, que ya usaba `save()`.
+
+**Archivos/módulos tocados:**
+- `app/domain/models/dominio.py` — creado (enum `Dominio`).
+- `app/domain/ports/dominio_repository_port.py` — purificado (enum en vez de ORM).
+- `app/infrastructure/database/repositories/dominio_repository.py` — mapeo enum → ORM.
+- `app/application/use_cases/core_importar_afiliado.py` — quitados ORMs, usa enum.
+- `app/domain/ports/afiliado/afiliado_importacion_port.py` — rename `save_importacion`→`save`.
+- `docs/estado_actual_proyecto.md` — secciones 1, 3 actualizadas (rama activa, enum `Dominio`).
+
+**Estado resultante:** dominio 100% puro (sin `sqlalchemy.orm.DeclarativeBase` fuera de infraestructura); suite 86/86 tests OK (excluyendo el `test_data_transformer.py` roto preexistente); imports de F1 verificados. Quedan pendientes F2 (fix AF-RN12 `row_number`), F3 (split core/SRP + eliminar wrappers), F4 (deuda operativa), F5 (endpoints), F6 (doc final).
+
+---
+
+## 2026-09-07 — F2: Fix AF-RN12 (se persiste row_number en errores de validación)
+
+**Qué se hizo:** se implementó la **Fase 2** del plan de refactorización. Se corrigió el bug AF-RN12 por el cual `ErrorRepository.registrar_error` no implementaba el parámetro `row_number` exigido por `ErrorRepositoryPort`, por lo que el número de fila original se perdía al persistir los errores de validación.
+
+**Decisiones de arquitectura:**
+- El port ya exigía `row_number`, el use case core ya lo pasaba y el ORM ya definía la columna; solo faltaba que el repositorio lo aceptara y lo persistiera. Se alineó `ErrorRepository` con el contrato (LSP/ISP).
+- Se detectó un desincronismo modelo ↔ migración: la migración inicial `6fecb555bfe0` no creaba la columna `row_number` en `errores_validacion` aunque el ORM la definía. Se agregó la migración manual `a1f2b3c4d5e6` (no autogenerate porque no hay BD configurada `.env`).
+
+**Archivos/módulos tocados:**
+- `app/infrastructure/database/repositories/error_repository.py` — se implementa `row_number` y se persiste.
+- `alembic/versions/a1f2b3c4d5e6_agregar_row_number_errores.py` — creada (agrega columna `row_number`).
+- `docs/estado_actual_proyecto.md` — nota AF-RN12 en entidad `ErrorValidacion`.
+
+**Estado resultante:** AF-RN12 corregido; el número de fila original ahora persiste. Suite 86/86 tests OK; imports del repositorio verificados. Sin BD local no se pudo correr `alembic upgrade head` (queda pendiente verificarlo en entorno con BD). Pendientes: F3, F4, F5, F6.
+---
+
+## 2026-09-07 — F3: Split del core/SRP (pipeline de dominio puro + UC único)
+
+**Qué se hizo:** se implementó la **Fase 3** del plan: se extrajo la lógica de pipeline de importación a un servicio de dominio puro, se convirtió `core_importar_afiliado.py` en el orquestador/UC único, y se eliminaron los wrappers de UC que agregaban indirección redundante.
+
+**Decisiones de arquitectura (vale la opción "Core como UC único + pipeline puro"):**
+- Nuevo `app/domain/services/importacion_pipeline.py` → `procesar_fila()`: función pura del dominio que recibe los valores crudos + IDs de dominio/domicilio ya resueltos + DNIs, y devuelve `(dato_normalizado, errores)`. Encapsula normalización (RF7/RF8), validación (RF3/RF4) y dedupe por DNI (RF5). No toca repositorios ni frameworks.
+- `core_importar_afiliado.py` (`ImportarAfiliadoUseCase`) queda como **orquestador único**: resuelve dominios y domicilio vía ports, delega la lógica por fila en `procesar_fila`, y persiste/ registra errores. Absorbe la conversión de input: `importar_desde_dicts()` (UC1a), `agregar_afiliado()` (UC1b), `execute(rows)` (UC4, recibe InputRow del Sheet).
+- **Se eliminaron** `uc1a_importar_lista_afiliados.py`, `uc1b_agregar_afiliado.py`, `uc4_importar_afiliado.py`. **Se conservó** `uc4a_importar_afiliado.py` (`ImportSheetUseCase`): es el caso de uso de lectura/transformación del Sheet, NO un wrapper del core (el plan original lo listaba mal).
+- `dependency_injection.py` recalibrado: `get_importar_afiliado_core` (fábrica única del core), `get_import_sheet_uc4a` (lectura del Sheet), y alias `get_importar_afiliado_uc4 = get_importar_afiliado_core`.
+- Routers: `/afiliados/import` y `/afiliados/` apuntan al core (con `model_dump()`); `/sync/sheets/import` inyecta `ImportSheetUseCase` + core y los combina en el endpoint.
+
+**Instalación de deps (anticipo de F4):** se instalaron `gspread` y `google-auth` en el venv para poder validar la app completa (antes el import de `dependency_injection.py` fallaba por no tenerlos). Aún NO se agregaron a `app/requirements.txt`.
+
+**Archivos/módulos tocados:**
+- `app/domain/services/importacion_pipeline.py` — creado (función pura `procesar_fila`).
+- `app/application/use_cases/core_importar_afiliado.py` — reescrito como orquestador único.
+- `app/application/use_cases/uc1a_importar_lista_afiliados.py`, `uc1b_agregar_afiliado.py`, `uc4_importar_afiliado.py` — eliminados.
+- `app/infrastructure/dependencies/dependency_injection.py` — recalibrado.
+- `app/presentation/routers/afiliados.py`, `sync.py` — recalibrados al core.
+- `docs/estado_actual_proyecto.md` — sección 4 actualizada.
+
+**Bug latente detectado (preexistente, fuera de F3):** `normalizar_afiliado` no incluye `id_domicilio` en su dict de salida, por lo que el domicilio resuelto no se persiste con el afiliado. Se preservó este comportamiento en el refactor (no cambia semántica en F3); queda como deuda para F4/HU corrección.
+
+**Estado resultante:** suite 86/86 tests OK; pipeline validado (fila válida, inválida y duplicada); app completa carga con todos los endpoints. Pendientes: F4 (agregar deps a requirements, unificar env Google, arreglar test_data_transformer.py, bug domicilio, desacoplar DATABASE_URL de tests puros), F5, F6.
+
+---
+
+## 2026-09-07 — F4: Deuda operativa
+
+**Qué se hizo:** se implementó la **Fase 4** del plan, resolviendo la deuda operativa documentada en el estado del proyecto y el AGENTS.md.
+
+**Cambios resueltos:**
+1. **Deps de Google en requirements:** se agregaron `gspread==6.2.1` y `google-auth==2.57.1` a `app/requirements.txt` (antes el código los importaba pero no estaban listados; los endpoints de sync no cargaban).
+2. **Env de Google alineado:** `.env.example` ahora define `GOOGLE_CREDENTIALS_PATH` y `GOOGLE_SHEETS_ID` (coincide con `config.py` y `google_sheets_client.py`). Se eliminó el desincronismo previo (`GOOGLE_SERVICE_ACCOUNT_FILE`/`GOOGLE_SHEET_ID`).
+3. **Test roto preexistente arreglado:** `test_data_transformer.py` importaba `SheetRow` (renombrado a `InputRow`). Se actualizó el import y el `isinstance` de verificación.
+4. **Bug latente de domicilio corregido:** `normalizar_afiliado` no incluía `id_domicilio` en su dict de salida, por lo que el domicilio resuelto se perdía al persistir el afiliado. Se agregó `id_domicilio` a la normalización; se actualizó/amplió `test_normalizacion.py` (claves esperadas + propagación del ID).
+5. **`DATABASE_URL` desacoplada de tests puros:** nuevo `tests/conftest.py` que setea un `DATABASE_URL` por defecto antes de importar módulos, evitando que un import transitivo a `config.py` falle sin `.env`.
+
+**Decisiones de arquitectura:**
+- El desacople de `DATABASE_URL` se resolvió a nivel de `conftest.py` (fallback global) en lugar de modificar `config.py`, preservando el comportamiento productivo de requerir la var obligatoria.
+- El bug de `id_domicilio` se corrigió en el servicio de dominio (`normalizar_afiliado`), que es el punto único por donde pasa todo dato normalizado — beneficiando a todos los puntos de importación.
+
+**Archivos/módulos tocados:**
+- `app/requirements.txt` — agregados `gspread` y `google-auth`.
+- `.env.example` — renombradas vars de Google para alinear con código.
+- `tests/unit/domian/services/test_data_transformer.py` — `SheetRow` → `InputRow`.
+- `app/domain/services/normalizacion.py` — `id_domicilio` en la salida.
+- `tests/unit/domian/services/test_normalizacion.py` — claves esperadas + nuevo test de propagación de domicilio.
+- `tests/conftest.py` — creado (fallback de `DATABASE_URL`).
+- `docs/estado_actual_proyecto.md` — secciones 5/6/7 actualizadas.
+
+**Estado resultante:** suite completa **100/100 tests OK** (incluye el anteriormente roto); app carga con todos los endpoints; env de Google coherente; deps de instalación completa. Pendientes: F5 (endpoints), F6 (doc final).
+
+---
+
+## 2026-09-07 — F5: Endpoints (payload de errores unificado + lista de errores en respuesta)
+
+**Qué se hizo:** se implementó la **Fase 5** del plan: se uniformó el payload de errores de las excepciones de dominio a `{"error": str}` y se expuso la lista de errores de validación en `ImportResponse`.
+
+**Cambios:**
+1. **Handler `ImportacionError`:** se eliminó el payload anidado (`{"error": {"type", "message"}}`); ahora devuelve `{"error": str(exc)}`, coherente con el resto de excepciones (`AfiliadoNoEncontradoError`, `DatoInvalidoError`, etc.).
+2. **`ImportResponse`:** nuevos `ErrorValidacionResponse` (campo, descripcion_error, row_number — AF-RN12) y campo `errores: list[...]`.
+3. **Helper `import_response_from_importacion(importacion)`:** proyección explícita del modelo de dominio `Importacion` al schema de respuesta, reutilizada en los 3 endpoints (`/afiliados/import`, `/afiliados/`, `/sync/sheets/import`). Antes `afiliados.py` devolvía el objeto `Importacion` directo con `response_model=ImportResponse` (los nombres de campo no coincidían con el schema); ahora se construye `ImportResponse` explícitamente en todos lados.
+
+**Archivos/módulos tocados:**
+- `app/presentation/handlers.py` — handler `ImportacionError` unificado a `{"error": str}`.
+- `app/presentation/schemas/importacion_schema.py` — `ErrorValidacionResponse`, campo `errores` en `ImportResponse`, helper de proyección.
+- `app/presentation/routers/afiliados.py`, `sync.py` — usan `import_response_from_importacion`.
+
+**Estado resultante:** payload de errores 100% uniforme; los endpoints de importación exponen el detalle de errores con número de fila. Suite 100/100 tests OK; app carga con todos los endpoints. Pendientes: F6 (documentación final + merge).
+
+---
+
+## 2026-09-07 — F6: Cierre y documentación final del plan de refactorización
+
+**Qué se hizo:** se completó la **Fase 6** (cierre): se verificó la consistencia de toda la documentación con el código resultante del plan F1–F5 y se actualizaron los artefactos que aún reflejaban el estado previo.
+
+**Cambios:**
+1. `docs/estado_actual_proyecto.md` — se eliminó del TODO (sección 7) el ítem de unificar el payload de `ImportacionError` (ya resuelto en F5).
+2. `AGENTS.md` — se reemplazaron los gotchas resueltos: el desincronismo de env de Google Sheets y la ausencia de `gspread`/`google-auth` en requirements (ambos resueltos en F4). Se dejó la nota del pipeline como UC único.
+3. Se limpiaron referencias cosméticas/obsoletas a `SheetRow` en docstrings (`uc4a_importar_afiliado.py`, `data_transformer.py`).
+4. Verificación final: búsqueda global sin referencias rotas a wrappers eliminados ni a `save_importacion`/`SheetRow` en código funcional.
+
+**Estado final del plan F1–F6:**
+- F1 — Dominio purificado (enum `Dominio`, sin ORMs en el core, contrato `save` alineado). ✅
+- F2 — Fix AF-RN12 (`row_number` persiste en errores) + migración. ✅
+- F3 — Split core/SRP: `importacion_pipeline` puro + core como UC único, wrappers eliminados. ✅
+- F4 — Deuda operativa: deps Google, env alineado, test roto reparado, bug de domicilio, `DATABASE_URL` desacoplada de tests. ✅
+- F5 — Payload de errores unificado + lista de errores en `ImportResponse`. ✅
+- F6 — Documentación final. ✅
+
+**Archivos/módulos tocados:**
+- `docs/estado_actual_proyecto.md` — TODO actualizado.
+- `AGENTS.md` — gotchas actualizados.
+- `app/application/use_cases/uc4a_importar_afiliado.py`, `app/domain/services/data_transformer.py` — docstrings.
+
+**Estado resultante:** suite 100/100 tests OK; app carga con los 12 endpoints; documentación (estado, vitácora, AGENTS.md) coherente con el código. Plan de refactorización F1–F6 **completo**. Pendiente de decisión del usuario: merge de `feature/refactorizacion-arquitectonica` a `develop`.
