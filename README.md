@@ -12,8 +12,6 @@
 
 Este proyecto implementa una API REST para la importación, validación, normalización y gestión de datos de afiliados.
 
-El sistema actúa como una capa intermedia entre fuentes de datos externas y sistemas de consulta, garantizando la consistencia y calidad de la información almacenada.
-
 El proyecto está diseñado como ejercicio práctico de **análisis funcional + desarrollo backend**, simulando un sistema real de gestión de datos administrativos.
 
 El sistema actúa como una capa intermedia entre fuentes de datos externas y sistemas de consulta, garantizando la consistencia y calidad de la información almacenada.
@@ -36,19 +34,14 @@ El sistema actúa como una capa intermedia entre fuentes de datos externas y sis
 
 ## Documentación funcional
 
-La documentación del análisis funcional se encuentra en la carpeta `docs/`.
+La documentación del análisis funcional se encuentra en la carpeta `docs/`, en **formato Benn (backend-only)**:
 
-Incluye:
-
-- Documento de visión
-- Alcance del sistema
-- Actores
-- Requerimientos funcionales
-- Reglas de negocio
-- Casos de uso
-- Modelo de datos conceptual
-- Especificación de API
-- Casos de prueba
+- `01_global` — visión, actores, reglas de negocio, alcance
+- `02_tecnico` — modelo de datos, decisiones técnicas, diagramas UML/ER
+- `03_procesos` — definición de "listo" (DoS)
+- `04_historias_usuario/HU-01..HU-08` — 8 historias de usuario (5 archivos c/u: HU, caso de uso expandido, api, modelos de datos, pruebas)
+- `07_metodologia_agil` — método Kanban
+- `estado_actual_proyecto.md` + `vitacora_agentica.md` — memoria del proyecto (foto actual + historial append-only)
 
 Esto simula la documentación generada por un **analista funcional junior en un proyecto real**.
 
@@ -64,6 +57,22 @@ Esto simula la documentación generada por un **analista funcional junior en un 
 - Actualización de afiliados
 - Baja lógica de afiliados
 - Sincronización con Google Sheets
+
+---
+
+## Endpoints principales
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| POST | `/afiliados/import` | Importar afiliados por archivo/lista (UC1a) |
+| POST | `/afiliados/` | Registrar afiliado manual (UC1b) |
+| GET | `/afiliados/` | Listar afiliados (UC2) |
+| GET | `/afiliados/{id}` | Obtener afiliado por ID (UC2) |
+| PATCH | `/afiliados/{id}` | Actualizar afiliado (UC3) |
+| DELETE | `/afiliados/{id}` | Dar de baja afiliado (UC5) |
+| POST | `/sync/sheets/import` | Importar desde Google Sheets (UC4) |
+
+> Las respuestas de error usan payload uniforme `{"error": "mensaje"}`. La importación responde con el detalle de errores de validación (campo, descripción y número de fila).
 
 ---
 
@@ -93,9 +102,7 @@ Esto permite mantener el sistema modular y mantenible.
 ## 🚀 Instalación y configuración
 ```
 # Clonar el repo
-
 git clone ...
-
 
 # Crear entorno virtual
 python -m venv venv
@@ -103,21 +110,18 @@ python -m venv venv
 # Linux 
 source venv/bin/activate 
 
-# Instalar dependencias
-pip install -r requirements.txt
+# Instalar dependencias (requirements.txt está dentro de app/)
+pip install -r app/requirements.txt
 
 # Configurar variables de entorno
 cp .env.example .env
 
-# Correr migraciones
+# Correr migraciones (Alembic ya está inicializado, NO ejecutar `alembic init`)
 
-# 1. inicializar alembic en el proyecto
-alembic init alembic
+# 1. genera una migración automática leyendo tus modelos
+alembic revision --autogenerate -m "descripcion"
 
-# 2. genera una migración automática leyendo tus modelos
-alembic revision --autogenerate -m "crear tabla afiliados"
-
-# 3. aplica la migración en PostgreSQL
+# 2. aplica la migración en PostgreSQL
 alembic upgrade head
 
 # Levantar la API
@@ -168,17 +172,16 @@ api-normalizacion/
 │
 │   ├── application/  🟩 CAPA DE APLICACIÓN (Use Cases)
 │   │   └── use_cases/
-│   │       ├── core_importar_afiliado.py
-│   │       ├── uc1a_importar_afiliados.py
-│   │       ├── uc1b_importar_afiliado.py
-│   │       ├── uc2_listar_afiliado.py
-│   │       ├── uc2_obtener_afiliado.py
+│   │       ├── core_importar_afiliado.py   ← UC único de importación (orquesta el pipeline)
+│   │       ├── uc2_listar_afiliados.py
+│   │       ├── uc2_obtener_afiliado_por_id.py
 │   │       ├── uc3_actualizar_afiliado.py
-│   │       ├── uc4_importar_afiliado.py
-│   │       ├── uc4a_importar_afiliado.py
+│   │       ├── uc4a_importar_afiliado.py   ← lectura/transformación del Sheet (fuente)
 │   │       └── uc5_dar_baja_afiliado.py
 │   │
 │   │       💬 Implementación de casos de uso del sistema
+│   │       💬 El pipeline de importación es un UC único: absorbe UC1a (archivo),
+│   │          UC1b (alta manual) y UC4 (Sheets) usando importacion_pipeline
 │   │
 │   │   🎯 Responsabilidad:
 │   │   - Orquestar la lógica de negocio
@@ -190,15 +193,18 @@ api-normalizacion/
 │   │
 │   │   ├── models/
 │   │   │   ├── afiliado.py
+│   │   │   ├── dominio.py          ← enum de valores controlados (puro)
 │   │   │   ├── importacion.py
 │   │   │   ├── error_validacion.py
 │   │   │   ├── input_row.py
+│   │   │   ├── sheet_raw_data.py
 │   │   │   └── mapping.py
 │   │   │   💬 Entidades y modelos del dominio (reglas puras)
 │   │   │
 │   │   ├── services/
 │   │   │   ├── normalizacion.py
 │   │   │   ├── validacion.py
+│   │   │   ├── importacion_pipeline.py   ← lógica pura por fila (normalizar+validar+dup)
 │   │   │   ├── data_transformer.py
 │   │   │   └── data_key_mapper.py
 │   │   │   💬 Lógica de negocio compleja desacoplada de entidades
@@ -301,6 +307,7 @@ api-normalizacion/
 │   - Diagramas UML y ER
 │
 ├── tests/  🧪 TESTING
+│   ├── conftest.py   ← aísla los tests de DATABASE_URL (valor por defecto)
 │   └──  unit/
 │        └── domian/
 │            └── services/
@@ -368,18 +375,27 @@ La documentación fue revisada y validada asegurando coherencia entre visión, a
 
 📄 Ver detalle del cierre: [fase_1_cierre.md](face_1_cierre.md)
 
+✔ Fase 2 — Diseño técnico y arquitectura: FINALIZADA
+
+Clean Architecture + Hexagonal (Ports & Adapters), SQLAlchemy 2.0 async, DI con `Depends(get_*_ucN)`.
+
+✔ Fase 3 — Implementación API REST: FINALIZADA
+
+Casos de uso implementados y endpoints expuestos (ver sección de estructura). El pipeline de importación es un UC único con lógica de dominio pura en `importacion_pipeline.py`.
+
+🔄 Fase 4 — Pruebas y validación: EN CURSO
+
+Suite de tests unitarios de dominio: **100/100 OK** (`python -m pytest -q` desde la raíz).
 
 ---
 
 ## 🗺️ Roadmap
 
 - Fase 1: Documentación funcional ✔
-
-- Fase 2: Diseño técnico y arquitectura (pendiente)
-
-- Fase 3: Implementación API REST (pendiente)
-
-- Fase 4: Pruebas y validación (pendiente)
+- Fase 2: Diseño técnico y arquitectura ✔
+- Fase 3: Implementación API REST ✔
+- Fase 4: Pruebas y validación (en curso)
+- Pendientes: activar `POST /sync/sheets/export` (UC6), UC4b marcado de errores en la hoja
 
 ---
 
