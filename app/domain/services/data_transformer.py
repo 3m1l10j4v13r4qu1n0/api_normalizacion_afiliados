@@ -6,7 +6,7 @@ from app.domain.services.data_key_mapper import DataKeyMapper
 class DataTransformer:
     """
     Orquesta el pipeline de transformación de datos crudos de Google Sheets
-    en una lista de SheetRow con claves pytónicas.
+    en una lista de InputRow con claves pytónicas.
 
     Pipeline interno:
         raw_data (List[List])
