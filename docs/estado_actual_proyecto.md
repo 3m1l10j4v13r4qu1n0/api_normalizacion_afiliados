@@ -25,7 +25,7 @@ Convenciones: todo caso de uso nuevo se cablea en `dependency_injection.py` y se
 - `InputRow` — fila intermedia de lectura de Google Sheets (con `row_number` y `value`).
 - `SheetRawData` — estructura de lectura de la hoja (encabezados + datos).
 - `Importacion` — registro de un proceso de importación.
-- `ErrorValidacion` — error de validación por registro/campo, asociado a `row_number`.
+- `ErrorValidacion` — error de validación por registro/campo, asociado a `row_number` (AF-RN12).
 - `Dominio` — enum puro que identifica las tablas de valores controlados (GENERO, ESTADO_CIVIL, NIVEL_EDUCATIVO, RELACION_DEPENDENCIA, ESTADO_AFILIADO). Se inyecta al port `DominioRepositoryPort` en lugar de la clase ORM.
 - Valores controlados (tablas de dominio en BD vía seed): estado afiliado, género, estado civil, nivel educativo, relación de dependencia.
 

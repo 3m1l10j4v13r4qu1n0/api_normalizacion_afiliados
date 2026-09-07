@@ -143,3 +143,20 @@
 - `docs/estado_actual_proyecto.md` — secciones 1, 3 actualizadas (rama activa, enum `Dominio`).
 
 **Estado resultante:** dominio 100% puro (sin `sqlalchemy.orm.DeclarativeBase` fuera de infraestructura); suite 86/86 tests OK (excluyendo el `test_data_transformer.py` roto preexistente); imports de F1 verificados. Quedan pendientes F2 (fix AF-RN12 `row_number`), F3 (split core/SRP + eliminar wrappers), F4 (deuda operativa), F5 (endpoints), F6 (doc final).
+
+---
+
+## 2026-09-07 — F2: Fix AF-RN12 (se persiste row_number en errores de validación)
+
+**Qué se hizo:** se implementó la **Fase 2** del plan de refactorización. Se corrigió el bug AF-RN12 por el cual `ErrorRepository.registrar_error` no implementaba el parámetro `row_number` exigido por `ErrorRepositoryPort`, por lo que el número de fila original se perdía al persistir los errores de validación.
+
+**Decisiones de arquitectura:**
+- El port ya exigía `row_number`, el use case core ya lo pasaba y el ORM ya definía la columna; solo faltaba que el repositorio lo aceptara y lo persistiera. Se alineó `ErrorRepository` con el contrato (LSP/ISP).
+- Se detectó un desincronismo modelo ↔ migración: la migración inicial `6fecb555bfe0` no creaba la columna `row_number` en `errores_validacion` aunque el ORM la definía. Se agregó la migración manual `a1f2b3c4d5e6` (no autogenerate porque no hay BD configurada `.env`).
+
+**Archivos/módulos tocados:**
+- `app/infrastructure/database/repositories/error_repository.py` — se implementa `row_number` y se persiste.
+- `alembic/versions/a1f2b3c4d5e6_agregar_row_number_errores.py` — creada (agrega columna `row_number`).
+- `docs/estado_actual_proyecto.md` — nota AF-RN12 en entidad `ErrorValidacion`.
+
+**Estado resultante:** AF-RN12 corregido; el número de fila original ahora persiste. Suite 86/86 tests OK; imports del repositorio verificados. Sin BD local no se pudo correr `alembic upgrade head` (queda pendiente verificarlo en entorno con BD). Pendientes: F3, F4, F5, F6.
