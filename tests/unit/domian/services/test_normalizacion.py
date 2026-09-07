@@ -180,9 +180,16 @@ class TestNormalizarAfiliado:
         assert resultado["id_estado_civil"]         is None
         assert resultado["id_nivel_educativo"]      is None
         assert resultado["id_relacion_dependencia"] is None
+        assert resultado["id_domicilio"]            is None
         assert resultado["fecha_nacimiento"]        is None
         assert resultado["fecha_ingreso"]           is None
         assert resultado["fecha_alta"]              is None
+
+    def test_id_domicilio_se_propaga(self, datos_completos):
+        """El ID de domicilio ya resuelto debe propagarse a la salida."""
+        datos_completos["id_domicilio"] = 7
+        resultado = normalizar_afiliado(datos_completos)
+        assert resultado["id_domicilio"] == 7
 
     def test_retorna_todas_las_claves_esperadas(self):
         """El dict resultante siempre tiene las mismas claves."""
@@ -191,7 +198,7 @@ class TestNormalizarAfiliado:
             "apellido", "nombre", "dni", "email", "telefono",
             "numero_legajo", "titulo_obtenido", "id_estado_afiliado",
             "id_genero", "id_estado_civil", "id_nivel_educativo",
-            "id_relacion_dependencia", "fecha_nacimiento",
+            "id_relacion_dependencia", "id_domicilio", "fecha_nacimiento",
             "fecha_ingreso", "fecha_alta",
         }
         assert set(resultado.keys()) == claves_esperadas
