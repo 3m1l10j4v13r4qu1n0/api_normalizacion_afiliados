@@ -10,14 +10,12 @@ from app.presentation.schemas.importacion_schema import (
     ImportResponse,
 )
 
-from app.infrastructure.dependencies.dependency_injection import get_importar_desde_api_uc1a
-from app.infrastructure.dependencies.dependency_injection import get_agregar_afiliado_uc1b
+from app.infrastructure.dependencies.dependency_injection import get_importar_afiliado_core
 from app.infrastructure.dependencies.dependency_injection import get_listar_afiliados_uc2
 from app.infrastructure.dependencies.dependency_injection import get_obtener_afiliado_por_id_uc2
 from app.infrastructure.dependencies.dependency_injection import get_actualizar_afiliado_uc3
 from app.infrastructure.dependencies.dependency_injection import get_dar_baja_afiliado_uc5
-from app.application.use_cases.uc1a_importar_lista_afiliados import ImportarDesdeAPIUseCase
-from app.application.use_cases.uc1b_agregar_afiliado import AgregarAfiliadoUseCase
+from app.application.use_cases.core_importar_afiliado import ImportarAfiliadoUseCase
 from app.application.use_cases.uc2_obtener_afiliado_por_id import ObtenerAfiliadoPorIdUseCase
 from app.application.use_cases.uc2_listar_afiliados import ListarAfiliadosUseCase
 from app.application.use_cases.uc3_actualizar_afiliado import ActualizarAfiliadoUseCase
@@ -29,16 +27,17 @@ router = APIRouter(prefix="/afiliados", tags=["Afiliados"])
 @router.post("/import", response_model=ImportResponse, status_code=201)
 async def importar_desde_api(
     request: ImportRequest,
-    uc: ImportarDesdeAPIUseCase = Depends(get_importar_desde_api_uc1a),
+    core_uc: ImportarAfiliadoUseCase = Depends(get_importar_afiliado_core),
 ):
-    return await uc.execute(request.afiliados)
+    datos = [afiliado.model_dump() for afiliado in request.afiliados]
+    return await core_uc.importar_desde_dicts(datos)
 
 @router.post("/", response_model=ImportResponse, status_code=201)
 async def agregar_afiliado(
     request: AfiliadoCreate,
-    uc: AgregarAfiliadoUseCase = Depends(get_agregar_afiliado_uc1b)
+    core_uc: ImportarAfiliadoUseCase = Depends(get_importar_afiliado_core),
 ):
-    return await uc.execute(request.model_dump())
+    return await core_uc.agregar_afiliado(request.model_dump())
 
 
 @router.get("/", response_model=list[AfiliadoResponse])
