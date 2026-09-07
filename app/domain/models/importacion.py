@@ -52,6 +52,9 @@ class Importacion:
         AF-RN12 — Los errores deben registrarse con referencia a la fila o índice
         AF-RN13 — La importación debe continuar aunque existan registros inválidos
         """
+        if self.id is None:
+            raise ValueError("No se puede registrar un error sin un ID de importación")
+
         error = ErrorValidacion(
             registro_origen   = registro_origen,
             campo             = campo,
