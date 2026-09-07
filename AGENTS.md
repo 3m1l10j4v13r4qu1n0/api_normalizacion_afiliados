@@ -17,8 +17,10 @@ API REST de normalización de afiliados en Python/FastAPI con Clean Architecture
 - `requirements.txt` está en **`app/requirements.txt`** (no en la raíz). El README dice `pip install -r requirements.txt`, pero es inexacto.
 - Python fijado a **3.13.5** (`app/.python-version`). No hay venv commitado.
 - Config lee variables de entorno via pydantic-settings desde `.env` (ver `app/infrastructure/core/config.py`). Var obligatoria: `DATABASE_URL` (PostgreSQL async, `postgresql+asyncpg://...`).
-- **Desincronismo de env de Google Sheets**: el código lee `GOOGLE_SHEETS_ID` y `GOOGLE_CREDENTIALS_PATH` (`google_sheets_client.py`, `dependency_injection.py`), pero `.env.example` define `GOOGLE_SHEET_ID` y `GOOGLE_SERVICE_ACCOUNT_FILE`. Corregir si se va a usar `GET /sync/sheets/import`.
-- **`gspread` y `google-auth` no están en `requirements.txt`** aunque `google_sheets_client.py` los importa. Los endpoints de sync fallarán al importar sin instalarlos aparte.
+- **Env de Google Sheets**: el código lee `GOOGLE_SHEETS_ID` y `GOOGLE_CREDENTIALS_PATH` (`config.py`, `google_sheets_client.py`), alineado con `.env.example`.
+- **`gspread` y `google-auth`** están listados en `app/requirements.txt` (necesarios para los endpoints de sync).
+- El pipeline de importación es un **UC único** (`ImportarAfiliadoUseCase` en `core_importar_afiliado.py`) que usa el servicio de dominio puro `importacion_pipeline.procesar_fila`; ya no hay wrappers `uc1a/uc1b/uc4`. La lectura del Sheet vive en `uc4a_importar_afiliado.py` (`ImportSheetUseCase`).
+- Tests puros desacoplados de `DATABASE_URL` vía `tests/conftest.py` (fallback por defecto).
 - La base usa SQLAlchemy 2.0 async (`AsyncSession`, `asyncpg`). `get_db()` en `connection.py` hace **commit automático al finalizar el request** — los casos de uso no deben commitear.
 
 ## Arquitectura

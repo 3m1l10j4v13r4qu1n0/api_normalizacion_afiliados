@@ -69,8 +69,7 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 1. Activar e implementar `POST /sync/sheets/export` (HU-08).
 2. Mantener migraciones de Alembic al día con el modelo.
 3. Revisar semántica de baja lógica (seed: 1=Activo, 2=Inactivo).
-4. Vº `ImportacionError` payload anidado → unificar a `{"error": str}` (F5).
-5. Verificar `alembic upgrade head` en entorno con BD (migración `a1f2b3c4d5e6` de F2 no pudo correrse localmente).
+4. Verificar `alembic upgrade head` en entorno con BD (migración `a1f2b3c4d5e6` de F2 no pudo correrse localmente).
 
 ## 8. Decisiones y convenciones vigentes
 

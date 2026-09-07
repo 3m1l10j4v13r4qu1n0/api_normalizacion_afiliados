@@ -232,3 +232,30 @@
 - `app/presentation/routers/afiliados.py`, `sync.py` — usan `import_response_from_importacion`.
 
 **Estado resultante:** payload de errores 100% uniforme; los endpoints de importación exponen el detalle de errores con número de fila. Suite 100/100 tests OK; app carga con todos los endpoints. Pendientes: F6 (documentación final + merge).
+
+---
+
+## 2026-09-07 — F6: Cierre y documentación final del plan de refactorización
+
+**Qué se hizo:** se completó la **Fase 6** (cierre): se verificó la consistencia de toda la documentación con el código resultante del plan F1–F5 y se actualizaron los artefactos que aún reflejaban el estado previo.
+
+**Cambios:**
+1. `docs/estado_actual_proyecto.md` — se eliminó del TODO (sección 7) el ítem de unificar el payload de `ImportacionError` (ya resuelto en F5).
+2. `AGENTS.md` — se reemplazaron los gotchas resueltos: el desincronismo de env de Google Sheets y la ausencia de `gspread`/`google-auth` en requirements (ambos resueltos en F4). Se dejó la nota del pipeline como UC único.
+3. Se limpiaron referencias cosméticas/obsoletas a `SheetRow` en docstrings (`uc4a_importar_afiliado.py`, `data_transformer.py`).
+4. Verificación final: búsqueda global sin referencias rotas a wrappers eliminados ni a `save_importacion`/`SheetRow` en código funcional.
+
+**Estado final del plan F1–F6:**
+- F1 — Dominio purificado (enum `Dominio`, sin ORMs en el core, contrato `save` alineado). ✅
+- F2 — Fix AF-RN12 (`row_number` persiste en errores) + migración. ✅
+- F3 — Split core/SRP: `importacion_pipeline` puro + core como UC único, wrappers eliminados. ✅
+- F4 — Deuda operativa: deps Google, env alineado, test roto reparado, bug de domicilio, `DATABASE_URL` desacoplada de tests. ✅
+- F5 — Payload de errores unificado + lista de errores en `ImportResponse`. ✅
+- F6 — Documentación final. ✅
+
+**Archivos/módulos tocados:**
+- `docs/estado_actual_proyecto.md` — TODO actualizado.
+- `AGENTS.md` — gotchas actualizados.
+- `app/application/use_cases/uc4a_importar_afiliado.py`, `app/domain/services/data_transformer.py` — docstrings.
+
+**Estado resultante:** suite 100/100 tests OK; app carga con los 12 endpoints; documentación (estado, vitácora, AGENTS.md) coherente con el código. Plan de refactorización F1–F6 **completo**. Pendiente de decisión del usuario: merge de `feature/refactorizacion-arquitectonica` a `develop`.
