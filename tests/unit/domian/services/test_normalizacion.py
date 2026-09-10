@@ -9,19 +9,21 @@ Cubre:
     - normalizar_afiliado() — orquestador completo
 """
 
-import pytest
 from datetime import date
-from app.domain.services.normalizacion import (
-    normalizar_texto,
-    normalizar_nombre,
-    normalizar_dni,
-    normalizar_afiliado,
-)
 
+import pytest
+
+from app.domain.services.normalizacion import (
+    normalizar_afiliado,
+    normalizar_dni,
+    normalizar_nombre,
+    normalizar_texto,
+)
 
 # ---------------------------------------------------------------------------
 # normalizar_texto()
 # ---------------------------------------------------------------------------
+
 
 class TestNormalizarTexto:
 
@@ -47,6 +49,7 @@ class TestNormalizarTexto:
 # ---------------------------------------------------------------------------
 # normalizar_nombre()
 # ---------------------------------------------------------------------------
+
 
 class TestNormalizarNombre:
 
@@ -74,6 +77,7 @@ class TestNormalizarNombre:
 # ---------------------------------------------------------------------------
 # normalizar_dni()
 # ---------------------------------------------------------------------------
+
 
 class TestNormalizarDni:
 
@@ -103,26 +107,27 @@ class TestNormalizarDni:
 # normalizar_afiliado() — orquestador
 # ---------------------------------------------------------------------------
 
+
 class TestNormalizarAfiliado:
 
     @pytest.fixture
     def datos_completos(self):
         return {
-            "apellido"               : "  garcía  ",
-            "nombre"                 : "  juan  ",
-            "dni"                    : "12.345.678",
-            "email"                  : "  juan@test.com  ",
-            "telefono"               : "  1234567890  ",
-            "numero_legajo"          : "  L001  ",
-            "titulo_obtenido"        : "  Licenciado  ",
-            "id_estado_afiliado"     : 1,
-            "id_genero"              : 2,
-            "id_estado_civil"        : 1,
-            "id_nivel_educativo"     : 4,
+            "apellido": "  garcía  ",
+            "nombre": "  juan  ",
+            "dni": "12.345.678",
+            "email": "  juan@test.com  ",
+            "telefono": "  1234567890  ",
+            "numero_legajo": "  L001  ",
+            "titulo_obtenido": "  Licenciado  ",
+            "id_estado_afiliado": 1,
+            "id_genero": 2,
+            "id_estado_civil": 1,
+            "id_nivel_educativo": 4,
             "id_relacion_dependencia": 1,
-            "fecha_nacimiento"       : date(1990, 5, 20),
-            "fecha_ingreso"          : date(2020, 1, 1),
-            "fecha_alta"             : date(2020, 1, 1),
+            "fecha_nacimiento": date(1990, 5, 20),
+            "fecha_ingreso": date(2020, 1, 1),
+            "fecha_alta": date(2020, 1, 1),
         }
 
     def test_apellido_en_mayusculas_sin_espacios(self, datos_completos):
@@ -151,17 +156,17 @@ class TestNormalizarAfiliado:
 
     def test_ids_se_preservan(self, datos_completos):
         resultado = normalizar_afiliado(datos_completos)
-        assert resultado["id_genero"]               == 2
-        assert resultado["id_estado_civil"]         == 1
-        assert resultado["id_nivel_educativo"]      == 4
+        assert resultado["id_genero"] == 2
+        assert resultado["id_estado_civil"] == 1
+        assert resultado["id_nivel_educativo"] == 4
         assert resultado["id_relacion_dependencia"] == 1
 
     def test_fechas_se_preservan_sin_cambios(self, datos_completos):
         """Las fechas se pasan tal cual, sin normalización."""
         resultado = normalizar_afiliado(datos_completos)
         assert resultado["fecha_nacimiento"] == date(1990, 5, 20)
-        assert resultado["fecha_ingreso"]    == date(2020, 1, 1)
-        assert resultado["fecha_alta"]       == date(2020, 1, 1)
+        assert resultado["fecha_ingreso"] == date(2020, 1, 1)
+        assert resultado["fecha_alta"] == date(2020, 1, 1)
 
     def test_id_estado_afiliado_default_1_si_ausente(self):
         """RN9 — si id_estado_afiliado no viene, se usa 1 (Activo) por defecto."""
@@ -176,14 +181,14 @@ class TestNormalizarAfiliado:
     def test_campos_opcionales_none_retornan_none(self):
         """RN9 — campos opcionales ausentes retornan None."""
         resultado = normalizar_afiliado({})
-        assert resultado["id_genero"]               is None
-        assert resultado["id_estado_civil"]         is None
-        assert resultado["id_nivel_educativo"]      is None
+        assert resultado["id_genero"] is None
+        assert resultado["id_estado_civil"] is None
+        assert resultado["id_nivel_educativo"] is None
         assert resultado["id_relacion_dependencia"] is None
-        assert resultado["id_domicilio"]            is None
-        assert resultado["fecha_nacimiento"]        is None
-        assert resultado["fecha_ingreso"]           is None
-        assert resultado["fecha_alta"]              is None
+        assert resultado["id_domicilio"] is None
+        assert resultado["fecha_nacimiento"] is None
+        assert resultado["fecha_ingreso"] is None
+        assert resultado["fecha_alta"] is None
 
     def test_id_domicilio_se_propaga(self, datos_completos):
         """El ID de domicilio ya resuelto debe propagarse a la salida."""
@@ -195,10 +200,21 @@ class TestNormalizarAfiliado:
         """El dict resultante siempre tiene las mismas claves."""
         resultado = normalizar_afiliado({})
         claves_esperadas = {
-            "apellido", "nombre", "dni", "email", "telefono",
-            "numero_legajo", "titulo_obtenido", "id_estado_afiliado",
-            "id_genero", "id_estado_civil", "id_nivel_educativo",
-            "id_relacion_dependencia", "id_domicilio", "fecha_nacimiento",
-            "fecha_ingreso", "fecha_alta",
+            "apellido",
+            "nombre",
+            "dni",
+            "email",
+            "telefono",
+            "numero_legajo",
+            "titulo_obtenido",
+            "id_estado_afiliado",
+            "id_genero",
+            "id_estado_civil",
+            "id_nivel_educativo",
+            "id_relacion_dependencia",
+            "id_domicilio",
+            "fecha_nacimiento",
+            "fecha_ingreso",
+            "fecha_alta",
         }
         assert set(resultado.keys()) == claves_esperadas

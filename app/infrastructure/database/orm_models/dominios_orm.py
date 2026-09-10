@@ -1,13 +1,14 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
+
 from app.infrastructure.database.connection import Base
 
 
 class GeneroORM(Base):
-    
+
     __tablename__ = "generos"
 
-    id          = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     descripcion = Column(String(50), nullable=False, unique=True)
 
     # Relación inversa — un género puede tener muchos afiliados
@@ -15,43 +16,44 @@ class GeneroORM(Base):
 
 
 class EstadoCivilORM(Base):
-    
+
     __tablename__ = "estados_civiles"
 
-    id          = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     descripcion = Column(String(50), nullable=False, unique=True)
 
     afiliados = relationship("AfiliadoORM", back_populates="estado_civil")
 
 
 class NivelEducativoORM(Base):
-    
+
     __tablename__ = "niveles_educativos"
 
-    id          = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     descripcion = Column(String(100), nullable=False, unique=True)
 
     afiliados = relationship("AfiliadoORM", back_populates="nivel_educativo")
 
 
 class RelacionDependenciaORM(Base):
-    
+
     __tablename__ = "relaciones_dependencia"
 
-    id          = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     descripcion = Column(String(100), nullable=False, unique=True)
 
     afiliados = relationship("AfiliadoORM", back_populates="relacion_dependencia")
 
 
 class EstadoAfiliadoORM(Base):
-    
+
     __tablename__ = "estados_afiliado"
 
-    id          = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     descripcion = Column(String(50), nullable=False, unique=True)
 
     afiliados = relationship("AfiliadoORM", back_populates="estado_afiliado")
+
 
 """
 

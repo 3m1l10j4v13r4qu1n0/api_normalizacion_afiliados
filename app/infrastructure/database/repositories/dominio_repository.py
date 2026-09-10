@@ -1,16 +1,18 @@
-from typing import Optional
+from typing import ClassVar
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.models.dominio import Dominio
 from app.domain.ports.dominio_repository_port import DominioRepositoryPort
 from app.infrastructure.database.orm_models.dominios_orm import (
-    GeneroORM,
+    EstadoAfiliadoORM,
     EstadoCivilORM,
+    GeneroORM,
     NivelEducativoORM,
     RelacionDependenciaORM,
-    EstadoAfiliadoORM,
 )
+
 """
 AF-RN17 — Los atributos género, estado civil, nivel educativo, 
 relación de dependencia y estado del afiliado deben pertenecer a 
@@ -33,12 +35,12 @@ class DominioRepository(DominioRepositoryPort):
         id_estado = await dominio_repo.resolver_o_crear(Dominio.ESTADO_CIVIL, "Soltero")
     """
 
-    _ORM_POR_DOMINIO = {
-        Dominio.GENERO:               GeneroORM,
-        Dominio.ESTADO_CIVIL:         EstadoCivilORM,
-        Dominio.NIVEL_EDUCATIVO:      NivelEducativoORM,
+    _ORM_POR_DOMINIO: ClassVar[dict] = {
+        Dominio.GENERO: GeneroORM,
+        Dominio.ESTADO_CIVIL: EstadoCivilORM,
+        Dominio.NIVEL_EDUCATIVO: NivelEducativoORM,
         Dominio.RELACION_DEPENDENCIA: RelacionDependenciaORM,
-        Dominio.ESTADO_AFILIADO:      EstadoAfiliadoORM,
+        Dominio.ESTADO_AFILIADO: EstadoAfiliadoORM,
     }
 
     def __init__(self, session: AsyncSession) -> None:
@@ -46,9 +48,9 @@ class DominioRepository(DominioRepositoryPort):
 
     async def resolver_o_crear(
         self,
-        dominio     : Dominio,
-        descripcion : Optional[str],
-    ) -> Optional[int]:
+        dominio: Dominio,
+        descripcion: str | None,
+    ) -> int | None:
         """
         Busca por descripción en la tabla del ORM correspondiente al dominio.
         Crea el registro si no existe. Retorna el ID.

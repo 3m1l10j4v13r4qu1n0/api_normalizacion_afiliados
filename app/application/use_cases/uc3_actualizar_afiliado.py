@@ -1,11 +1,12 @@
+from app.domain.exceptions import AfiliadoNoEncontradoError, EmailDuplicadoError
 from app.domain.ports.afiliado.afiliado_command_port import AfiliadoCommandPort
 from app.presentation.schemas.afiliados_schema import AfiliadoUpdate
-from app.domain.exceptions import AfiliadoNoEncontradoError, EmailDuplicadoError
 
 """
 UC3  — Actualizar afiliado
 RF12 — Permitir actualizar datos de afiliados
 """
+
 
 class ActualizarAfiliadoUseCase:
     """
@@ -23,7 +24,7 @@ class ActualizarAfiliadoUseCase:
         # Paso 1 — Si viene email, verificar que no esté en uso
         if datos.email is not None:
             en_uso = await self._repo.buscar_por_email_excluyendo_id(
-                email      =datos.email,
+                email=datos.email,
                 afiliado_id=afiliado_id,
             )
             if en_uso is not None:
@@ -37,8 +38,6 @@ class ActualizarAfiliadoUseCase:
 
         # Paso 3 — Verificar que el afiliado existe
         if afiliado is None:
-            raise AfiliadoNoEncontradoError(
-                f"No existe afiliado con id={afiliado_id}"
-            )
+            raise AfiliadoNoEncontradoError(f"No existe afiliado con id={afiliado_id}")
 
         return afiliado

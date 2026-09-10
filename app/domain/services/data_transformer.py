@@ -1,4 +1,5 @@
-from typing import List, Any
+from typing import Any
+
 from app.domain.models.input_row import InputRow
 from app.domain.services.data_key_mapper import DataKeyMapper
 
@@ -10,7 +11,7 @@ class DataTransformer:
 
     Pipeline interno:
         raw_data (List[List])
-            → dicts con headers originales  
+            → dicts con headers originales
             → dicts con claves renombradas  (DataKeyMapper — inyectado)
             → List[InputRow]                (modelo de dominio)
 
@@ -37,9 +38,9 @@ class DataTransformer:
 
     def transform(
         self,
-        raw_data: List[List[Any]],
-        headers:  List[str],
-    ) -> List[InputRow]:
+        raw_data: list[list[Any]],
+        headers: list[str],
+    ) -> list[InputRow]:
         """
         Transforma los datos crudos del Sheet en una lista de InputRow.
 
@@ -56,7 +57,7 @@ class DataTransformer:
             List[InputRow] — Una entrada por fila, row_number base 2
                              (coincide con el número real de fila en Sheets).
         """
-        rows: List[InputRow] = []
+        rows: list[InputRow] = []
 
         for index, row in enumerate(raw_data):
             raw_dict = dict(zip(headers, row))
@@ -66,7 +67,7 @@ class DataTransformer:
 
             rows.append(
                 InputRow(
-                    row_number=index + 2,   # +2: base 1 del Sheet + fila de header
+                    row_number=index + 2,  # +2: base 1 del Sheet + fila de header
                     values=renamed,
                 )
             )

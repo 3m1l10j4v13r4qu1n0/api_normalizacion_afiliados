@@ -1,4 +1,3 @@
-from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,10 +22,10 @@ class DomicilioRepository(DomicilioRepositoryPort):
 
     async def resolver_o_crear(
         self,
-        direccion    : Optional[str],
-        localidad    : Optional[str],
-        provincia    : Optional[str],
-        codigo_postal: Optional[str],
+        direccion: str | None,
+        localidad: str | None,
+        provincia: str | None,
+        codigo_postal: str | None,
     ) -> int:
         """
         Busca o crea provincia → localidad → domicilio y retorna el id_domicilio.
@@ -42,7 +41,7 @@ class DomicilioRepository(DomicilioRepositoryPort):
     # Privados
     # -----------------------------------------------------------------------
 
-    async def _resolver_o_crear_provincia(self, nombre: Optional[str]) -> Optional[int]:
+    async def _resolver_o_crear_provincia(self, nombre: str | None) -> int | None:
         if not nombre:
             return None
         nombre = nombre.strip().upper()
@@ -58,15 +57,15 @@ class DomicilioRepository(DomicilioRepositoryPort):
 
     async def _resolver_o_crear_localidad(
         self,
-        nombre      : Optional[str],
-        id_provincia: Optional[int],
-    ) -> Optional[int]:
+        nombre: str | None,
+        id_provincia: int | None,
+    ) -> int | None:
         if not nombre:
             return None
         nombre = nombre.strip().upper()
         resultado = await self._session.execute(
             select(LocalidadORM).where(
-                LocalidadORM.nombre       == nombre,
+                LocalidadORM.nombre == nombre,
                 LocalidadORM.id_provincia == id_provincia,
             )
         )
@@ -79,16 +78,16 @@ class DomicilioRepository(DomicilioRepositoryPort):
 
     async def _resolver_o_crear_domicilio(
         self,
-        direccion    : Optional[str],
-        codigo_postal: Optional[str],
-        id_localidad : Optional[int],
-    ) -> Optional[int]:
+        direccion: str | None,
+        codigo_postal: str | None,
+        id_localidad: int | None,
+    ) -> int | None:
         if not direccion and not id_localidad:
             return None
         domicilio = DomicilioORM(
-            direccion    =direccion.strip() if direccion else None,
+            direccion=direccion.strip() if direccion else None,
             codigo_postal=codigo_postal.strip() if codigo_postal else None,
-            id_localidad =id_localidad,
+            id_localidad=id_localidad,
         )
         self._session.add(domicilio)
         await self._session.flush()

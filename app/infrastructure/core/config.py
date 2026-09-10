@@ -1,5 +1,6 @@
-from pydantic_settings import BaseSettings
 from functools import lru_cache
+
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -17,11 +18,11 @@ class Settings(BaseSettings):
     GOOGLE_CREDENTIALS_PATH: str = ""
 
     class Config:
-        env_file = ".env"           # ← lee del archivo .env
+        env_file = ".env"  # ← lee del archivo .env
         env_file_encoding = "utf-8"
 
 
-@lru_cache()             # ← crea la configuración una sola vez
+@lru_cache  # ← crea la configuración una sola vez
 def get_settings() -> Settings:
     return Settings()
 

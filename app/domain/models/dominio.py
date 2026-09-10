@@ -12,8 +12,8 @@ class Dominio(Enum):
     Esto mantiene al dominio libre de cualquier dependencia de framework.
     """
 
-    GENERO               = "GENERO"
-    ESTADO_CIVIL         = "ESTADO_CIVIL"
-    NIVEL_EDUCATIVO      = "NIVEL_EDUCATIVO"
+    GENERO = "GENERO"
+    ESTADO_CIVIL = "ESTADO_CIVIL"
+    NIVEL_EDUCATIVO = "NIVEL_EDUCATIVO"
     RELACION_DEPENDENCIA = "RELACION_DEPENDENCIA"
-    ESTADO_AFILIADO      = "ESTADO_AFILIADO"
+    ESTADO_AFILIADO = "ESTADO_AFILIADO"

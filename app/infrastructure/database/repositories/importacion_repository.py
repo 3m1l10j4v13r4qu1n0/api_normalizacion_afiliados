@@ -21,8 +21,8 @@ class ImportacionRepository(ImportacionRepositoryPort):
         """
         importacion = ImportacionORM(
             cantidad_registros=cantidad_registros,
-            cantidad_errores  =0,
-            estado            ="pendiente",
+            cantidad_errores=0,
+            estado="pendiente",
         )
         self._session.add(importacion)
         await self._session.flush()
@@ -30,7 +30,7 @@ class ImportacionRepository(ImportacionRepositoryPort):
 
     async def completar_importacion(
         self,
-        id_importacion  : int,
+        id_importacion: int,
         cantidad_errores: int,
     ) -> None:
         """
@@ -40,5 +40,5 @@ class ImportacionRepository(ImportacionRepositoryPort):
         if importacion is None:
             raise ValueError(f"Importación con id={id_importacion} no encontrada.")
         importacion.cantidad_errores = cantidad_errores
-        importacion.estado           = "completada"
+        importacion.estado = "completada"
         await self._session.flush()

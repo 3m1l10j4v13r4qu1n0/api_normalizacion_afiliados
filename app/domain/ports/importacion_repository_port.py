@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 class ImportacionRepositoryPort(ABC):
     """
     Puerto de salida para el repositorio de importaciones.
-    
+
     Responsabilidad: ciclo de vida de la importación (crear y completar).
     Los errores de validación los gestiona ErrorRepositoryPort.
     """
@@ -20,7 +20,9 @@ class ImportacionRepositoryPort(ABC):
         ...
 
     @abstractmethod
-    async def completar_importacion(self, id_importacion: int, cantidad_errores: int) -> None:
+    async def completar_importacion(
+        self, id_importacion: int, cantidad_errores: int
+    ) -> None:
         """
         Actualiza la importación con el resultado final.
 

@@ -12,21 +12,22 @@ Cubre:
 """
 
 import pytest
+
+from app.domain.exceptions import DatoInvalidoError
 from app.domain.services.validacion import (
-    validar_nombre,
+    validar_afiliado,
     validar_apellido,
     validar_dni,
     validar_dni_duplicado,
-    validar_estado_afiliado,
     validar_email,
-    validar_afiliado,
+    validar_estado_afiliado,
+    validar_nombre,
 )
-from app.domain.exceptions import DatoInvalidoError
-
 
 # ---------------------------------------------------------------------------
 # validar_nombre()
 # ---------------------------------------------------------------------------
+
 
 class TestValidarNombre:
 
@@ -53,6 +54,7 @@ class TestValidarNombre:
 # validar_apellido()
 # ---------------------------------------------------------------------------
 
+
 class TestValidarApellido:
 
     def test_apellido_valido(self):
@@ -74,6 +76,7 @@ class TestValidarApellido:
 # ---------------------------------------------------------------------------
 # validar_dni()
 # ---------------------------------------------------------------------------
+
 
 class TestValidarDni:
 
@@ -112,6 +115,7 @@ class TestValidarDni:
 # validar_dni_duplicado()
 # ---------------------------------------------------------------------------
 
+
 class TestValidarDniDuplicado:
 
     def test_dni_no_duplicado_no_lanza(self):
@@ -133,6 +137,7 @@ class TestValidarDniDuplicado:
 # validar_estado_afiliado()
 # ---------------------------------------------------------------------------
 
+
 class TestValidarEstadoAfiliado:
 
     def test_estado_valido(self):
@@ -150,6 +155,7 @@ class TestValidarEstadoAfiliado:
 # ---------------------------------------------------------------------------
 # validar_email()
 # ---------------------------------------------------------------------------
+
 
 class TestValidarEmail:
 
@@ -181,15 +187,16 @@ class TestValidarEmail:
 # validar_afiliado() — orquestador
 # ---------------------------------------------------------------------------
 
+
 class TestValidarAfiliado:
 
     @pytest.fixture
     def datos_validos(self):
         return {
-            "nombre"            : "Juan",
-            "apellido"          : "García",
-            "dni"               : "12345678",
-            "email"             : "juan@test.com",
+            "nombre": "Juan",
+            "apellido": "García",
+            "dni": "12345678",
+            "email": "juan@test.com",
             "id_estado_afiliado": 1,
         }
 
@@ -213,17 +220,17 @@ class TestValidarAfiliado:
     def test_continua_aunque_haya_errores(self, datos_validos):
         """RN13 — si nombre y dni fallan, se registran ambos errores."""
         datos_validos["nombre"] = None
-        datos_validos["dni"]    = None
+        datos_validos["dni"] = None
         errores = validar_afiliado(datos_validos)
-        campos  = [e[0] for e in errores]
+        campos = [e[0] for e in errores]
         assert "nombre" in campos
-        assert "dni"    in campos
+        assert "dni" in campos
 
     def test_multiples_errores_todos_registrados(self, datos_validos):
         """RN12 — todos los errores se registran, no solo el primero."""
-        datos_validos["nombre"]             = None
-        datos_validos["apellido"]           = None
-        datos_validos["dni"]                = None
+        datos_validos["nombre"] = None
+        datos_validos["apellido"] = None
+        datos_validos["dni"] = None
         datos_validos["id_estado_afiliado"] = None
         errores = validar_afiliado(datos_validos)
         assert len(errores) == 4
@@ -237,20 +244,20 @@ class TestValidarAfiliado:
     def test_email_invalido_genera_error(self, datos_validos):
         datos_validos["email"] = "no_es_email"
         errores = validar_afiliado(datos_validos)
-        campos  = [e[0] for e in errores]
+        campos = [e[0] for e in errores]
         assert "email" in campos
 
     def test_dni_con_letras_genera_error(self, datos_validos):
         datos_validos["dni"] = "ABC123"
         errores = validar_afiliado(datos_validos)
-        campos  = [e[0] for e in errores]
+        campos = [e[0] for e in errores]
         assert "dni" in campos
 
     def test_datos_completamente_vacios(self):
         """Todos los campos obligatorios ausentes generan sus errores."""
         errores = validar_afiliado({})
-        campos  = [e[0] for e in errores]
-        assert "nombre"             in campos
-        assert "apellido"           in campos
-        assert "dni"                in campos
+        campos = [e[0] for e in errores]
+        assert "nombre" in campos
+        assert "apellido" in campos
+        assert "dni" in campos
         assert "id_estado_afiliado" in campos

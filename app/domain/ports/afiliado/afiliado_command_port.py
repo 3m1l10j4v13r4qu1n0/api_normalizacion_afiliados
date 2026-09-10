@@ -1,28 +1,26 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any
+from typing import Any
 
 
 class AfiliadoCommandPort(ABC):
     @abstractmethod
-    async def update_afiliado(self, afiliado:Dict[str,Any]) -> Dict[str,str]:
+    async def update_afiliado(self, afiliado: dict[str, Any]) -> dict[str, str]:
         """
         UC3 — Actualiza los datos de un afiliado existente
         RF12 — Permitir actualizar datos de afiliados
         """
         ...
+
     @abstractmethod
     async def buscar_por_email_excluyendo_id(
-        self, 
-        email: str, 
-        afiliado_id: int
-        ) -> Dict[str,str]:
+        self, email: str, afiliado_id: int
+    ) -> dict[str, str]:
         """
         Verificar que el email no esté en uso por otro afiliado
-        
-        """   
+
+        """
         ...
 
-    
     @abstractmethod
     async def dar_baja(self, afiliado_id: int):
         """

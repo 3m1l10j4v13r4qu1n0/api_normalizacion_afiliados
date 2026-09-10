@@ -18,10 +18,10 @@ from app.domain.models.dominio import Dominio
 from app.domain.models.importacion import Importacion
 from app.domain.models.input_row import InputRow
 from app.domain.ports.afiliado.afiliado_importacion_port import AfiliadoImportacionPort
-from app.domain.ports.importacion_repository_port import ImportacionRepositoryPort
-from app.domain.ports.error_repository_port import ErrorRepositoryPort
 from app.domain.ports.domicilio_repository_port import DomicilioRepositoryPort
 from app.domain.ports.dominio_repository_port import DominioRepositoryPort
+from app.domain.ports.error_repository_port import ErrorRepositoryPort
+from app.domain.ports.importacion_repository_port import ImportacionRepositoryPort
 from app.domain.services.importacion_pipeline import procesar_fila
 
 
@@ -52,17 +52,17 @@ class ImportarAfiliadoUseCase:
 
     def __init__(
         self,
-        afiliado_repo   : AfiliadoImportacionPort,
+        afiliado_repo: AfiliadoImportacionPort,
         importacion_repo: ImportacionRepositoryPort,
-        error_repo      : ErrorRepositoryPort,
-        domicilio_repo  : DomicilioRepositoryPort,
-        dominio_repo    : DominioRepositoryPort,
+        error_repo: ErrorRepositoryPort,
+        domicilio_repo: DomicilioRepositoryPort,
+        dominio_repo: DominioRepositoryPort,
     ) -> None:
-        self._afiliado_repo    = afiliado_repo
+        self._afiliado_repo = afiliado_repo
         self._importacion_repo = importacion_repo
-        self._error_repo       = error_repo
-        self._domicilio_repo   = domicilio_repo
-        self._dominio_repo     = dominio_repo
+        self._error_repo = error_repo
+        self._domicilio_repo = domicilio_repo
+        self._dominio_repo = dominio_repo
 
     async def importar_desde_dicts(self, datos: list[dict]) -> Importacion:
         """
@@ -71,10 +71,7 @@ class ImportarAfiliadoUseCase:
         Convertimos cada dict a un InputRow manteniendo el índice real
         (row_number = i + 1) y delegamos en el pipeline.
         """
-        rows = [
-            InputRow(row_number=i + 1, values=dato)
-            for i, dato in enumerate(datos)
-        ]
+        rows = [InputRow(row_number=i + 1, values=dato) for i, dato in enumerate(datos)]
         return await self.execute(rows)
 
     async def agregar_afiliado(self, datos: dict) -> Importacion:
@@ -102,7 +99,7 @@ class ImportarAfiliadoUseCase:
             cantidad_registros=len(rows)
         )
         importacion = Importacion(
-            id                =id_importacion,
+            id=id_importacion,
             cantidad_registros=len(rows),
         )
 
@@ -116,28 +113,39 @@ class ImportarAfiliadoUseCase:
 
             # Paso 3a — Resolver dominios (strings → IDs)
             ids_dominio = {
-                "id_genero"              : await self._dominio_repo.resolver_o_crear(Dominio.GENERO,               valores.get("genero")),
-                "id_estado_civil"        : await self._dominio_repo.resolver_o_crear(Dominio.ESTADO_CIVIL,         valores.get("estado_civil")),
-                "id_nivel_educativo"     : await self._dominio_repo.resolver_o_crear(Dominio.NIVEL_EDUCATIVO,      valores.get("nivel_educativo")),
-                "id_relacion_dependencia": await self._dominio_repo.resolver_o_crear(Dominio.RELACION_DEPENDENCIA, valores.get("relacion_dependencia")),
-                "id_estado_afiliado"     : await self._dominio_repo.resolver_o_crear(Dominio.ESTADO_AFILIADO,      valores.get("estado_afiliado")) or 1,
+                "id_genero": await self._dominio_repo.resolver_o_crear(
+                    Dominio.GENERO, valores.get("genero")
+                ),
+                "id_estado_civil": await self._dominio_repo.resolver_o_crear(
+                    Dominio.ESTADO_CIVIL, valores.get("estado_civil")
+                ),
+                "id_nivel_educativo": await self._dominio_repo.resolver_o_crear(
+                    Dominio.NIVEL_EDUCATIVO, valores.get("nivel_educativo")
+                ),
+                "id_relacion_dependencia": await self._dominio_repo.resolver_o_crear(
+                    Dominio.RELACION_DEPENDENCIA, valores.get("relacion_dependencia")
+                ),
+                "id_estado_afiliado": await self._dominio_repo.resolver_o_crear(
+                    Dominio.ESTADO_AFILIADO, valores.get("estado_afiliado")
+                )
+                or 1,
             }
 
             # Paso 3b — Resolver domicilio
             id_domicilio = await self._domicilio_repo.resolver_o_crear(
-                direccion    =valores.get("direccion"),
-                localidad    =valores.get("localidad"),
-                provincia    =valores.get("provincia"),
+                direccion=valores.get("direccion"),
+                localidad=valores.get("localidad"),
+                provincia=valores.get("provincia"),
                 codigo_postal=valores.get("codigo_postal"),
             )
 
             # Paso 3c — Lógica de dominio pura por fila (normalizar + validar + dup)
             dato_normalizado, errores = procesar_fila(
-                valores        =valores,
-                ids_dominio    =ids_dominio,
-                id_domicilio   =id_domicilio,
+                valores=valores,
+                ids_dominio=ids_dominio,
+                id_domicilio=id_domicilio,
                 dnis_existentes=dnis_existentes,
-                dnis_en_lote   =dnis_en_lote,
+                dnis_en_lote=dnis_en_lote,
             )
 
             if errores:
@@ -147,24 +155,24 @@ class ImportarAfiliadoUseCase:
 
                 for campo, descripcion in errores:
                     await self._error_repo.registrar_error(
-                        id_importacion    = id_importacion,
-                        registro_origen  =str(valores),
-                        campo            =campo,
+                        id_importacion=id_importacion,
+                        registro_origen=str(valores),
+                        campo=campo,
                         descripcion_error=descripcion,
-                        row_number        = row.row_number
+                        row_number=row.row_number,
                     )
                 importacion.registrar_error(
-                    campo      =errores[0][0],
+                    campo=errores[0][0],
                     descripcion=errores[0][1],
-                    origen     =str(valores),
+                    origen=str(valores),
                 )
                 # AF-RN13 — continúa con la siguiente fila
 
             else:
                 # RF9 — persistir afiliado válido
                 await self._afiliado_repo.save(
-                    datos         = dato_normalizado,
-                    id_importacion = id_importacion,
+                    datos=dato_normalizado,
+                    id_importacion=id_importacion,
                 )
                 dni = dato_normalizado.get("dni")
                 if dni:
@@ -172,8 +180,8 @@ class ImportarAfiliadoUseCase:
 
         # Paso 4 — Cerrar importación con resultado final
         await self._importacion_repo.completar_importacion(
-            id_importacion   = id_importacion,
-            cantidad_errores = importacion.cantidad_errores,
+            id_importacion=id_importacion,
+            cantidad_errores=importacion.cantidad_errores,
         )
         importacion.completar()
 

@@ -1,10 +1,11 @@
-from app.domain.ports.afiliado.afiliado_query_port import AfiliadoQueryPort
 from app.domain.exceptions import AfiliadoNoEncontradoError
+from app.domain.ports.afiliado.afiliado_query_port import AfiliadoQueryPort
 
 """
 UC2  — Obtener afiliado por ID
 RF11 — Permitir consultar afiliado por identificador
 """
+
 
 class ObtenerAfiliadoPorIdUseCase:
     """
@@ -31,8 +32,6 @@ class ObtenerAfiliadoPorIdUseCase:
         afiliado = await self._repo.obtener_por_id(afiliado_id)
 
         if afiliado is None:
-            raise AfiliadoNoEncontradoError(
-                f"No existe afiliado con id={afiliado_id}"
-            )
+            raise AfiliadoNoEncontradoError(f"No existe afiliado con id={afiliado_id}")
 
         return afiliado

@@ -9,11 +9,11 @@ class ErrorRepositoryPort(ABC):
     @abstractmethod
     async def registrar_error(
         self,
-        id_importacion   : int,
-        registro_origen  : str,
-        campo            : str,
+        id_importacion: int,
+        registro_origen: str,
+        campo: str,
         descripcion_error: str,
-        row_number       : int,
+        row_number: int,
     ) -> None:
         """
         Persiste un error de validación asociado a una importación.

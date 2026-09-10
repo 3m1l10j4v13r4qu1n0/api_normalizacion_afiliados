@@ -1,11 +1,5 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.infrastructure.database.connection import get_db
-
-from app.domain.models.mapping import mapping
-from app.domain.services.data_key_mapper import DataKeyMapper
-from app.domain.services.data_transformer import DataTransformer
-from app.domain.ports.sheet_data_port import SheetDataPort
 
 from app.application.use_cases.core_importar_afiliado import ImportarAfiliadoUseCase
 from app.application.use_cases.uc2_listar_afiliados import ListarAfiliadosUseCase
@@ -18,32 +12,35 @@ from app.application.use_cases.uc5_dar_baja_afiliado import DarBajaAfiliadoUseCa
 from app.application.use_cases.uc6_marcar_errores_sheets import (
     MarcarErroresSheetsUseCase,
 )
-
+from app.domain.models.mapping import mapping
+from app.domain.ports.sheet_data_port import SheetDataPort
 from app.domain.ports.sheet_marking_port import SheetMarkingPort
-
+from app.domain.services.data_key_mapper import DataKeyMapper
+from app.domain.services.data_transformer import DataTransformer
 from app.infrastructure.core.config import settings
-from app.infrastructure.google.google_sheets_client import GspreadSheetsClient
-from app.infrastructure.google.google_sheets_adapter import GoogleSheetsAdapter
-from app.infrastructure.google.sheets_marking_adapter import SheetsMarkingAdapter
+from app.infrastructure.database.connection import get_db
 from app.infrastructure.database.repositories.afiliado_command_repository import (
     AfiliadoCommandRepository,
-)
-from app.infrastructure.database.repositories.afiliado_query_repository import (
-    AfiliadoQueryRepository,
 )
 from app.infrastructure.database.repositories.afiliado_importacion_repository import (
     AfiliadoImportacionRepository,
 )
-from app.infrastructure.database.repositories.importacion_repository import (
-    ImportacionRepository,
+from app.infrastructure.database.repositories.afiliado_query_repository import (
+    AfiliadoQueryRepository,
 )
-from app.infrastructure.database.repositories.error_repository import ErrorRepository
 from app.infrastructure.database.repositories.domicilio_repository import (
     DomicilioRepository,
 )
 from app.infrastructure.database.repositories.dominio_repository import (
     DominioRepository,
 )
+from app.infrastructure.database.repositories.error_repository import ErrorRepository
+from app.infrastructure.database.repositories.importacion_repository import (
+    ImportacionRepository,
+)
+from app.infrastructure.google.google_sheets_adapter import GoogleSheetsAdapter
+from app.infrastructure.google.google_sheets_client import GspreadSheetsClient
+from app.infrastructure.google.sheets_marking_adapter import SheetsMarkingAdapter
 
 
 # ── CORE — Importar afiliados (UC único) ───────────────────────────

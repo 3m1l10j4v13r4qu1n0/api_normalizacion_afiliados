@@ -1,24 +1,11 @@
 from logging.config import fileConfig
+
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
+
 from alembic import context
-
-from app.infrastructure.database.connection import Base
 from app.infrastructure.core.config import settings
-
-from app.infrastructure.database.orm_models import (
-    AfiliadoORM,
-    GeneroORM,
-    EstadoCivilORM,
-    NivelEducativoORM,
-    RelacionDependenciaORM,
-    EstadoAfiliadoORM,
-    DomicilioORM,       
-    LocalidadORM,       
-    ProvinciaORM,       
-    ErrorValidacionORM,
-    ImportacionORM,
-)
+from app.infrastructure.database.connection import Base
 
 config = context.config
 
@@ -43,10 +30,7 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection) -> None:
-    context.configure(
-        connection=connection,
-        target_metadata=target_metadata
-    )
+    context.configure(connection=connection, target_metadata=target_metadata)
     with context.begin_transaction():
         context.run_migrations()
 
@@ -63,6 +47,7 @@ async def run_async_migrations() -> None:
 
 def run_migrations_online() -> None:
     import asyncio
+
     asyncio.run(run_async_migrations())
 
 

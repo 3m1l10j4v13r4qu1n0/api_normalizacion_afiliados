@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Set
+
 
 class AfiliadoImportacionPort(ABC):
     """
@@ -7,7 +7,7 @@ class AfiliadoImportacionPort(ABC):
     """
 
     @abstractmethod
-    async def get_all_dnis(self) -> Set[str]:
+    async def get_all_dnis(self) -> set[str]:
         """
         Retorna el conjunto de DNIs ya registrados en el sistema.
         Usado para validar duplicados (RN1, RN2, RF5).

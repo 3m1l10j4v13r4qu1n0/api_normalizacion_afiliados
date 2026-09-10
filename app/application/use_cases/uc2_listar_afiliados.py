@@ -1,10 +1,10 @@
-from typing import List
 from app.domain.ports.afiliado.afiliado_query_port import AfiliadoQueryPort
 
 """
 UC2  — Listar afiliados
 RF10 — Permitir consultar afiliados
 """
+
 
 class ListarAfiliadosUseCase:
     """
@@ -17,5 +17,5 @@ class ListarAfiliadosUseCase:
     def __init__(self, repo: AfiliadoQueryPort) -> None:
         self._repo = repo
 
-    async def execute(self) -> List:
+    async def execute(self) -> list:
         return await self._repo.listar()

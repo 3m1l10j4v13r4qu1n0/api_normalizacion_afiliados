@@ -18,16 +18,17 @@ Reglas cubiertas:
     AF-RN13 — Importación continúa aunque haya errores
 """
 
+from app.domain.exceptions import DatoInvalidoError
 from app.domain.services.normalizacion import normalizar_afiliado
 from app.domain.services.validacion import validar_afiliado, validar_dni_duplicado
 
 
 def procesar_fila(
-    valores        : dict,
-    ids_dominio    : dict,
-    id_domicilio   : int | None,
+    valores: dict,
+    ids_dominio: dict,
+    id_domicilio: int | None,
     dnis_existentes: set[str],
-    dnis_en_lote   : set[str],
+    dnis_en_lote: set[str],
 ) -> tuple[dict, list[tuple[str, str]]]:
     """
     Procesa una única fila del lote: normaliza, valida y verifica
@@ -47,15 +48,17 @@ def procesar_fila(
         Si errores está vacío el registro es válido y `dato_normalizado`
         puede persistirse.
     """
-    dato_normalizado = normalizar_afiliado({
-        **valores,
-        "id_genero"              : ids_dominio.get("id_genero"),
-        "id_estado_civil"        : ids_dominio.get("id_estado_civil"),
-        "id_nivel_educativo"     : ids_dominio.get("id_nivel_educativo"),
-        "id_relacion_dependencia": ids_dominio.get("id_relacion_dependencia"),
-        "id_estado_afiliado"     : ids_dominio.get("id_estado_afiliado") or 1,
-        "id_domicilio"           : id_domicilio,
-    })
+    dato_normalizado = normalizar_afiliado(
+        {
+            **valores,
+            "id_genero": ids_dominio.get("id_genero"),
+            "id_estado_civil": ids_dominio.get("id_estado_civil"),
+            "id_nivel_educativo": ids_dominio.get("id_nivel_educativo"),
+            "id_relacion_dependencia": ids_dominio.get("id_relacion_dependencia"),
+            "id_estado_afiliado": ids_dominio.get("id_estado_afiliado") or 1,
+            "id_domicilio": id_domicilio,
+        }
+    )
 
     errores = validar_afiliado(dato_normalizado)
 
@@ -63,7 +66,7 @@ def procesar_fila(
     if dni and not errores:
         try:
             validar_dni_duplicado(dni, dnis_existentes | dnis_en_lote)
-        except Exception as e:
+        except DatoInvalidoError as e:
             errores.append(("dni", str(e)))
 
     return dato_normalizado, errores

@@ -1,5 +1,5 @@
-from app.domain.ports.afiliado.afiliado_command_port import AfiliadoCommandPort
 from app.domain.exceptions import AfiliadoNoEncontradoError
+from app.domain.ports.afiliado.afiliado_command_port import AfiliadoCommandPort
 
 """
 UC5  — Dar de baja afiliado
@@ -7,6 +7,7 @@ RF13 — Permitir dar de baja afiliados
 AF-RN16 — La eliminación debe realizarse mediante baja lógica, marcando estado 
 como inactivo
 """
+
 
 class DarBajaAfiliadoUseCase:
     """
@@ -23,8 +24,6 @@ class DarBajaAfiliadoUseCase:
         afiliado = await self._repo.dar_baja(afiliado_id)
 
         if afiliado is None:
-            raise AfiliadoNoEncontradoError(
-                f"No existe afiliado con id={afiliado_id}"
-            )
+            raise AfiliadoNoEncontradoError(f"No existe afiliado con id={afiliado_id}")
 
         return afiliado
