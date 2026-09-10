@@ -310,3 +310,18 @@
 **Commits:** `f7ca501` (puerto), `f8188c9` (adapter), `1e93fc1` (UC6), `26845b1` (DI), `4746ce4` (sync), `4e45d06` (test).
 
 **Estado resultante:** 104/104 tests OK; app carga; HU-06 completa. Pendiente: HU-08 (exportar a Sheets) y verificaciones operativas.
+
+## 2026-09-10 — Limpieza de estilo: ruff y black en verde
+
+**Qué se hizo:** se resolvieron los 257 errores de ruff y los 67 archivos sin formato de black que existían previamente (deuda técnica detectada en la HU-06).
+- Se creó `pyproject.toml` en la raíz con config de Ruff (`line-length=100`, `target-version=py313`).
+- Se ignoró `B008` (patrón FastAPI `Depends()` como default, intencional en todo el repo) y `BLE001` solo en `google_sheets_client.py` (catch-all que envuelve errores de gspread en `SincronizacionError`).
+- `ruff --fix` corrigió 234 errores auto-arreglables (imports, anotaciones PEP 604/585, placeholders).
+- Correcciones manuales: `__all__` con re-exports explícitos en `orm_models/__init__.py` (necesarios para Alembic), `ClassVar` en `dominio_repository.py`, `except DatoInvalidoError` en lugar de `except Exception` en `importacion_pipeline.py`, línea inútil `datos` eliminada en `afiliados.py`.
+- `black` reformateó 60 archivos.
+
+**Decisión:** `B008` y el `BLE001` del adapter de Google son patrones intencionales del código, se configuran en `pyproject.toml` en lugar de forzar reescrituras que romperían la convención FastAPI del repo.
+
+**Commits:** `dbf6760` `style(api): se aplican reglas de ruff y black` (62 archivos).
+
+**Estado resultante:** `ruff check .` en verde, `black --check .` en verde (79 archivos), 104/104 tests OK. Pendiente: HU-08 (exportar a Sheets) y verificaciones operativas.
