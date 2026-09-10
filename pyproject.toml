@@ -5,6 +5,7 @@ target-version = "py313"
 [tool.ruff.lint]
 ignore = [
     "B008",
+    "DTZ007",  # fechas naive intencionales: el dominio trabaja con dates sin zona horaria
 ]
 
 [tool.ruff.lint.per-file-ignores]

@@ -59,6 +59,12 @@ def validar_estado_afiliado(id_estado_afiliado: int | None) -> None:
         raise DatoInvalidoError("El estado del afiliado es obligatorio")
 
 
+def validar_fecha_nacimiento(fecha_nacimiento) -> None:
+    """AF-RN05 — La fecha de nacimiento no pueden estar vacías"""
+    if fecha_nacimiento is None:
+        raise DatoInvalidoError("La fecha de nacimiento es obligatoria")
+
+
 def validar_email(email: str | None) -> None:
     """
     AF-RN04 — El email debe tener un formato válido
@@ -87,6 +93,10 @@ def validar_afiliado(datos: dict) -> list[tuple[str, str]]:
         ("apellido", lambda: validar_apellido(datos.get("apellido"))),
         ("dni", lambda: validar_dni(datos.get("dni"))),
         ("email", lambda: validar_email(datos.get("email"))),
+        (
+            "fecha_nacimiento",
+            lambda: validar_fecha_nacimiento(datos.get("fecha_nacimiento")),
+        ),
         (
             "id_estado_afiliado",
             lambda: validar_estado_afiliado(datos.get("id_estado_afiliado")),

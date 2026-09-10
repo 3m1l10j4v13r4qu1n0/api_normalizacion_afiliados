@@ -21,6 +21,7 @@ from app.domain.services.validacion import (
     validar_dni_duplicado,
     validar_email,
     validar_estado_afiliado,
+    validar_fecha_nacimiento,
     validar_nombre,
 )
 
@@ -153,6 +154,23 @@ class TestValidarEstadoAfiliado:
 
 
 # ---------------------------------------------------------------------------
+# validar_fecha_nacimiento()
+# ---------------------------------------------------------------------------
+
+
+class TestValidarFechaNacimiento:
+
+    def test_fecha_valida(self):
+        from datetime import date
+
+        validar_fecha_nacimiento(date(1990, 5, 20))  # no lanza
+
+    def test_fecha_none_lanza_error(self):
+        with pytest.raises(DatoInvalidoError, match="obligatoria"):
+            validar_fecha_nacimiento(None)
+
+
+# ---------------------------------------------------------------------------
 # validar_email()
 # ---------------------------------------------------------------------------
 
@@ -192,11 +210,14 @@ class TestValidarAfiliado:
 
     @pytest.fixture
     def datos_validos(self):
+        from datetime import date
+
         return {
             "nombre": "Juan",
             "apellido": "García",
             "dni": "12345678",
             "email": "juan@test.com",
+            "fecha_nacimiento": date(1990, 5, 20),
             "id_estado_afiliado": 1,
         }
 
@@ -260,4 +281,5 @@ class TestValidarAfiliado:
         assert "nombre" in campos
         assert "apellido" in campos
         assert "dni" in campos
+        assert "fecha_nacimiento" in campos
         assert "id_estado_afiliado" in campos

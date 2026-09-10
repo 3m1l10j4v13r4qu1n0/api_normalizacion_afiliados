@@ -16,6 +16,7 @@ import pytest
 from app.domain.services.normalizacion import (
     normalizar_afiliado,
     normalizar_dni,
+    normalizar_fecha,
     normalizar_nombre,
     normalizar_texto,
 )
@@ -101,6 +102,39 @@ class TestNormalizarDni:
 
     def test_dni_limpio_no_cambia(self):
         assert normalizar_dni("12345678") == "12345678"
+
+
+# ---------------------------------------------------------------------------
+# normalizar_fecha()
+# ---------------------------------------------------------------------------
+
+
+class TestNormalizarFecha:
+
+    def test_formato_d_m_y_sin_ceros(self):
+        """Formato latino d/m/Y como llega de Google Sheets (20/8/1994)."""
+        assert normalizar_fecha("20/8/1994") == date(1994, 8, 20)
+
+    def test_formato_d_m_y_con_ceros(self):
+        assert normalizar_fecha("05/03/2020") == date(2020, 3, 5)
+
+    def test_formato_iso(self):
+        assert normalizar_fecha("2020-03-05") == date(2020, 3, 5)
+
+    def test_formato_con_hora(self):
+        assert normalizar_fecha("25/3/2025 17:07:45") == date(2025, 3, 25)
+
+    def test_ya_es_date_no_cambia(self):
+        assert normalizar_fecha(date(1990, 5, 20)) == date(1990, 5, 20)
+
+    def test_none_retorna_none(self):
+        assert normalizar_fecha(None) is None
+
+    def test_texto_vacio_retorna_none(self):
+        assert normalizar_fecha("") is None
+
+    def test_texto_invalido_retorna_none(self):
+        assert normalizar_fecha("no dato") is None
 
 
 # ---------------------------------------------------------------------------
