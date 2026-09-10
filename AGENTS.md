@@ -138,14 +138,11 @@ Leyenda: ✅ verificado en sesión | 🟡 parcial | 🔵 pendiente externo/no im
 
 ## Pendientes de implementación
 
-Verificaciones operativas pendientes:
-- Probar `alembic upgrade head` contra BD real
-- Verificar si `GET /afiliados/` filtra inactivos o muestra todos
-
-2. **Verificaciones operativas**:
-   - Probar `alembic upgrade head` contra BD real
-   - Verificar si `GET /afiliados/` filtra inactivos o muestra todos
-   - Merge rama `feature/refactorizacion-arquitectonica` → `develop`
+Verificaciones operativas (todas resueltas 2026-09-10 contra BD real + credenciales reales):
+- ~~Probar `alembic upgrade head` contra BD real~~ — ✅ esquema sincronizado (`alembic check` OK)
+- ~~Verificar si `GET /afiliados/` filtra inactivos~~ — ✅ no filtra, devuelve todos (HU-03)
+- ~~Merge rama `feature/refactorizacion-arquitectonica` → `develop`~~ — ✅ ya estaba mergeada, rama borrada
+- ~~Probar `/sync/sheets/import` y `/sync/sheets/export` con credenciales reales~~ — ✅ 36 afiliados importados, 35 exportados
 
 ## Memoria del proyecto (docs/estado_actual_proyecto.md y docs/vitacora_agentica.md)
 

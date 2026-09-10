@@ -393,3 +393,36 @@
 - `docs/vitacora_agentica.md` — esta entrada.
 
 **Estado resultante:** checklist en verde (ruff, black, 111/111 tests, `alembic check` sin operaciones); BD real sincronizada con el modelo y seed cargado. Quedan pendientes operativos: verificar `GET /afiliados/` con inactivos, probar endpoints de Google Sheets con credenciales reales.
+
+---
+
+## 2026-09-10 — Pruebas E2E contra PostgreSQL real + Google Sheets: migración hoja → BD
+
+**Qué se hizo:** se completaron las verificaciones operativas pendientes contra entorno real (PostgreSQL local + credenciales reales de Google). Se ejecutó el flujo completo `POST /sync/sheets/import` (migración Google Sheets → PostgreSQL) y `POST /sync/sheets/export`, y se respondió la pregunta pendiente sobre `GET /afiliados/`.
+
+**Verificaciones:**
+1. **`POST /sync/sheets/import`** → 201: 39 filas procesadas, 36 válidas persistidas, 3 errores de email rechazados y registrados con `row_number` (AF-RN12). Las fechas del formulario (`20/8/1994`) se persistieron como `date` (`1994-08-20`).
+2. **`POST /sync/sheets/export`** → 200: 35 afiliados activos exportados a Sheets (excluye al inactivo → AF-RN18).
+3. **`GET /afiliados/`** → NO filtra inactivos; devuelve todos. Comportamiento correcto según HU-03 ("todos los afiliados almacenados"). La baja lógica (DELETE → `id_estado_afiliado=2`) verificada en BD.
+
+**Bugs detectados y corregidos durante las pruebas E2E:**
+1. `.env`/`.env.example` apuntaban a `credentials/service_account.json` pero las credenciales reales están en `.credentials/` (según `.gitignore`). Se alineó la ruta.
+2. `sync.py` usaba `range_name="Respuestas!A1:Z"` hardcodeado; la hoja real se llama "Respuestas de formulario 1" (es el `sheet1`). Se cambió a `"A1:Z"`.
+3. **Fechas sin normalizar:** `normalizar_afiliado` pasaba las fechas como string (`20/8/1994`); asyncpg fallaba al insertarlas en columnas `DATE`. Se agregó `normalizar_fecha()` en el dominio (acepta `date`/ISO/`d/m/Y` con o sin hora) y se aplica en `normalizar_afiliado`. Se agregó `validar_fecha_nacimiento` (AF-RN05, obligatoria) al orquestador de validaciones.
+4. **`registro_origen` truncado:** el dict serializado (~30 columnas de la hoja) superaba el `VARCHAR(500)`; el adapter `ErrorRepository` ahora trunca a 500.
+5. **Bug AF-RN call:** `core_importar_afiliado.py` llamaba `Importacion.registrar_error(origen=...)` con una clave inexistente y sin `row_number`; se corrigió a `registro_origen` + `row_number`. Bug latente que nunca se había ejecutado por falta de BD real.
+
+**Decisión de calidad:** DTZ007 (fechas naive con `strptime`) se ignoró a nivel global en `pyproject.toml` porque el dominio trabaja con `date` sin zona horaria (patrón intencional, como `B008`).
+
+**Archivos/módulos tocados:**
+- `.env` (no versionado) y `.env.example` — ruta de credenciales.
+- `app/presentation/routers/sync.py` — range_name `A1:Z`.
+- `app/domain/services/normalizacion.py` — `normalizar_fecha()` + aplicación en `normalizar_afiliado`.
+- `app/domain/services/validacion.py` — `validar_fecha_nacimiento`.
+- `app/infrastructure/database/repositories/error_repository.py` — truncado a 500.
+- `app/application/use_cases/core_importar_afiliado.py` — parámetros correctos de `registrar_error`.
+- `pyproject.toml` — ignore `DTZ007`.
+- `tests/unit/domian/services/test_normalizacion.py` / `test_validacion.py` — tests de fecha (121 en total).
+- `docs/estado_actual_proyecto.md` — pendientes 3–6 resueltos.
+
+**Estado resultante:** 121/121 tests OK; ruff y black en verde; migración Google Sheets → PostgreSQL funcional end-to-end. **Verificaciones operativas contra BD real completadas.**

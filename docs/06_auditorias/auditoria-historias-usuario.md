@@ -41,9 +41,10 @@ Se verificó el estado de implementación de las 8 historias de usuario document
 
 ## 4. Verificaciones operativas pendientes
 
-1. Probar `alembic upgrade head` contra BD real (migración `a1f2b3c4d5e6` no corrió localmente)
-2. Verificar comportamiento de `GET /afiliados/` con afiliados inactivos (¿filtra o muestra todos?)
-3. Merge de rama `feature/refactorizacion-arquitectonica` → `develop`
+1. ✅ (2026-09-10) `alembic upgrade head` contra BD real — resuelto, esquema sincronizado (`alembic check` OK)
+2. ✅ (2026-09-10) `GET /afiliados/` con inactivos — NO filtra, muestra todos (correcto según HU-03)
+3. ✅ (2026-09-10) Merge de rama `feature/refactorizacion-arquitectonica` → `develop` — ya estaba mergeada, rama borrada
+4. ✅ (2026-09-10) Endpoints de Google Sheets con credenciales reales — `/sync/sheets/import` (39 filas, 36 válidas) y `/sync/sheets/export` (35 activos) OK
 
 ## 5. Archivos modificados en esta auditoría / seguimiento
 
@@ -53,3 +54,4 @@ Se verificó el estado de implementación de las 8 historias de usuario document
 ## 6. NOTA de seguimiento (2026-09-10)
 
 - HU-06 fue **implementada**: `SheetMarkingPort` (`app/domain/ports/sheet_marking_port.py`), `SheetsMarkingAdapter` (`app/infrastructure/google/sheets_marking_adapter.py`), UC6 (`app/application/use_cases/uc6_marcar_errores_sheets.py`), integrado en `POST /sync/sheets/import`. Tests 104/104 OK.
+- HU-08 fue **implementada** el mismo día: `SheetExportPort` + `SheetsExportAdapter` + UC8 (`uc8_exportar_afiliados_sheets.py`), endpoint `POST /sync/sheets/export` habilitado. Verificado con credenciales reales (35 activos exportados).

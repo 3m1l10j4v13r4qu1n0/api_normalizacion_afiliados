@@ -70,6 +70,9 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 1. Mantener migraciones de Alembic al día con el modelo.
 2. Revisar semántica de baja lógica (seed: 1=Activo, 2=Inactivo).
 3. ~~Verificar `alembic upgrade head` en entorno con BD~~ — **resuelto 2026-09-10**: `alembic upgrade head` corrió contra PostgreSQL real (llegó a `d674f37e1587`). Se detectó y corrigió bug en `alembic/env.py`: no importaba los modelos ORM, por lo que `Base.metadata` quedaba vacío y `alembic check` reportaba todas las tablas como "removidas". Ahora importa `orm_models`; `alembic check` confirma **no new upgrade operations detected** (esquema sincronizado con modelos). Seed de datos iniciales cargado con éxito.
+4. ~~Verificar si `GET /afiliados/` filtra inactivos~~ — **resuelto 2026-09-10**: NO filtra; devuelve todos los afiliados (incluidos inactivos), tal como especifica HU-03 ("todos los afiliados almacenados"). La baja lógica (`id_estado_afiliado=2`) verifica estado en BD.
+5. ~~Endpoint `/sync/sheets/import` con credenciales reales~~ — **resuelto 2026-09-10**: import real de Google Sheets → PostgreSQL OK (39 filas, 36 válidas, 3 errores de email registrados). Corrigió ruta de credenciales en `.env`/`.env.example` (`credentials/` → `.credentials/`), range_name de la hoja (`A1:Z` en vez de `Respuestas!A1:Z`) y bugs de persistencia (normalización de fechas, truncado de `registro_origen`, llamada a `Importacion.registrar_error`).
+6. ~~Endpoint `/sync/sheets/export` con credenciales reales~~ — **resuelto 2026-09-10**: export OK (35 afiliados activos → Sheets, excluye el inactivo, AF-RN18).
 
 ## 8. Decisiones y convenciones vigentes
 
