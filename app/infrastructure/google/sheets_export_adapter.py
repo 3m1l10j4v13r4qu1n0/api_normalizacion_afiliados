@@ -18,7 +18,13 @@ class SheetsExportAdapter(SheetExportPort):
         filas: list[AfiliadoExportRow],
     ) -> None:
         datos = [
-            [fila.nombre_apellido, str(fila.edad), fila.dni, fila.numero_legajo, fila.email]
+            [
+                fila.nombre_apellido,
+                str(fila.edad),
+                fila.dni,
+                fila.numero_legajo,
+                fila.email,
+            ]
             for fila in filas
         ]
         loop = asyncio.get_event_loop()
