@@ -164,7 +164,8 @@ class ImportarAfiliadoUseCase:
                 importacion.registrar_error(
                     campo=errores[0][0],
                     descripcion=errores[0][1],
-                    origen=str(valores),
+                    registro_origen=str(valores),
+                    row_number=row.row_number,
                 )
                 # AF-RN13 — continúa con la siguiente fila
 

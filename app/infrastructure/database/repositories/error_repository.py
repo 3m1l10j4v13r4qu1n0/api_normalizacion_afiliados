@@ -28,7 +28,7 @@ class ErrorRepository(ErrorRepositoryPort):
         """
         error = ErrorValidacionORM(
             id_importacion=id_importacion,
-            registro_origen=registro_origen,
+            registro_origen=registro_origen[:500],
             campo=campo,
             descripcion_error=descripcion_error,
             row_number=row_number,

@@ -33,7 +33,7 @@ async def importar_desde_sheets_endpoint(
     """UC4 — Importar afiliados desde Google Sheets"""
 
     # 🔹 UC4a — leer y transformar el sheet (source)
-    sheet_rows = await sheet_uc.execute(range_name="Respuestas!A1:Z")
+    sheet_rows = await sheet_uc.execute(range_name="A1:Z")
 
     # 🔹 CORE — lógica de negocio
     resultado = await core_uc.execute(sheet_rows)
