@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import UTC, date, datetime
 
 from app.domain.exceptions import AfiliadoNoEncontradoError
 from app.domain.models.afiliado_export_row import AfiliadoExportRow
@@ -9,9 +9,11 @@ ENCABEZADOS = ["Nombre y Apellido", "Edad", "DNI", "N° Legajo", "Email"]
 
 
 def calcular_edad(fecha_nacimiento: date) -> int:
-    hoy = date.today()
-    return hoy.year - fecha_nacimiento.year - (
-        (hoy.month, hoy.day) < (fecha_nacimiento.month, fecha_nacimiento.day)
+    hoy = datetime.now(tz=UTC).date()
+    return (
+        hoy.year
+        - fecha_nacimiento.year
+        - ((hoy.month, hoy.day) < (fecha_nacimiento.month, fecha_nacimiento.day))
     )
 
 
@@ -38,9 +40,7 @@ class ExportarAfiliadosSheetsUseCase:
         afiliados = await self._afiliado_query.obtener_activos()
 
         if not afiliados:
-            raise AfiliadoNoEncontradoError(
-                "No hay afiliados activos para exportar"
-            )
+            raise AfiliadoNoEncontradoError("No hay afiliados activos para exportar")
 
         filas = sorted(
             [
