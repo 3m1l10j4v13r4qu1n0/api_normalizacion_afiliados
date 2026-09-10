@@ -13,7 +13,8 @@ AF-RN12 — Errores se registran con referencia a fila/índice
 AF-RN13 — Importación continúa aunque haya errores
 """
 
-from email_validator import validate_email, EmailNotValidError
+from email_validator import EmailNotValidError, validate_email
+
 from app.domain.exceptions import DatoInvalidoError
 
 
@@ -69,7 +70,7 @@ def validar_email(email: str | None) -> None:
     try:
         validate_email(email, check_deliverability=False)
     except EmailNotValidError as e:
-        raise DatoInvalidoError(f"El email '{email}' no es válido: {str(e)}")
+        raise DatoInvalidoError(f"El email '{email}' no es válido: {e!s}")
 
 
 def validar_afiliado(datos: dict) -> list[tuple[str, str]]:
@@ -82,11 +83,14 @@ def validar_afiliado(datos: dict) -> list[tuple[str, str]]:
     errores = []
 
     validaciones = [
-        ("nombre",             lambda: validar_nombre(datos.get("nombre"))),
-        ("apellido",           lambda: validar_apellido(datos.get("apellido"))),
-        ("dni",                lambda: validar_dni(datos.get("dni"))),
-        ("email",              lambda: validar_email(datos.get("email"))),
-        ("id_estado_afiliado", lambda: validar_estado_afiliado(datos.get("id_estado_afiliado"))),
+        ("nombre", lambda: validar_nombre(datos.get("nombre"))),
+        ("apellido", lambda: validar_apellido(datos.get("apellido"))),
+        ("dni", lambda: validar_dni(datos.get("dni"))),
+        ("email", lambda: validar_email(datos.get("email"))),
+        (
+            "id_estado_afiliado",
+            lambda: validar_estado_afiliado(datos.get("id_estado_afiliado")),
+        ),
     ]
 
     for campo, validar in validaciones:
@@ -96,5 +100,3 @@ def validar_afiliado(datos: dict) -> list[tuple[str, str]]:
             errores.append((campo, str(e)))  # ← RN12 registra el error
 
     return errores  # ← RN13 devuelve sin detener el proceso
-
-

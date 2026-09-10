@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Any
 
 
 class DataKeyMapper:
@@ -19,15 +19,15 @@ class DataKeyMapper:
             renamed = mapper.remap()
     """
 
-    def __init__(self, mapping: Dict[str, str]) -> None:
-        self._mapping: Dict[str, str]  = mapping
-        self._data:    Dict[str, Any]  = {}
+    def __init__(self, mapping: dict[str, str]) -> None:
+        self._mapping: dict[str, str] = mapping
+        self._data: dict[str, Any] = {}
 
-    def set_data(self, data: Dict[str, Any]) -> None:
+    def set_data(self, data: dict[str, Any]) -> None:
         """Carga los datos de la fila a procesar."""
         self._data = data.copy() if data else {}
 
-    def remap(self) -> Dict[str, Any]:
+    def remap(self) -> dict[str, Any]:
         """
         Renombra las claves de _data según _mapping.
 
@@ -50,6 +50,6 @@ class DataKeyMapper:
         }
         return self._data
 
-    def get_data(self) -> Dict[str, Any]:
+    def get_data(self) -> dict[str, Any]:
         """Retorna el estado actual de _data."""
         return self._data

@@ -1,5 +1,6 @@
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
 
 from app.infrastructure.core.config import settings
 from app.presentation.handlers import registrar_handlers
@@ -22,16 +23,16 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title       = settings.APP_NAME,
-    version     = settings.APP_VERSION,
-    debug       = settings.DEBUG,
-    description = """
+    title=settings.APP_NAME,
+    version=settings.APP_VERSION,
+    debug=settings.DEBUG,
+    description="""
     API REST para la gestión y normalización de datos de afiliados.
 
     Permite importar, validar, normalizar, consultar y sincronizar
     datos de afiliados con Google Sheets.
     """,
-    lifespan    = lifespan
+    lifespan=lifespan,
 )
 
 # ── Handlers de errores ──────────────────────────────────────────────
@@ -46,7 +47,7 @@ app.include_router(sync_router)
 @app.get("/", tags=["Health"])
 async def health_check():
     return {
-        "estado"  : "ok",
-        "app"     : settings.APP_NAME,
-        "version" : settings.APP_VERSION,
+        "estado": "ok",
+        "app": settings.APP_NAME,
+        "version": settings.APP_VERSION,
     }

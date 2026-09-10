@@ -1,20 +1,20 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.infrastructure.database.orm_models.dominios_orm import (
-    GeneroORM,
+    EstadoAfiliadoORM,
     EstadoCivilORM,
+    GeneroORM,
     NivelEducativoORM,
     RelacionDependenciaORM,
-    EstadoAfiliadoORM,
 )
 
 
 async def cargar_si_vacia(db: AsyncSession, modelo, datos: list):
-    
     """Inserta datos solo si la tabla está vacía — evita duplicados"""
-    
+
     resultado = await db.execute(select(modelo))
-    
+
     if resultado.scalars().first() is None:
         for item in datos:
             db.add(item)
@@ -26,33 +26,53 @@ async def cargar_si_vacia(db: AsyncSession, modelo, datos: list):
 
 async def cargar_datos_iniciales(db: AsyncSession):
 
-    await cargar_si_vacia(db, GeneroORM, [
-        GeneroORM(descripcion="Masculino"),
-        GeneroORM(descripcion="Femenino"),
-        GeneroORM(descripcion="No binario"),
-    ])
+    await cargar_si_vacia(
+        db,
+        GeneroORM,
+        [
+            GeneroORM(descripcion="Masculino"),
+            GeneroORM(descripcion="Femenino"),
+            GeneroORM(descripcion="No binario"),
+        ],
+    )
 
-    await cargar_si_vacia(db, EstadoCivilORM, [
-        EstadoCivilORM(descripcion="Soltero"),
-        EstadoCivilORM(descripcion="Casado"),
-        EstadoCivilORM(descripcion="Divorciado"),
-        EstadoCivilORM(descripcion="Viudo"),
-    ])
+    await cargar_si_vacia(
+        db,
+        EstadoCivilORM,
+        [
+            EstadoCivilORM(descripcion="Soltero"),
+            EstadoCivilORM(descripcion="Casado"),
+            EstadoCivilORM(descripcion="Divorciado"),
+            EstadoCivilORM(descripcion="Viudo"),
+        ],
+    )
 
-    await cargar_si_vacia(db, NivelEducativoORM, [
-        NivelEducativoORM(descripcion="Primario"),
-        NivelEducativoORM(descripcion="Secundario"),
-        NivelEducativoORM(descripcion="Terciario"),
-        NivelEducativoORM(descripcion="Universitario"),
-    ])
+    await cargar_si_vacia(
+        db,
+        NivelEducativoORM,
+        [
+            NivelEducativoORM(descripcion="Primario"),
+            NivelEducativoORM(descripcion="Secundario"),
+            NivelEducativoORM(descripcion="Terciario"),
+            NivelEducativoORM(descripcion="Universitario"),
+        ],
+    )
 
-    await cargar_si_vacia(db, RelacionDependenciaORM, [
-        RelacionDependenciaORM(descripcion="Planta Permanente"),
-        RelacionDependenciaORM(descripcion="Planta Transitoria"),
-        RelacionDependenciaORM(descripcion="Monotributista"),
-    ])
+    await cargar_si_vacia(
+        db,
+        RelacionDependenciaORM,
+        [
+            RelacionDependenciaORM(descripcion="Planta Permanente"),
+            RelacionDependenciaORM(descripcion="Planta Transitoria"),
+            RelacionDependenciaORM(descripcion="Monotributista"),
+        ],
+    )
 
-    await cargar_si_vacia(db, EstadoAfiliadoORM, [
-        EstadoAfiliadoORM(descripcion="Activo"),
-        EstadoAfiliadoORM(descripcion="Inactivo"),
-    ])
+    await cargar_si_vacia(
+        db,
+        EstadoAfiliadoORM,
+        [
+            EstadoAfiliadoORM(descripcion="Activo"),
+            EstadoAfiliadoORM(descripcion="Inactivo"),
+        ],
+    )

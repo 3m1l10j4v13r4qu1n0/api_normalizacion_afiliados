@@ -1,4 +1,3 @@
-from typing import List, Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,7 +16,7 @@ class AfiliadoQueryRepository(AfiliadoQueryPort):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def listar(self) -> List[AfiliadoORM]:
+    async def listar(self) -> list[AfiliadoORM]:
         """
         UC2  — Obtiene todos los afiliados almacenados
         RF10 — Permitir consultar afiliados
@@ -25,7 +24,7 @@ class AfiliadoQueryRepository(AfiliadoQueryPort):
         resultado = await self._session.execute(select(AfiliadoORM))
         return resultado.scalars().all()
 
-    async def obtener_por_id(self, afiliado_id: int) -> Optional[AfiliadoORM]:
+    async def obtener_por_id(self, afiliado_id: int) -> AfiliadoORM | None:
         """
         UC2  — Obtiene un afiliado por su ID
         RF11 — Permitir consultar afiliado por identificador

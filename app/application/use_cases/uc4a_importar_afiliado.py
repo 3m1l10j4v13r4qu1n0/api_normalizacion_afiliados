@@ -1,5 +1,3 @@
-from typing import List
-
 from app.domain.models.input_row import InputRow
 from app.domain.ports.sheet_data_port import SheetDataPort
 from app.domain.services.data_transformer import DataTransformer
@@ -37,13 +35,13 @@ class ImportSheetUseCase:
 
     def __init__(
         self,
-        sheet_port  : SheetDataPort,
-        transformer : DataTransformer,
+        sheet_port: SheetDataPort,
+        transformer: DataTransformer,
     ) -> None:
-        self._sheet_port  = sheet_port
+        self._sheet_port = sheet_port
         self._transformer = transformer
 
-    async def execute(self, range_name: str) -> List[InputRow]:
+    async def execute(self, range_name: str) -> list[InputRow]:
         """
         Ejecuta UC4a: lee el Sheet y devuelve los datos como List[InputRow].
 
@@ -62,8 +60,8 @@ class ImportSheetUseCase:
         if not list_sheet_rows or not list_sheet_rows.values:
             raise ValueError(f"No se encontraron datos en el rango '{range_name}'.")
 
-        raw   = list_sheet_rows.values
-        headers  = raw[0]
+        raw = list_sheet_rows.values
+        headers = raw[0]
         raw_data = raw[1:]
 
         return self._transformer.transform(raw_data=raw_data, headers=headers)

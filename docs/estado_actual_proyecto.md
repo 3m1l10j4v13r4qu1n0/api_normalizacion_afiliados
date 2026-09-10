@@ -37,9 +37,10 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 - [x] UC1b — registrar afiliado manual (HU-02) — vía core
 - [x] UC2 — consultar afiliados, listado y por ID (HU-03)
 - [x] UC3 — actualizar afiliado (HU-04)
-- [x] UC4a/4b — importar desde Google Sheets + marcar errores en la hoja (HU-05/06, requiere `gspread`/`google-auth`)
+- [x] UC4a — importar desde Google Sheets (HU-05, requiere `gspread`/`google-auth`)
+- [x] UC4b/UC6 — marcar filas con errores en la hoja (HU-06): `SheetMarkingPort` + `SheetsMarkingAdapter` + `uc6_marcar_errores_sheets.py`, integrado al flujo de `/sync/sheets/import`
 - [x] UC5 — dar de baja afiliado (HU-07)
-- [ ] UC6 — generar tabla en Google Sheets (HU-08, endpoint comentado en router)
+- [ ] UC6 → HU-08 — generar tabla en Google Sheets (endpoint comentado en router)
 
 > Nota: los wrappers de importación `uc1a_importar_lista_afiliados.py`, `uc1b_agregar_afiliado.py` y `uc4_importar_afiliado.py` fueron **eliminados** en F3 (indirección redundante). `uc4a_importar_afiliado.py` se conserva (lectura de Sheet, no es wrapper del core).
 
@@ -53,8 +54,8 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 | GET | `/afiliados/{afiliado_id}` | Obtener afiliado por ID (UC2) | ✅ |
 | PATCH | `/afiliados/{afiliado_id}` | Actualizar afiliado (UC3) | ✅ |
 | DELETE | `/afiliados/{afiliado_id}` | Dar de baja afiliado (UC5) | ✅ |
-| POST | `/sync/sheets/import` | Importar desde Google Sheets (UC4) | ⚠️ requiere credenciales reales |
-| POST | `/sync/sheets/export` | Generar tabla en Sheets (UC6) | ❌ comentado |
+| POST | `/sync/sheets/import` | Importar desde Google Sheets (UC4) + marcar errores (HU-06) | ⚠️ requiere credenciales reales |
+| POST | `/sync/sheets/export` | Generar tabla en Sheets (HU-08) | ❌ comentado |
 
 ## 6. Infraestructura / Integraciones
 

@@ -10,9 +10,9 @@ Convenciones que sigue el repo (ver AGENTS.md y .agents/rules/reglas-solid.md):
 Ejemplo: recurso de ejemplo sobre el recurso `afiliados`.
 """
 
+from app.application.use_cases.ucN_xx import XxUseCase
 from fastapi import APIRouter, Depends, status
 
-from app.application.use_cases.ucN_xx import XxUseCase
 from app.infrastructure.dependencies.dependency_injection import get_xx_ucN
 from app.presentation.schemas.afiliados_schema import XxResponse, XxUpdate
 
@@ -28,7 +28,9 @@ async def obtener_afiliado(
     return await uc.execute(afiliado_id=afiliado_id)
 
 
-@router.patch("/{afiliado_id}", response_model=XxResponse, status_code=status.HTTP_200_OK)
+@router.patch(
+    "/{afiliado_id}", response_model=XxResponse, status_code=status.HTTP_200_OK
+)
 async def actualizar_afiliado(
     afiliado_id: int,
     payload: XxUpdate,

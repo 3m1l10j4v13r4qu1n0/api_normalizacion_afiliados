@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
 
 class DomicilioRepositoryPort(ABC):
@@ -10,10 +9,10 @@ class DomicilioRepositoryPort(ABC):
     @abstractmethod
     async def resolver_o_crear(
         self,
-        direccion    : Optional[str],
-        localidad    : Optional[str],
-        provincia    : Optional[str],
-        codigo_postal: Optional[str],
+        direccion: str | None,
+        localidad: str | None,
+        provincia: str | None,
+        codigo_postal: str | None,
     ) -> int:
         """
         Busca un domicilio existente por localidad + provincia.

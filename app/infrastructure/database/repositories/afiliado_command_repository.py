@@ -1,4 +1,5 @@
-from typing import Dict, Any, Optional
+from typing import Any
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,9 +16,9 @@ class AfiliadoCommandRepository(AfiliadoCommandPort):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def update_afiliado( # type: ignore
-        self, afiliado_id: int, datos: Dict[str, Any]
-    ) -> Optional[AfiliadoORM]:
+    async def update_afiliado(  # type: ignore
+        self, afiliado_id: int, datos: dict[str, Any]
+    ) -> AfiliadoORM | None:
         """
         UC3  — Actualiza los campos recibidos en datos.
         RF12 — Permitir actualizar datos de afiliados.
@@ -31,9 +32,9 @@ class AfiliadoCommandRepository(AfiliadoCommandPort):
         await self._session.flush()
         return afiliado
 
-    async def buscar_por_email_excluyendo_id( # type: ignore
+    async def buscar_por_email_excluyendo_id(  # type: ignore
         self, email: str, afiliado_id: int
-    ) -> Optional[AfiliadoORM]:
+    ) -> AfiliadoORM | None:
         """
         Verifica que el email no esté en uso por otro afiliado.
         """
@@ -43,9 +44,8 @@ class AfiliadoCommandRepository(AfiliadoCommandPort):
             .where(AfiliadoORM.id != afiliado_id)
         )
         return resultado.scalar_one_or_none()
-    
 
-    async def dar_baja(self, afiliado_id: int) -> Optional[AfiliadoORM]: # type: ignore
+    async def dar_baja(self, afiliado_id: int) -> AfiliadoORM | None:  # type: ignore
         """
         UC5  — Baja lógica del afiliado
         AF-RN16 — La eliminación debe realizarse mediante baja lógica
@@ -53,6 +53,6 @@ class AfiliadoCommandRepository(AfiliadoCommandPort):
         afiliado = await self._session.get(AfiliadoORM, afiliado_id)
         if afiliado is None:
             return None
-        afiliado.id_estado_afiliado = 2 # type: ignore
+        afiliado.id_estado_afiliado = 2  # type: ignore
         await self._session.flush()
         return afiliado

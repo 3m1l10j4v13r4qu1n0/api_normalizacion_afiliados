@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from app.domain.models.dominio import Dominio
 
@@ -21,9 +20,9 @@ class DominioRepositoryPort(ABC):
     @abstractmethod
     async def resolver_o_crear(
         self,
-        dominio     : Dominio,
-        descripcion : Optional[str],
-    ) -> Optional[int]:
+        dominio: Dominio,
+        descripcion: str | None,
+    ) -> int | None:
         """
         Busca un registro por descripción en la tabla correspondiente al dominio.
         Si no existe, lo crea.

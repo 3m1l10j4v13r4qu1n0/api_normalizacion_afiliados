@@ -40,26 +40,23 @@ def normalizar_afiliado(datos: dict) -> dict:
     Datos nulos se transforman en valores por defecto cuando corresponda.
     """
     return {
-        "apellido"        : normalizar_nombre(datos.get("apellido")),
-        "nombre"          : normalizar_nombre(datos.get("nombre")),
-        "dni"             : normalizar_dni(datos.get("dni")),
-        "email"           : normalizar_texto(datos.get("email")),
-        "telefono"        : normalizar_texto(datos.get("telefono")),
-        "numero_legajo"   : normalizar_texto(datos.get("numero_legajo")),
-        "titulo_obtenido" : normalizar_texto(datos.get("titulo_obtenido")),
-
+        "apellido": normalizar_nombre(datos.get("apellido")),
+        "nombre": normalizar_nombre(datos.get("nombre")),
+        "dni": normalizar_dni(datos.get("dni")),
+        "email": normalizar_texto(datos.get("email")),
+        "telefono": normalizar_texto(datos.get("telefono")),
+        "numero_legajo": normalizar_texto(datos.get("numero_legajo")),
+        "titulo_obtenido": normalizar_texto(datos.get("titulo_obtenido")),
         # RN9 — valores por defecto para nulos
-        "id_estado_afiliado"      : datos.get("id_estado_afiliado", 1),  # ← 1 = Activo
-        "id_genero"               : datos.get("id_genero"),
-        "id_estado_civil"         : datos.get("id_estado_civil"),
-        "id_nivel_educativo"      : datos.get("id_nivel_educativo"),
-        "id_relacion_dependencia" : datos.get("id_relacion_dependencia"),
-
+        "id_estado_afiliado": datos.get("id_estado_afiliado", 1),  # ← 1 = Activo
+        "id_genero": datos.get("id_genero"),
+        "id_estado_civil": datos.get("id_estado_civil"),
+        "id_nivel_educativo": datos.get("id_nivel_educativo"),
+        "id_relacion_dependencia": datos.get("id_relacion_dependencia"),
         # Domicilio — se propaga el ID ya resuelto (se persiste con el afiliado)
-        "id_domicilio"            : datos.get("id_domicilio"),
-
+        "id_domicilio": datos.get("id_domicilio"),
         # Fechas — sin normalización, se pasan tal cual
-        "fecha_nacimiento" : datos.get("fecha_nacimiento"),
-        "fecha_ingreso"    : datos.get("fecha_ingreso"),
-        "fecha_alta"       : datos.get("fecha_alta"),
+        "fecha_nacimiento": datos.get("fecha_nacimiento"),
+        "fecha_ingreso": datos.get("fecha_ingreso"),
+        "fecha_alta": datos.get("fecha_alta"),
     }

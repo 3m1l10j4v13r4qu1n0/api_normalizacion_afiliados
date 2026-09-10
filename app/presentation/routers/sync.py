@@ -1,24 +1,29 @@
 from fastapi import APIRouter, Depends
 
+from app.application.use_cases.core_importar_afiliado import ImportarAfiliadoUseCase
+from app.application.use_cases.uc4a_importar_afiliado import ImportSheetUseCase
+from app.application.use_cases.uc6_marcar_errores_sheets import (
+    MarcarErroresSheetsUseCase,
+)
+from app.domain.exceptions import SincronizacionError
+from app.infrastructure.dependencies.dependency_injection import (
+    get_import_sheet_uc4a,
+    get_importar_afiliado_uc4,
+    get_marcar_errores_sheets_uc6,
+)
 from app.presentation.schemas.importacion_schema import (
     ImportResponse,
     import_response_from_importacion,
 )
-from app.application.use_cases.core_importar_afiliado import ImportarAfiliadoUseCase
-from app.application.use_cases.uc4a_importar_afiliado import ImportSheetUseCase
-
-from app.infrastructure.dependencies.dependency_injection import (
-    get_importar_afiliado_uc4,
-    get_import_sheet_uc4a,
-)
-
 
 router = APIRouter(prefix="/sync", tags=["Sincronización"])
+
 
 @router.post("/sheets/import", response_model=ImportResponse, status_code=201)
 async def importar_desde_sheets_endpoint(
     sheet_uc: ImportSheetUseCase = Depends(get_import_sheet_uc4a),
     core_uc: ImportarAfiliadoUseCase = Depends(get_importar_afiliado_uc4),
+    marking_uc: MarcarErroresSheetsUseCase = Depends(get_marcar_errores_sheets_uc6),
 ):
     """UC4 — Importar afiliados desde Google Sheets"""
 
@@ -28,13 +33,19 @@ async def importar_desde_sheets_endpoint(
     # 🔹 CORE — lógica de negocio
     resultado = await core_uc.execute(sheet_rows)
 
-    return import_response_from_importacion(resultado)
+    # 🔹 UC6 — marcar filas con errores en la hoja (HU-06)
+    # SH-UC4b-RN4 — el fallo al marcar no interrumpe la importación
+    try:
+        await marking_uc.execute(resultado.errores)
+    except SincronizacionError:
+        pass
 
+    return import_response_from_importacion(resultado)
 
 
 # @router.post("/sheets/export", status_code=200)
 # async def exportar_a_sheets_endpoint(db: AsyncSession = Depends(get_db)):
-#     """UC6 — 
+#     """UC6 —
 #       AF-RN14 — Solo se sincronizan afiliados válidos.
 #       AF-RN15 — La sincronización no debe modificar datos locales.
 #     """

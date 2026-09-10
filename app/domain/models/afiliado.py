@@ -1,36 +1,35 @@
 from dataclasses import dataclass, field
 from datetime import date, datetime
-from typing import Optional
 
 
 @dataclass
 class Afiliado:
     # Datos personales obligatorios
-    apellido         : str
-    nombre           : str
-    fecha_nacimiento : date
-    dni              : str
-    numero_legajo    : str
+    apellido: str
+    nombre: str
+    fecha_nacimiento: date
+    dni: str
+    numero_legajo: str
 
     # Datos opcionales
-    email            : Optional[str] = None
-    telefono         : Optional[str] = None
-    fecha_ingreso    : Optional[date] = None
-    fecha_alta       : Optional[date] = None
-    titulo_obtenido  : Optional[str] = None
+    email: str | None = None
+    telefono: str | None = None
+    fecha_ingreso: date | None = None
+    fecha_alta: date | None = None
+    titulo_obtenido: str | None = None
 
     # Relaciones — IDs de entidades de dominio
-    id_genero               : Optional[int] = None
-    id_estado_civil         : Optional[int] = None
-    id_nivel_educativo      : Optional[int] = None
-    id_relacion_dependencia : Optional[int] = None
-    id_estado_afiliado      : Optional[int] = None
-    id_domicilio            : Optional[int] = None
-    id_importacion          : Optional[int] = None
+    id_genero: int | None = None
+    id_estado_civil: int | None = None
+    id_nivel_educativo: int | None = None
+    id_relacion_dependencia: int | None = None
+    id_estado_afiliado: int | None = None
+    id_domicilio: int | None = None
+    id_importacion: int | None = None
 
     # Marcas temporales — las maneja el sistema
-    marca_temporal_creacion      : Optional[datetime] = None
-    marca_temporal_actualizacion : Optional[datetime] = None
+    marca_temporal_creacion: datetime | None = None
+    marca_temporal_actualizacion: datetime | None = None
 
     # Clave primaria — la asigna la BD
-    id : Optional[int] = field(default=None)
+    id: int | None = field(default=None)

@@ -1,11 +1,25 @@
-from .afiliado_orm import AfiliadoORM
+from .afiliado_orm import AfiliadoORM as AfiliadoORM
+from .domicilio_orm import DomicilioORM, LocalidadORM, ProvinciaORM
 from .dominios_orm import (
-    GeneroORM,
+    EstadoAfiliadoORM,
     EstadoCivilORM,
+    GeneroORM,
     NivelEducativoORM,
     RelacionDependenciaORM,
-    EstadoAfiliadoORM,
 )
-from .domicilio_orm import ProvinciaORM, LocalidadORM, DomicilioORM
-from .error_validacion_orm import ErrorValidacionORM
-from .importacion_orm import ImportacionORM
+from .error_validacion_orm import ErrorValidacionORM as ErrorValidacionORM
+from .importacion_orm import ImportacionORM as ImportacionORM
+
+__all__ = [
+    "AfiliadoORM",
+    "DomicilioORM",
+    "ErrorValidacionORM",
+    "EstadoAfiliadoORM",
+    "EstadoCivilORM",
+    "GeneroORM",
+    "ImportacionORM",
+    "LocalidadORM",
+    "NivelEducativoORM",
+    "ProvinciaORM",
+    "RelacionDependenciaORM",
+]

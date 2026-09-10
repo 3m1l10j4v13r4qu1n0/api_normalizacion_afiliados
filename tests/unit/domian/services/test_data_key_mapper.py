@@ -9,21 +9,23 @@ Cubre:
 """
 
 import pytest
-from app.domain.services.data_key_mapper import DataKeyMapper
 
+from app.domain.services.data_key_mapper import DataKeyMapper
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def mapping():
     return {
-        "Apellido/s:" : "apellido",
-        "Nombre/s:"   : "nombre",
-        "D.N.I:"      : "dni",
-        "Email:"      : "email",
+        "Apellido/s:": "apellido",
+        "Nombre/s:": "nombre",
+        "D.N.I:": "dni",
+        "Email:": "email",
     }
+
 
 @pytest.fixture
 def mapper(mapping):
@@ -33,6 +35,7 @@ def mapper(mapping):
 # ---------------------------------------------------------------------------
 # set_data()
 # ---------------------------------------------------------------------------
+
 
 class TestSetData:
 
@@ -67,6 +70,7 @@ class TestSetData:
 # remap()
 # ---------------------------------------------------------------------------
 
+
 class TestRemap:
 
     def test_renombra_clave_simple(self, mapper):
@@ -92,7 +96,7 @@ class TestRemap:
         mapper.set_data({"Apellido/s:": "García"})
         resultado = mapper.remap()
         assert "nombre" not in resultado
-        assert "dni"    not in resultado
+        assert "dni" not in resultado
 
     def test_header_original_no_aparece_en_resultado(self, mapper):
         mapper.set_data({"Apellido/s:": "García"})
@@ -102,7 +106,7 @@ class TestRemap:
     def test_valores_se_preservan(self, mapper):
         mapper.set_data({"D.N.I:": "12345678", "Email:": "test@test.com"})
         resultado = mapper.remap()
-        assert resultado["dni"]   == "12345678"
+        assert resultado["dni"] == "12345678"
         assert resultado["email"] == "test@test.com"
 
     def test_error_si_no_hay_datos(self, mapper):
@@ -127,12 +131,13 @@ class TestRemap:
 # Flujo completo
 # ---------------------------------------------------------------------------
 
+
 class TestFlujoCompleto:
 
     def test_multiples_filas_secuenciales(self, mapper):
         """Procesar múltiples filas en secuencia no genera contaminación entre filas."""
         fila1 = {"Apellido/s:": "García", "Nombre/s:": "Juan"}
-        fila2 = {"Apellido/s:": "López",  "Nombre/s:": "Ana"}
+        fila2 = {"Apellido/s:": "López", "Nombre/s:": "Ana"}
 
         mapper.set_data(fila1)
         resultado1 = mapper.remap()
@@ -151,16 +156,16 @@ class TestFlujoCompleto:
     def test_mapping_completo(self, mapper):
         """Todas las claves del mapping presentes en el dict se renombran."""
         data = {
-            "Apellido/s:" : "García",
-            "Nombre/s:"   : "Juan",
-            "D.N.I:"      : "12345678",
-            "Email:"      : "juan@test.com",
+            "Apellido/s:": "García",
+            "Nombre/s:": "Juan",
+            "D.N.I:": "12345678",
+            "Email:": "juan@test.com",
         }
         mapper.set_data(data)
         resultado = mapper.remap()
         assert resultado == {
-            "apellido" : "García",
-            "nombre"   : "Juan",
-            "dni"      : "12345678",
-            "email"    : "juan@test.com",
+            "apellido": "García",
+            "nombre": "Juan",
+            "dni": "12345678",
+            "email": "juan@test.com",
         }

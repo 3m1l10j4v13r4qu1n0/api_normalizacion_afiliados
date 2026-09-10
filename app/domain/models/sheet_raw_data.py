@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import List, Any
+from typing import Any
+
 
 @dataclass
 class SheetRawData:
-    values: List[List[Any]]
+    values: list[list[Any]]

@@ -1,4 +1,5 @@
 import asyncio
+
 from app.infrastructure.database.connection import AsyncSessionLocal
 from app.infrastructure.database.seed import cargar_datos_iniciales
 
