@@ -75,3 +75,13 @@ def import_response_from_importacion(importacion) -> ImportResponse:
             for error in importacion.errores
         ],
     )
+
+
+# ── ExportResponse — respuesta de exportación (HU-08) ──────────────
+
+
+class ExportResponse(BaseModel):
+    """Resumen del proceso de exportación — UC8"""
+
+    cantidad_registros_procesados: int
+    mensaje: str
