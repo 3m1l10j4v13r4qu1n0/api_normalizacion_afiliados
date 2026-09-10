@@ -57,3 +57,23 @@ class GspreadSheetsClient:
                 self._hoja.batch_format(ranges)
         except Exception as e:
             raise SincronizacionError(f"Error al marcar filas con errores: {e!s}")
+
+    def exportar_tabla(
+        self,
+        titulo_hoja: str,
+        encabezados: list[str],
+        datos: list[list[str]],
+    ) -> None:
+        """Exporta una tabla completa a Google Sheets (HU-08)."""
+        try:
+            spreadsheet = self._hoja.spreadsheet
+            try:
+                hoja = spreadsheet.worksheet(titulo_hoja)
+                hoja.clear()
+            except gspread.exceptions.WorksheetNotFound:
+                hoja = spreadsheet.add_worksheet(
+                    title=titulo_hoja, rows=len(datos) + 1, cols=len(encabezados)
+                )
+            hoja.update(range_name="A1", values=[encabezados] + datos)
+        except Exception as e:
+            raise SincronizacionError(f"Error al exportar tabla a Sheets: {e!s}")

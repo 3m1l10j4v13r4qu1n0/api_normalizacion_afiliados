@@ -34,3 +34,13 @@ class AfiliadoQueryRepository(AfiliadoQueryPort):
             El use case es responsable de lanzar AfiliadoNoEncontrado.
         """
         return await self._session.get(AfiliadoORM, afiliado_id)
+
+    async def obtener_activos(self) -> list[AfiliadoORM]:
+        """
+        UC8  — Obtiene todos los afiliados con estado activo
+        AF-RN18 — Solo se exportan afiliados activos (id_estado_afiliado=1)
+        """
+        resultado = await self._session.execute(
+            select(AfiliadoORM).where(AfiliadoORM.id_estado_afiliado == 1)
+        )
+        return resultado.scalars().all()
