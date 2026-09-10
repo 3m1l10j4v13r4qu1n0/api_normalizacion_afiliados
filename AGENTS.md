@@ -132,19 +132,15 @@ Convenciones:
 | HU-05 | Importar desde Google Sheets | ✅ | POST `/sync/sheets/import`, UC4a+UC4 (requiere credenciales reales) |
 | HU-06 | Marcar filas con errores en Sheets | ✅ | `SheetMarkingPort` + `SheetsMarkingAdapter` + UC6, integrado en `POST /sync/sheets/import` (fondo rojo en batch) |
 | HU-07 | Dar de baja afiliado | ✅ | DELETE `/afiliados/{id}`, UC5 (baja lógica, `id_estado_afiliado=2`) |
-| HU-08 | Generar tabla de afiliados en Sheets | 🔵 | Endpoint comentado en `sync.py`, sin caso de uso ni adapter |
+| HU-08 | Generar tabla de afiliados en Sheets | ✅ | `SheetExportPort` + `SheetsExportAdapter` + UC8, `POST /sync/sheets/export` (edad dinámica, solo activos) |
 
 Leyenda: ✅ verificado en sesión | 🟡 parcial | 🔵 pendiente externo/no implementado | ⏳ en proceso
 
-## Pendientes de implementación (ver `docs/04_historias_usuario/`)
+## Pendientes de implementación
 
-1. **HU-08** — Implementar exportación a Google Sheets:
-   - Puerto: `sheet_export_port.py` (contrato para escribir tabla)
-   - Adapter: `sheets_export_adapter.py` (crear/limpiar hoja, escribir filas)
-   - Caso de uso: `uc8_exportar_afiliados_sheets.py` (consultar activos, calcular edad, ordenar)
-   - Query port: agregar `obtener_activos()` al `AfiliadoQueryPort`
-   - Router: descomentar y conectar `POST /sync/sheets/export`
-   - Reglas: AF-RN18 (solo activos), AF-RN19 (edad dinámica), AF-RN20 (datos relevantes), AF-RN21 (orden alfabético), AF-RN22 (sin duplicados)
+Verificaciones operativas pendientes:
+- Probar `alembic upgrade head` contra BD real
+- Verificar si `GET /afiliados/` filtra inactivos o muestra todos
 
 2. **Verificaciones operativas**:
    - Probar `alembic upgrade head` contra BD real

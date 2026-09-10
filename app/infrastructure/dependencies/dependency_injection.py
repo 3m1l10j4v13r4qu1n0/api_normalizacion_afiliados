@@ -12,8 +12,12 @@ from app.application.use_cases.uc5_dar_baja_afiliado import DarBajaAfiliadoUseCa
 from app.application.use_cases.uc6_marcar_errores_sheets import (
     MarcarErroresSheetsUseCase,
 )
+from app.application.use_cases.uc8_exportar_afiliados_sheets import (
+    ExportarAfiliadosSheetsUseCase,
+)
 from app.domain.models.mapping import mapping
 from app.domain.ports.sheet_data_port import SheetDataPort
+from app.domain.ports.sheet_export_port import SheetExportPort
 from app.domain.ports.sheet_marking_port import SheetMarkingPort
 from app.domain.services.data_key_mapper import DataKeyMapper
 from app.domain.services.data_transformer import DataTransformer
@@ -40,6 +44,7 @@ from app.infrastructure.database.repositories.importacion_repository import (
 )
 from app.infrastructure.google.google_sheets_adapter import GoogleSheetsAdapter
 from app.infrastructure.google.google_sheets_client import GspreadSheetsClient
+from app.infrastructure.google.sheets_export_adapter import SheetsExportAdapter
 from app.infrastructure.google.sheets_marking_adapter import SheetsMarkingAdapter
 
 
@@ -129,3 +134,21 @@ def get_dar_baja_afiliado_uc5(
 ) -> DarBajaAfiliadoUseCase:
     repo = AfiliadoCommandRepository(session)
     return DarBajaAfiliadoUseCase(repo)
+
+
+# ── UC8 Dependencias ──────────────────────────────────────────────
+def build_export_port() -> SheetExportPort:
+    sheets_client = GspreadSheetsClient(
+        sheet_id=settings.GOOGLE_SHEETS_ID,
+        credentials_path=settings.GOOGLE_CREDENTIALS_PATH,
+    )
+    return SheetsExportAdapter(sheets_client)
+
+
+def get_exportar_afiliados_uc8(
+    session: AsyncSession = Depends(get_db),
+) -> ExportarAfiliadosSheetsUseCase:
+    return ExportarAfiliadosSheetsUseCase(
+        afiliado_query_repo=AfiliadoQueryRepository(session),
+        sheet_export_port=build_export_port(),
+    )

@@ -23,3 +23,11 @@ class AfiliadoQueryPort(ABC):
         RF11 — Permitir consultar afiliado por identificador
         """
         ...
+
+    @abstractmethod
+    async def obtener_activos(self) -> list[Any]:
+        """
+        UC8 — Obtiene todos los afiliados con estado activo (id_estado_afiliado=1).
+        AF-RN18 — Solo se exportan afiliados activos.
+        """
+        ...

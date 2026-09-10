@@ -325,3 +325,24 @@
 **Commits:** `dbf6760` `style(api): se aplican reglas de ruff y black` (62 archivos).
 
 **Estado resultante:** `ruff check .` en verde, `black --check .` en verde (79 archivos), 104/104 tests OK. Pendiente: HU-08 (exportar a Sheets) y verificaciones operativas.
+
+## 2026-09-10 — HU-08: exportar tabla de afiliados activos a Google Sheets
+
+**Qué se hizo:** se implementó la exportación de la tabla de afiliados activos a Google Sheets (HU-08), que estaba sin implementar:
+- `app/domain/models/afiliado_export_row.py` — nueva entidad `AfiliadoExportRow` (nombre_apellido, edad, dni, numero_legajo, email).
+- `app/domain/ports/sheet_export_port.py` — nuevo puerto `SheetExportPort` (contrato `exportar_tabla`).
+- `app/domain/ports/afiliado/afiliado_query_port.py` — se agregó `obtener_activos()` al puerto.
+- `app/infrastructure/google/sheets_export_adapter.py` — nuevo adapter `SheetsExportAdapter` (gspread, crea hoja si no existe, limpia y regraba, ejecuta en executor).
+- `app/infrastructure/google/google_sheets_client.py` — se agregó método `exportar_tabla` al cliente gspread.
+- `app/infrastructure/database/repositories/afiliado_query_repository.py` — implementación de `obtener_activos()` (filtra `id_estado_afiliado == 1`).
+- `app/application/use_cases/uc8_exportar_afiliados_sheets.py` — UC8 `ExportarAfiliadosSheetsUseCase` (consulta activos, calcula edad, ordena alfabéticamente, delega al puerto de exportación).
+- `app/infrastructure/dependencies/dependency_injection.py` — `build_export_port()` + `get_exportar_afiliados_uc8()`.
+- `app/presentation/routers/sync.py` — se descomentó y habilitó `POST /sync/sheets/export` con `ExportResponse`.
+- `app/presentation/schemas/importacion_schema.py` — nuevo schema `ExportResponse` (cantidad_registros_procesados, mensaje).
+- `tests/unit/domian/services/test_exportar_afiliados_sheets.py` — 7 tests (calcular_edad, orden, sin activos, email opcional).
+
+**Decisiones:** la columna "Datos Relevantes" se desglosó en 3 columnas separadas (DNI, N° Legajo, Email) para mayor claridad en la hoja de Sheets. La función `calcular_edad` vive en el caso de uso (no en el dominio) porque depende de `datetime.now()`. `AfiliadoNoEncontradoError` se reutiliza para el caso "no hay activos" (404 en la API).
+
+**Commits:** `54b565c` (dominio), `5090adc` (infra), `54412c1` (UC8+DI), `36d53cc` (presentación), `b0ed084` (tests).
+
+**Estado resultante:** 111/111 tests OK; `ruff check .` y `black --check .` en verde; endpoint `/sync/sheets/export` registrado. Pendiente: verificaciones operativas (BD real, merge a develop).
