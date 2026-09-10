@@ -40,7 +40,7 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 - [x] UC4a — importar desde Google Sheets (HU-05, requiere `gspread`/`google-auth`)
 - [x] UC4b/UC6 — marcar filas con errores en la hoja (HU-06): `SheetMarkingPort` + `SheetsMarkingAdapter` + `uc6_marcar_errores_sheets.py`, integrado al flujo de `/sync/sheets/import`
 - [x] UC5 — dar de baja afiliado (HU-07)
-- [ ] UC6 → HU-08 — generar tabla en Google Sheets (endpoint comentado en router)
+- [x] UC8 — exportar tabla de afiliados activos a Google Sheets (HU-08): `SheetExportPort` + `SheetsExportAdapter` + `uc8_exportar_afiliados_sheets.py`
 
 > Nota: los wrappers de importación `uc1a_importar_lista_afiliados.py`, `uc1b_agregar_afiliado.py` y `uc4_importar_afiliado.py` fueron **eliminados** en F3 (indirección redundante). `uc4a_importar_afiliado.py` se conserva (lectura de Sheet, no es wrapper del core).
 
@@ -55,7 +55,7 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 | PATCH | `/afiliados/{afiliado_id}` | Actualizar afiliado (UC3) | ✅ |
 | DELETE | `/afiliados/{afiliado_id}` | Dar de baja afiliado (UC5) | ✅ |
 | POST | `/sync/sheets/import` | Importar desde Google Sheets (UC4) + marcar errores (HU-06) | ⚠️ requiere credenciales reales |
-| POST | `/sync/sheets/export` | Generar tabla en Sheets (HU-08) | ❌ comentado |
+| POST | `/sync/sheets/export` | Generar tabla en Sheets (HU-08) | ⚠️ requiere credenciales reales |
 
 ## 6. Infraestructura / Integraciones
 
@@ -67,10 +67,9 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 
 ## 7. Pendientes / TODO conocidos
 
-1. Activar e implementar `POST /sync/sheets/export` (HU-08).
-2. Mantener migraciones de Alembic al día con el modelo.
-3. Revisar semántica de baja lógica (seed: 1=Activo, 2=Inactivo).
-4. Verificar `alembic upgrade head` en entorno con BD (migración `a1f2b3c4d5e6` de F2 no pudo correrse localmente).
+1. Mantener migraciones de Alembic al día con el modelo.
+2. Revisar semántica de baja lógica (seed: 1=Activo, 2=Inactivo).
+3. Verificar `alembic upgrade head` en entorno con BD (migración `a1f2b3c4d5e6` de F2 no pudo correrse localmente).
 
 ## 8. Decisiones y convenciones vigentes
 
