@@ -41,6 +41,7 @@ La documentación del análisis funcional se encuentra en la carpeta `docs/`:
 - `03_procesos` — definición de "listo" (DoS)
 - `04_historias_usuario/HU-01..HU-08` — 8 historias de usuario (5 archivos c/u: HU, caso de uso expandido, api, modelos de datos, pruebas)
 - `07_metodologia_agil` — método Kanban
+- `06_auditorias` — informes de auditoría del proyecto
 - `estado_actual_proyecto.md` + `vitacora_agentica.md` — memoria del proyecto (foto actual + historial append-only)
 
 Esto simula la documentación generada por un **analista funcional junior en un proyecto real**.
@@ -70,7 +71,8 @@ Esto simula la documentación generada por un **analista funcional junior en un 
 | GET | `/afiliados/{id}` | Obtener afiliado por ID (UC2) |
 | PATCH | `/afiliados/{id}` | Actualizar afiliado (UC3) |
 | DELETE | `/afiliados/{id}` | Dar de baja afiliado (UC5) |
-| POST | `/sync/sheets/import` | Importar desde Google Sheets (UC4) |
+| POST | `/sync/sheets/import` | Importar desde Google Sheets (UC4) + marcar errores (HU-06) |
+| POST | `/sync/sheets/export` | Exportar tabla de afiliados activos a Sheets (HU-08) |
 
 > Las respuestas de error usan payload uniforme `{"error": "mensaje"}`. La importación responde con el detalle de errores de validación (campo, descripción y número de fila).
 
@@ -299,6 +301,8 @@ api-normalizacion/
 │    │   └── definicion_listo.md
 │    ├── 04_historias_usuario
 │    │   ├── HU-01 .. HU-08 (5 archivos c/u: HU-0X, caso_uso_expandido, api, modelos_datos, pruevas)
+│    ├── 06_auditorias
+│    │   └── auditoria-historias-usuario.md
 │    └── 05_metodologia_agil
 │        └── metodoKanban.md
 │   💬 Documentación completa del sistema:
@@ -315,7 +319,9 @@ api-normalizacion/
 │                ├── test_data_key_mapper.py
 │                ├── test_data_transformer.py
 │                ├── test_normalizacion.py
-│                └── test_validacion.py
+│                ├── test_validacion.py
+│                ├── test_marcar_errores_sheets.py  ← HU-06
+│                └── test_exportar_afiliados_sheets.py  ← HU-08
 │   💬 Tests unitarios del dominio (normalización, validación, etc.)
 │
 │   🎯 Responsabilidad:
@@ -323,7 +329,13 @@ api-normalizacion/
 │   - Asegurar comportamiento correcto del sistema
 │
 ├── face_1_cierre.md 
-│   💬 Documentación faces del proyecto
+│   💬 Documentación de cierre de fases del proyecto
+├── face_2_cierre.md 
+│   💬 Cierre Fase 2 — Diseño técnico y arquitectura
+├── face_3_cierre.md 
+│   💬 Cierre Fase 3 — Implementación API REST
+├── face_4_cierre.md 
+│   💬 Cierre Fase 4 — Pruebas y validación
 │
 ├── README.md  
 │   💬 Documentación principal del proyecto
@@ -374,19 +386,31 @@ Infrastructure (DB, APIs externas)
 
 La documentación fue revisada y validada asegurando coherencia entre visión, alcance, reglas de negocio, casos de uso, API y modelo de datos.
 
-📄 Ver detalle del cierre: [fase_1_cierre.md](face_1_cierre.md)
+📄 Ver detalle del cierre: [face_1_cierre.md](face_1_cierre.md)
 
 ✔ Fase 2 — Diseño técnico y arquitectura: FINALIZADA
 
-Clean Architecture + Hexagonal (Ports & Adapters), SQLAlchemy 2.0 async, DI con `Depends(get_*_ucN)`.
+Clean Architecture + Hexagonal (Ports & Adapters), SQLAlchemy 2.0 async, DI con `Depends(get_*_ucN)`, diagramas UML/ER.
+
+📄 Ver detalle del cierre: [face_2_cierre.md](face_2_cierre.md)
 
 ✔ Fase 3 — Implementación API REST: FINALIZADA
 
-Casos de uso implementados y endpoints expuestos (ver sección de estructura). El pipeline de importación es un UC único con lógica de dominio pura en `importacion_pipeline.py`.
+Las 8 historias de usuario (HU-01 a HU-08) están implementadas. Pipeline de importación como UC único con lógica de dominio pura. Refactorización F1–F6 completada.
 
-🔄 Fase 4 — Pruebas y validación: EN CURSO
+📄 Ver detalle del cierre: [face_3_cierre.md](face_3_cierre.md)
 
-Suite de tests unitarios de dominio: **100/100 OK** (`python -m pytest -q` desde la raíz).
+✔ Fase 4 — Pruebas y validación: FINALIZADA
+
+Suite de tests unitarios de dominio: **111/111 OK** (`pytest -q` desde la raíz). `ruff check .` y `black --check .` en verde.
+
+📄 Ver detalle del cierre: [face_4_cierre.md](face_4_cierre.md)
+
+⚠️ Verificaciones operativas pendientes (requieren entorno con BD real):
+- `alembic upgrade head` contra PostgreSQL
+- Comportamiento de `GET /afiliados/` con afiliados inactivos
+- Endpoints de Google Sheets con credenciales reales
+- Merge de rama `feature/refactorizacion-arquitectonica` → `develop`
 
 ---
 
@@ -395,8 +419,8 @@ Suite de tests unitarios de dominio: **100/100 OK** (`python -m pytest -q` desde
 - Fase 1: Documentación funcional ✔
 - Fase 2: Diseño técnico y arquitectura ✔
 - Fase 3: Implementación API REST ✔
-- Fase 4: Pruebas y validación (en curso)
-- Pendientes: activar `POST /sync/sheets/export` (UC6), UC4b marcado de errores en la hoja
+- Fase 4: Pruebas y validación ✔
+- Pendientes: verificaciones operativas contra BD real, merge a develop
 
 ---
 
