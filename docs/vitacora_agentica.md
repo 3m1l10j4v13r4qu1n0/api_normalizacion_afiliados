@@ -259,3 +259,54 @@
 - `app/application/use_cases/uc4a_importar_afiliado.py`, `app/domain/services/data_transformer.py` — docstrings.
 
 **Estado resultante:** suite 100/100 tests OK; app carga con los 12 endpoints; documentación (estado, vitácora, AGENTS.md) coherente con el código. Plan de refactorización F1–F6 **completo**. Pendiente de decisión del usuario: merge de `feature/refactorizacion-arquitectonica` a `develop`.
+
+---
+
+## 2026-09-10 — Auditoría de historias de usuario (HU-01 a HU-08)
+
+**Qué se hizo:** auditoría completa del estado de implementación de las 8 historias de usuario documentadas en `docs/04_historias_usuario/`. Se verificó cada HU contra el código fuente end-to-end (endpoints, casos de uso, puertos, adapters, tests).
+
+**Resultado de la auditoría:**
+- ✅ HU-01 a HU-05, HU-07 — completamente implementadas
+- 🟡 HU-06 — parcial: `ErrorValidacion`+`row_number` se registra en BD, falta adapter para marcación visual (fondo rojo) en Google Sheets
+- 🔵 HU-08 — no implementada: endpoint comentado, sin caso de uso ni adapter
+
+**Archivos/módulos tocados:**
+- `AGENTS.md` — se agregó tabla de estado de HUs verificada + sección de pendientes de implementación
+- `docs/06_auditorias/auditoria-historias-usuario.md` — nuevo: informe de auditoría
+- `docs/vitacora_agentica.md` — esta entrada
+
+**Estado resultante:** el AGENTS.md ahora refleja el estado real de implementación de cada HU y detalla los pasos para completar HU-06 y HU-08.
+
+---
+
+## 2026-09-10 — Actualización de AGENTS.md con reglas del proyecto
+
+**Qué se hizo:** se reescribió `AGENTS.md` para incorporar de manera integral todas las reglas del proyecto (`.agents/rules/`), Organizándolas en secciones claras:
+- Flujo de implementación (tarea → código → commit → rama → merge → versionado)
+- Reglas de verificación y anti-alucinación
+- Referencias correctas a `.agents/rules/` (antes decía `.opencode/rules/`)
+
+**Archivos/módulos tocados:**
+- `AGENTS.md` — reescrito con reglas integradas
+
+**Estado resultante:** AGENTS.md actualizado como guía completa para futuras implementaciones, alineado con todas las reglas duras del proyecto.
+
+---
+
+## 2026-09-10 — HU-06: marcación visual de errores en Google Sheets
+
+**Qué se hizo:** se implementó la marcación visual de filas con errores en Google Sheets (HU-06), que estaba parcial:
+- `app/domain/ports/sheet_marking_port.py` — nuevo puerto `SheetMarkingPort` (contrato `marcar_filas_con_errores`).
+- `app/infrastructure/google/sheets_marking_adapter.py` — nuevo adapter `SheetsMarkingAdapter` (gspread, batch format, fondo rojo, ejecuta en executor para no bloquear el loop).
+- `app/infrastructure/google/google_sheets_client.py` — se agregó método `marcar_filas_con_errores` al cliente gspread.
+- `app/application/use_cases/uc6_marcar_errores_sheets.py` — nuevo UC6 `MarcarErroresSheetsUseCase` (deduplica y ordena `row_number`s).
+- `app/infrastructure/dependencies/dependency_injection.py` — `build_marking_port()` + `get_marcar_errores_sheets_uc6()`.
+- `app/presentation/routers/sync.py` — se integró UC6 al final de `POST /sync/sheets/import`; el fallo al marcar no interrumpe la importación (SH-UC4b-RN4, captura solo `SincronizacionError`).
+- `tests/unit/domian/services/test_marcar_errores_sheets.py` — 4 tests unitarios (extracción, dedup, sin errores, orden).
+
+**Decisiones:** la marcación es paso interno del flujo de importación (no endpoint separado, según HU-06_api); se captura `SincronizacionError` en el router porque es el fallo permitido de no interrupción. Se instalaron `ruff` y `black` en el venv (el repo tenía 257 errores de ruff / 67 archivos por formatear preexistentes que NO se tocaron).
+
+**Commits:** `f7ca501` (puerto), `f8188c9` (adapter), `1e93fc1` (UC6), `26845b1` (DI), `4746ce4` (sync), `4e45d06` (test).
+
+**Estado resultante:** 104/104 tests OK; app carga; HU-06 completa. Pendiente: HU-08 (exportar a Sheets) y verificaciones operativas.
