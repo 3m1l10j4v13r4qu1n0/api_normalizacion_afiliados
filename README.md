@@ -34,7 +34,7 @@ El sistema actúa como una capa intermedia entre fuentes de datos externas y sis
 
 ## Documentación funcional
 
-La documentación del análisis funcional se encuentra en la carpeta `docs/`, en **formato Benn (backend-only)**:
+La documentación del análisis funcional se encuentra en la carpeta `docs/`:
 
 - `01_global` — visión, actores, reglas de negocio, alcance
 - `02_tecnico` — modelo de datos, decisiones técnicas, diagramas UML/ER
@@ -118,11 +118,12 @@ cp .env.example .env
 
 # Correr migraciones (Alembic ya está inicializado, NO ejecutar `alembic init`)
 
-# 1. genera una migración automática leyendo tus modelos
+# 1. aplica la migración en PostgreSQL
+alembic upgrade head
+
+# 2. genera una migración automática leyendo tus modelos
 alembic revision --autogenerate -m "descripcion"
 
-# 2. aplica la migración en PostgreSQL
-alembic upgrade head
 
 # Levantar la API
 uvicorn app.main:app --reload
@@ -298,7 +299,7 @@ api-normalizacion/
 │    │   └── definicion_listo.md
 │    ├── 04_historias_usuario
 │    │   ├── HU-01 .. HU-08 (5 archivos c/u: HU-0X, caso_uso_expandido, api, modelos_datos, pruevas)
-│    └── 07_metodologia_agil
+│    └── 05_metodologia_agil
 │        └── metodoKanban.md
 │   💬 Documentación completa del sistema:
 │   - 8 historias de usuario (formato Benn)
