@@ -346,3 +346,28 @@
 **Commits:** `54b565c` (dominio), `5090adc` (infra), `54412c1` (UC8+DI), `36d53cc` (presentación), `b0ed084` (tests).
 
 **Estado resultante:** 111/111 tests OK; `ruff check .` y `black --check .` en verde; endpoint `/sync/sheets/export` registrado. Pendiente: verificaciones operativas (BD real, merge a develop).
+
+---
+
+## 2026-09-10 — Cierre documental de fases 2, 3 y 4 + actualización de README
+
+**Qué se hizo:** se crearon los documentos de cierre para las fases 2, 3 y 4 del proyecto (siguiendo el formato de `face_1_cierre.md`) y se actualizó el `README.md` con el estado real del proyecto.
+
+**Cambios:**
+1. `face_2_cierre.md` — cierre de Fase 2 (diseño técnico y arquitectura): Clean Architecture + Hexagonal, puertos/adapters, diagramas.
+2. `face_3_cierre.md` — cierre de Fase 3 (implementación API REST): 8 HUs implementadas, 8 endpoints, pipeline de importación, refactorización F1–F6.
+3. `face_4_cierre.md` — cierre de Fase 4 (pruebas y validación): 111/111 tests OK, ruff/black en verde.
+4. `README.md` — actualizado:
+   - Tabla de endpoints: agregado `POST /sync/sheets/export` (HU-08) + mención de HU-06 en import
+   - Sección de estado: las 4 fases marcadas como FINALIZADA, con links a cierres
+   - Roadmap: fase 4 completada, pendientes actualizados
+   - Estructura del proyecto: agregados `06_auditorias/` y tests de HU-06/HU-08
+   - Archivos de cierre: `face_2_cierre.md`, `face_3_cierre.md`, `face_4_cierre.md`
+
+**Archivos/módulos tocados:**
+- `face_2_cierre.md` — nuevo
+- `face_3_cierre.md` — nuevo
+- `face_4_cierre.md` — nuevo
+- `README.md` — endpoints, estado, roadmap, estructura, tests
+
+**Estado resultante:** las 4 fases del proyecto tienen su documento de cierre. El README refleja el estado real: 111/111 tests OK, 8 HUs implementadas, 8 endpoints. Pendientes: verificaciones operativas contra BD real y merge a develop.
