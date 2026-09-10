@@ -69,7 +69,7 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 
 1. Mantener migraciones de Alembic al día con el modelo.
 2. Revisar semántica de baja lógica (seed: 1=Activo, 2=Inactivo).
-3. Verificar `alembic upgrade head` en entorno con BD (migración `a1f2b3c4d5e6` de F2 no pudo correrse localmente).
+3. ~~Verificar `alembic upgrade head` en entorno con BD~~ — **resuelto 2026-09-10**: `alembic upgrade head` corrió contra PostgreSQL real (llegó a `d674f37e1587`). Se detectó y corrigió bug en `alembic/env.py`: no importaba los modelos ORM, por lo que `Base.metadata` quedaba vacío y `alembic check` reportaba todas las tablas como "removidas". Ahora importa `orm_models`; `alembic check` confirma **no new upgrade operations detected** (esquema sincronizado con modelos). Seed de datos iniciales cargado con éxito.
 
 ## 8. Decisiones y convenciones vigentes
 

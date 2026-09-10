@@ -371,3 +371,25 @@
 - `README.md` — endpoints, estado, roadmap, estructura, tests
 
 **Estado resultante:** las 4 fases del proyecto tienen su documento de cierre. El README refleja el estado real: 111/111 tests OK, 8 HUs implementadas, 8 endpoints. Pendientes: verificaciones operativas contra BD real y merge a develop.
+
+---
+
+## 2026-09-10 — Verificación operativa: alembic contra PostgreSQL real + fix env.py
+
+**Qué se hizo:** se verificó el paso pendiente de `alembic upgrade head` contra una base PostgreSQL real (local, BD `afiliado_db`), y se detectó/corrigió un bug en la configuración de Alembic.
+
+**Verificaciones:**
+1. PostgreSQL corriendo y BD `afiliado_db` existente (ya tenía las tablas creadas y `alembic_version` en `a1f2b3c4d5e6`).
+2. `alembic upgrade head` → aplicó `a1f2b3c4d5e6 → d674f37e1587` (migración stub de HU-08), quedando en head.
+3. **Bug detectado:** `alembic/env.py` importaba `Base` de `connection.py` sin importar los modelos ORM, dejando `Base.metadata` vacío. Por eso `alembic check` reportaba **todas** las tablas como "removidas" y un `--autogenerate` futuro no detectaría nada.
+4. **Fix:** se agregó `from app.infrastructure.database import orm_models` en `env.py` (con `noqa: F401`). `alembic check` confirmó **"No new upgrade operations detected"** (esquema 100% sincronizado con modelos).
+5. Seed de datos iniciales corrido con éxito (géneros, estados civiles, niveles educativos, relaciones de dependencia, estados de afiliado).
+
+**Decisión:** el fix es el patrón estándar de Alembic (importar los modelos para poblar el metadata); se preserva la regla de no correr `alembic init` (el proyecto ya estaba inicializado).
+
+**Archivos/módulos tocados:**
+- `alembic/env.py` — import de `orm_models` + order de imports (ruff).
+- `docs/estado_actual_proyecto.md` — pendiente 3 resuelto.
+- `docs/vitacora_agentica.md` — esta entrada.
+
+**Estado resultante:** checklist en verde (ruff, black, 111/111 tests, `alembic check` sin operaciones); BD real sincronizada con el modelo y seed cargado. Quedan pendientes operativos: verificar `GET /afiliados/` con inactivos, probar endpoints de Google Sheets con credenciales reales.
