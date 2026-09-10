@@ -5,6 +5,9 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 from app.infrastructure.core.config import settings
+from app.infrastructure.database import (
+    orm_models,  # noqa: F401  ← registra las tablas en Base.metadata
+)
 from app.infrastructure.database.connection import Base
 
 config = context.config
