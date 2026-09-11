@@ -55,3 +55,7 @@ Se verificó el estado de implementación de las 8 historias de usuario document
 
 - HU-06 fue **implementada**: `SheetMarkingPort` (`app/domain/ports/sheet_marking_port.py`), `SheetsMarkingAdapter` (`app/infrastructure/google/sheets_marking_adapter.py`), UC6 (`app/application/use_cases/uc6_marcar_errores_sheets.py`), integrado en `POST /sync/sheets/import`. Tests 104/104 OK.
 - HU-08 fue **implementada** el mismo día: `SheetExportPort` + `SheetsExportAdapter` + UC8 (`uc8_exportar_afiliados_sheets.py`), endpoint `POST /sync/sheets/export` habilitado. Verificado con credenciales reales (35 activos exportados).
+
+## 7. NOTA de seguimiento (2026-09-11)
+
+- HU-06 fue **rediseñada** (ciclo de corrección): `SheetMarkingPort`/`SheetsMarkingAdapter`/`uc6_marcar_errores_sheets.py` fueron **eliminados** y reemplazados por `SheetCorreccionPort` (`app/domain/ports/sheet_correccion_port.py`) + `SheetsCorreccionAdapter` (`app/infrastructure/google/sheets_correccion_adapter.py`) + UC6 (`uc6_actualizar_hoja_pendientes.py`). Ahora `/sync/sheets/import` genera la hoja "Pendientes de corrección" con las filas que no pudieron importarse (columnas + "motivo del error", en rojo) y existe `POST /sync/sheets/reimport` para reimportar las corregidas. Ver detalles en `docs/vitacora_agentica.md` (entrada 2026-09-11).

@@ -1,12 +1,12 @@
 # Estado Actual del Proyecto
 
-> Última actualización: 2026-09-07
+> Última actualización: 2026-09-11
 > Este archivo es una FOTO del presente, no un historial. Para el historial de cambios ver `vitacora_agentica.md`.
 > El agente debe leer este archivo completo al iniciar cualquier tarea sobre el proyecto.
 
 ## 1. Resumen del proyecto
 
-API REST en Python/FastAPI para la normalización, validación y gestión de datos de afiliados de un sindicato. Actúa como capa intermedia entre fuentes externas (importación manual, Google Sheets y scripts clientes) y los sistemas de consulta. Stack: FastAPI + SQLAlchemy 2.0 async (asyncpg) + pydantic-settings, Python 3.13.5 (`app/.python-version`, venv en `./venv`). Rama activa: `feature/refactorizacion-arquitectonica`.
+API REST en Python/FastAPI para la normalización, validación y gestión de datos de afiliados de un sindicato. Actúa como capa intermedia entre fuentes externas (importación manual, Google Sheets y scripts clientes) y los sistemas de consulta. Stack: FastAPI + SQLAlchemy 2.0 async (asyncpg) + pydantic-settings, Python 3.13.5 (`app/.python-version`, venv en `./venv`). Rama activa: `feature/tests-hus06`.
 
 ## 2. Arquitectura
 
@@ -38,7 +38,7 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 - [x] UC2 — consultar afiliados, listado y por ID (HU-03)
 - [x] UC3 — actualizar afiliado (HU-04)
 - [x] UC4a — importar desde Google Sheets (HU-05, requiere `gspread`/`google-auth`)
-- [x] UC4b/UC6 — marcar filas con errores en la hoja (HU-06): `SheetMarkingPort` + `SheetsMarkingAdapter` + `uc6_marcar_errores_sheets.py`, integrado al flujo de `/sync/sheets/import`. Cobertura de tests completa (`tests/unit/domian/services/test_marcar_errores_sheets.py`, `test_sheets_marking_adapter.py`, `test_sheets_marking_client.py` y `tests/unit/presentation/test_sync_sheets_import.py`): extracción/dedupe de `row_number`, batch masivo único con fondo rojo, filas válidas intactas y el escenario SH-UC4b-RN4 (el fallo al marcar NO interrumpe la importación, capturado a nivel de router).
+- [x] UC4b/UC6 — generar la hoja de pendientes de corrección (HU-06): `SheetCorreccionPort` + `SheetsCorreccionAdapter` + `uc6_actualizar_hoja_pendientes.py`. Al importar, vuelca las filas con error en la hoja "Pendientes de corrección" (misma planilla, `add_worksheet` si no existe) con sus columnas + columna "motivo del error", resaltadas en rojo en batch; reutilizado por `POST /sync/sheets/reimport` (reimporta pendientes corregidas y deja solo las que siguen fallando). Se eliminaron `SheetMarkingPort`, `SheetsMarkingAdapter` y `uc6_marcar_errores_sheets.py` (la interpretación previa marcaba la hoja de origen; el pedido real del cliente es un ciclo corregir → reimportar). Cobertura de tests completa (`test_actualizar_hoja_pendientes.py`, `test_sheets_correccion_adapter.py`, `test_sheets_correccion_client.py`, `tests/unit/presentation/test_sync_sheets_import.py`): agrupa errores por fila con motivo, crea/reutiliza/limpia la hoja, batch rojo único, RN4 (el fallo al actualizar pendientes NO interrumpe) y `/reimport` leyendo la hoja de pendientes como origen.
 - [x] UC5 — dar de baja afiliado (HU-07)
 - [x] UC8 — exportar tabla de afiliados activos a Google Sheets (HU-08): `SheetExportPort` + `SheetsExportAdapter` + `uc8_exportar_afiliados_sheets.py`
 
@@ -54,7 +54,8 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 | GET | `/afiliados/{afiliado_id}` | Obtener afiliado por ID (UC2) | ✅ |
 | PATCH | `/afiliados/{afiliado_id}` | Actualizar afiliado (UC3) | ✅ |
 | DELETE | `/afiliados/{afiliado_id}` | Dar de baja afiliado (UC5) | ✅ |
-| POST | `/sync/sheets/import` | Importar desde Google Sheets (UC4) + marcar errores (HU-06) | ⚠️ requiere credenciales reales |
+| POST | `/sync/sheets/import` | Importar desde Google Sheets (UC4) + generar pendientes de corrección (HU-06) | ⚠️ requiere credenciales reales |
+| POST | `/sync/sheets/reimport` | Reimportar pendientes corregidas desde la hoja de corrección (HU-06) | ⚠️ requiere credenciales reales |
 | POST | `/sync/sheets/export` | Generar tabla en Sheets (HU-08) | ⚠️ requiere credenciales reales |
 
 ## 6. Infraestructura / Integraciones

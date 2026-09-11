@@ -130,7 +130,7 @@ Convenciones:
 | HU-03 | Consultar afiliados (listado y por ID) | ✅ | GET `/afiliados/` y GET `/afiliados/{id}`, UC2 |
 | HU-04 | Modificar datos de afiliado | ✅ | PATCH `/afiliados/{id}`, UC3 |
 | HU-05 | Importar desde Google Sheets | ✅ | POST `/sync/sheets/import`, UC4a+UC4 (requiere credenciales reales) |
-| HU-06 | Marcar filas con errores en Sheets | ✅ | `SheetMarkingPort` + `SheetsMarkingAdapter` + UC6, integrado en `POST /sync/sheets/import` (fondo rojo en batch) |
+| HU-06 | Ciclo de corrección: hoja de pendientes + reimportar | ✅ | `SheetCorreccionPort` + `SheetsCorreccionAdapter` + UC6 (`uc6_actualizar_hoja_pendientes.py`), integrado en `POST /sync/sheets/import` y `POST /sync/sheets/reimport` (filas con error en hoja "Pendientes de corrección" resaltadas en rojo + reimport deriva corregidas) |
 | HU-07 | Dar de baja afiliado | ✅ | DELETE `/afiliados/{id}`, UC5 (baja lógica, `id_estado_afiliado=2`) |
 | HU-08 | Generar tabla de afiliados en Sheets | ✅ | `SheetExportPort` + `SheetsExportAdapter` + UC8, `POST /sync/sheets/export` (edad dinámica, solo activos) |
 
