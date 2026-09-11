@@ -426,3 +426,22 @@
 - `docs/estado_actual_proyecto.md` — pendientes 3–6 resueltos.
 
 **Estado resultante:** 121/121 tests OK; ruff y black en verde; migración Google Sheets → PostgreSQL funcional end-to-end. **Verificaciones operativas contra BD real completadas.**
+
+---
+
+## 2026-09-11 — Cobertura de tests completa para HU-06 (marcación de errores en Sheets)
+
+**Qué se hizo:** se evaluaron los 4 escenarios de aceptación de la HU-06 y se completó su cobertura de tests sobre la rama `feature/tests-hus06`. Ya existían 4 tests unit del UC6 (extracción de `row_number`, dedupe, orden, sin errores). Se agregaron los eslabones faltantes: tests del adapter `SheetsMarkingAdapter` (delega en el cliente, lista vacía no toca nada, propaga `SincronizacionError`), tests del cliente `GspreadSheetsClient.marcar_filas_con_errores` (una sola `batch_format` masiva con `A{r}:Z{r}` fondo rojo, lista vacía no actualiza la hoja, fallo → `SincronizacionError`) y un test de integración del endpoint `POST /sync/sheets/import` con `dependency_overrides` que valida el escenario SH-UC4b-RN4: el fallo al marcar NO interrumpe la importación (la respuesta sigue siendo 201 con el resumen original).
+
+**Decisiones de arquitectura:** el UC6 no captura errores del port a propósito (documentado con test); quien cumple el "no interrumpe" (SH-UC4b-RN4) es el router `sync.py` con `try/except SincronizacionError`. Los tests de infraestructura usan un cliente instanciado con `GspreadSheetsClient.__new__` (sin conexión a Google) mockeando `_hoja`.
+
+**Archivos/módulos tocados:**
+- `tests/unit/domian/services/test_marcar_errores_sheets.py` — se agrega test de propagación de error del port.
+- `tests/unit/domian/services/test_sheets_marking_adapter.py` — nuevo (3 tests del adapter).
+- `tests/unit/domian/services/test_sheets_marking_client.py` — nuevo (4 tests del cliente gspread).
+- `tests/unit/presentation/__init__.py` + `tests/unit/presentation/test_sync_sheets_import.py` — nuevo (4 tests de integración del router).
+- `docs/04_historias_usuario/HU-06/HU-06_pruevas.md` — checklist TDD marcado en verde.
+- `docs/estado_actual_proyecto.md` — nota de cobertura de tests de HU-06.
+
+**Estado resultante:** 133/133 tests OK; ruff y black en verde. Los 4 criterios de aceptación de la HU-06 quedan verificados por tests automatizados (fila con error marcada en rojo, actualización masiva, fila válida intacta, fallo de marcación no interrumpe el import).
+

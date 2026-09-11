@@ -22,6 +22,8 @@
 - **Y** no interrumpe el proceso de importación.
 
 ## Casos de Prueba TDD (Checklist para Desarrolladores)
-- [ ] `test_marcar_filas_con_errores()`
-- [ ] `test_actualizacion_masiva_de_filas()`
-- [ ] `test_no_alterar_filas_validas()`
+- [x] `test_marcar_filas_con_errores()` — `tests/unit/domian/services/test_marcar_errores_sheets.py` + `test_sheets_marking_client.py` (fondo rojo en `A{r}:Z{r}`)
+- [x] `test_actualizacion_masiva_de_filas()` — `test_sheets_marking_client.py::test_una_sola_actualizacion_masiva` (una sola `batch_format` para todas las filas)
+- [x] `test_no_alterar_filas_validas()` — `test_marcar_errores_sheets.py` + `test_sheets_marking_adapter.py` (lista vacía no toca la hoja)
+
+**Cobertura verificada (2026-09-11):** los 4 escenarios de aceptación están cubiertos, incluido el escenario 4 (SH-UC4b-RN4: el fallo al marcar no interrumpe la importación, verificado a nivel del router en `test_sync_sheets_import.py`).

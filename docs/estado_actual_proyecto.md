@@ -38,7 +38,7 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 - [x] UC2 — consultar afiliados, listado y por ID (HU-03)
 - [x] UC3 — actualizar afiliado (HU-04)
 - [x] UC4a — importar desde Google Sheets (HU-05, requiere `gspread`/`google-auth`)
-- [x] UC4b/UC6 — marcar filas con errores en la hoja (HU-06): `SheetMarkingPort` + `SheetsMarkingAdapter` + `uc6_marcar_errores_sheets.py`, integrado al flujo de `/sync/sheets/import`
+- [x] UC4b/UC6 — marcar filas con errores en la hoja (HU-06): `SheetMarkingPort` + `SheetsMarkingAdapter` + `uc6_marcar_errores_sheets.py`, integrado al flujo de `/sync/sheets/import`. Cobertura de tests completa (`tests/unit/domian/services/test_marcar_errores_sheets.py`, `test_sheets_marking_adapter.py`, `test_sheets_marking_client.py` y `tests/unit/presentation/test_sync_sheets_import.py`): extracción/dedupe de `row_number`, batch masivo único con fondo rojo, filas válidas intactas y el escenario SH-UC4b-RN4 (el fallo al marcar NO interrumpe la importación, capturado a nivel de router).
 - [x] UC5 — dar de baja afiliado (HU-07)
 - [x] UC8 — exportar tabla de afiliados activos a Google Sheets (HU-08): `SheetExportPort` + `SheetsExportAdapter` + `uc8_exportar_afiliados_sheets.py`
 
