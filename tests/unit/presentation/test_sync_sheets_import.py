@@ -1,11 +1,12 @@
 """
-Tests de integración del endpoint POST /sync/sheets/import (HU-06)
+Tests de integración de POST /sync/sheets/import y /sync/sheets/reimport (HU-06)
 
-Cubre los criterios de aceptación de la HU-06 a nivel de API:
-    1. Filas con error se marcan en la hoja al cerrar la importación.
-    2. El fallo al marcar NO interrumpe la importación (SH-UC4b-RN4):
+Cubre los criterios de aceptación del ciclo de corrección a nivel de API:
+    1. Al importar, se genera la hoja de pendientes con las filas con error.
+    2. El fallo al actualizar pendientes NO interrumpe la importación (RN4):
        la respuesta sigue siendo 201 con el resumen original.
-    3. Sin errores → no se marca nada.
+    3. Sin errores → las pendientes se guardan vacías (solo encabezados).
+    4. /reimport lee la hoja de pendientes como origen y devuelve su resumen.
 """
 
 from unittest.mock import AsyncMock
@@ -13,97 +14,106 @@ from unittest.mock import AsyncMock
 import pytest
 from fastapi.testclient import TestClient
 
+from app.application.use_cases.uc4a_importar_afiliado import SheetLectura
 from app.domain.exceptions import SincronizacionError
 from app.domain.models.importacion import Importacion
 from app.infrastructure.dependencies.dependency_injection import (
+    get_actualizar_pendientes_uc6,
     get_import_sheet_uc4a,
     get_importar_afiliado_uc4,
-    get_marcar_errores_sheets_uc6,
 )
 from app.main import app
+from app.presentation.routers.sync import RANGO_PENDIENTES
 
 
 @pytest.fixture
 def sync_client():
     sheet_uc = AsyncMock()
     core_uc = AsyncMock()
-    marking_uc = AsyncMock()
+    correccion_uc = AsyncMock()
 
-    importacion = Importacion(id=1, cantidad_registros=3)
-    importacion.registrar_error(
-        campo="email",
-        descripcion="email inválido",
-        registro_origen="{'dni': '1'}",
-        row_number=2,
-    )
+    importacion = Importacion(id=1, cantidad_registros=2)
     importacion.registrar_error(
         campo="dni",
         descripcion="dni inválido",
-        registro_origen="{dni: '2'}",
-        row_number=5,
+        registro_origen="{'dni': '1'}",
+        row_number=2,
     )
 
-    sheet_uc.execute.return_value = []
+    sheet_uc.execute.return_value = SheetLectura(
+        input_rows=[],
+        encabezados=["nombre", "dni"],
+        valores_crudos=[["Ana", "1"]],
+    )
     core_uc.execute.return_value = importacion
 
     app.dependency_overrides[get_import_sheet_uc4a] = lambda: sheet_uc
     app.dependency_overrides[get_importar_afiliado_uc4] = lambda: core_uc
-    app.dependency_overrides[get_marcar_errores_sheets_uc6] = lambda: marking_uc
+    app.dependency_overrides[get_actualizar_pendientes_uc6] = lambda: correccion_uc
 
-    yield TestClient(app), sheet_uc, core_uc, marking_uc, importacion
+    yield TestClient(app), sheet_uc, core_uc, correccion_uc, importacion
 
     app.dependency_overrides.clear()
 
 
-class TestImportarDesdeSheetsMarcandoErrores:
+class TestImportarDesdeSheetsConPendientes:
 
-    def test_marca_las_filas_con_error(self, sync_client):
-        client, _sheet_uc, _core_uc, marking_uc, importacion = sync_client
+    def test_genera_pendientes_con_filas_y_errores(self, sync_client):
+        client, _sheet_uc, _core_uc, correccion_uc, importacion = sync_client
 
         response = client.post("/sync/sheets/import")
 
         assert response.status_code == 201
-        marking_uc.execute.assert_called_once_with(importacion.errores)
+        correccion_uc.execute.assert_called_once_with(
+            ["nombre", "dni"],
+            [["Ana", "1"]],
+            importacion.errores,
+        )
 
     def test_devuelve_resumen_importacion(self, sync_client):
-        client, _sheet_uc, _core_uc, _marking_uc, _importacion = sync_client
+        client, _sheet_uc, _core_uc, _correccion_uc, _importacion = sync_client
 
         response = client.post("/sync/sheets/import")
 
         assert response.status_code == 201
-        assert response.json() == {
-            "cantidad_registros_procesados": 3,
-            "cantidad_registros_validos": 1,
-            "cantidad_errores": 2,
-            "errores": [
-                {
-                    "campo": "email",
-                    "descripcion_error": "email inválido",
-                    "row_number": 2,
-                },
-                {
-                    "campo": "dni",
-                    "descripcion_error": "dni inválido",
-                    "row_number": 5,
-                },
-            ],
-        }
+        assert response.json()["cantidad_registros_procesados"] == 2
+        assert response.json()["cantidad_errores"] == 1
 
-    def test_error_al_marcar_no_interrumpe_la_importacion(self, sync_client):
-        client, _sheet_uc, _core_uc, marking_uc, _importacion = sync_client
-        marking_uc.execute.side_effect = SincronizacionError("no se pudo marcar")
+    def test_error_al_actualizar_pendientes_no_interrumpe(self, sync_client):
+        client, _sheet_uc, _core_uc, correccion_uc, _importacion = sync_client
+        correccion_uc.execute.side_effect = SincronizacionError("no se pudo guardar")
 
         response = client.post("/sync/sheets/import")
 
         assert response.status_code == 201
-        assert response.json()["cantidad_registros_procesados"] == 3
-        marking_uc.execute.assert_called_once()
+        assert response.json()["cantidad_registros_procesados"] == 2
+        correccion_uc.execute.assert_called_once()
 
-    def test_sin_errores_no_marca_nada(self, sync_client):
-        client, _sheet_uc, core_uc, marking_uc, _importacion = sync_client
-        core_uc.execute.return_value = Importacion(id=2, cantidad_registros=2)
+    def test_sin_errores_guarda_pendientes_vacias(self, sync_client):
+        client, _sheet_uc, core_uc, correccion_uc, _importacion = sync_client
+        core_uc.execute.return_value = Importacion(id=2, cantidad_registros=1)
 
         response = client.post("/sync/sheets/import")
 
         assert response.status_code == 201
-        marking_uc.execute.assert_called_once_with([])
+        correccion_uc.execute.assert_called_once_with(
+            ["nombre", "dni"],
+            [["Ana", "1"]],
+            [],
+        )
+
+
+class TestReimportarPendientes:
+
+    def test_lee_la_hoja_de_pendientes_como_origen(self, sync_client):
+        client, sheet_uc, _core_uc, correccion_uc, importacion = sync_client
+
+        response = client.post("/sync/sheets/reimport")
+
+        assert response.status_code == 201
+        sheet_uc.execute.assert_called_once_with(range_name=RANGO_PENDIENTES)
+        correccion_uc.execute.assert_called_once_with(
+            ["nombre", "dni"],
+            [["Ana", "1"]],
+            importacion.errores,
+        )
