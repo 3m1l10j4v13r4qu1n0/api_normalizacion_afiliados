@@ -88,7 +88,7 @@ class ImportarAfiliadoUseCase:
         Ejecuta el pipeline completo de importación (UC4 — source ya listo del sheet).
 
         Parameters:
-            rows : List[InputRow] — Salida de ImportSheetUseCase.execute().
+            rows : List[InputRow] — Filas del sheet (SheetLectura.input_rows, UC4a).
 
         Returns:
             Importacion — Resumen del proceso (totales, errores).

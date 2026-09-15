@@ -1,6 +1,18 @@
+from dataclasses import dataclass
+from typing import Any
+
 from app.domain.models.input_row import InputRow
 from app.domain.ports.sheet_data_port import SheetDataPort
 from app.domain.services.data_transformer import DataTransformer
+
+
+@dataclass
+class SheetLectura:
+    """Resultado de la lectura de un Sheet: filas transformadas y datos crudos (HU-06)."""
+
+    input_rows: list[InputRow]
+    encabezados: list[str]
+    valores_crudos: list[list[Any]]
 
 
 class ImportSheetUseCase:
@@ -41,16 +53,16 @@ class ImportSheetUseCase:
         self._sheet_port = sheet_port
         self._transformer = transformer
 
-    async def execute(self, range_name: str) -> list[InputRow]:
+    async def execute(self, range_name: str) -> SheetLectura:
         """
-        Ejecuta UC4a: lee el Sheet y devuelve los datos como List[InputRow].
+        Ejecuta UC4a: lee el Sheet y devuelve filas transformadas y datos crudos.
 
         Parameters:
             range_name : str — Rango de Sheets a leer (ej: "Respuestas!A1:Z").
 
         Returns:
-            List[InputRow] — Una entrada por fila, con claves pytónicas
-                             y row_number real del Sheet (base 2).
+            SheetLectura — Entrada con `input_rows` (claves pytónicas y `row_number`
+                           real del Sheet, base 2), `encabezados` y `valores_crudos`.
 
         Raises:
             ValueError — si el Sheet no devuelve datos.
@@ -64,4 +76,8 @@ class ImportSheetUseCase:
         headers = raw[0]
         raw_data = raw[1:]
 
-        return self._transformer.transform(raw_data=raw_data, headers=headers)
+        return SheetLectura(
+            input_rows=self._transformer.transform(raw_data=raw_data, headers=headers),
+            encabezados=headers,
+            valores_crudos=raw_data,
+        )

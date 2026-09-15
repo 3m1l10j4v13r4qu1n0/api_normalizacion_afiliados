@@ -426,3 +426,47 @@
 - `docs/estado_actual_proyecto.md` — pendientes 3–6 resueltos.
 
 **Estado resultante:** 121/121 tests OK; ruff y black en verde; migración Google Sheets → PostgreSQL funcional end-to-end. **Verificaciones operativas contra BD real completadas.**
+
+---
+
+## 2026-09-11 — Cobertura de tests completa para HU-06 (marcación de errores en Sheets)
+
+**Qué se hizo:** se evaluaron los 4 escenarios de aceptación de la HU-06 y se completó su cobertura de tests sobre la rama `feature/tests-hus06`. Ya existían 4 tests unit del UC6 (extracción de `row_number`, dedupe, orden, sin errores). Se agregaron los eslabones faltantes: tests del adapter `SheetsMarkingAdapter` (delega en el cliente, lista vacía no toca nada, propaga `SincronizacionError`), tests del cliente `GspreadSheetsClient.marcar_filas_con_errores` (una sola `batch_format` masiva con `A{r}:Z{r}` fondo rojo, lista vacía no actualiza la hoja, fallo → `SincronizacionError`) y un test de integración del endpoint `POST /sync/sheets/import` con `dependency_overrides` que valida el escenario SH-UC4b-RN4: el fallo al marcar NO interrumpe la importación (la respuesta sigue siendo 201 con el resumen original).
+
+**Decisiones de arquitectura:** el UC6 no captura errores del port a propósito (documentado con test); quien cumple el "no interrumpe" (SH-UC4b-RN4) es el router `sync.py` con `try/except SincronizacionError`. Los tests de infraestructura usan un cliente instanciado con `GspreadSheetsClient.__new__` (sin conexión a Google) mockeando `_hoja`.
+
+**Archivos/módulos tocados:**
+- `tests/unit/domian/services/test_marcar_errores_sheets.py` — se agrega test de propagación de error del port.
+- `tests/unit/domian/services/test_sheets_marking_adapter.py` — nuevo (3 tests del adapter).
+- `tests/unit/domian/services/test_sheets_marking_client.py` — nuevo (4 tests del cliente gspread).
+- `tests/unit/presentation/__init__.py` + `tests/unit/presentation/test_sync_sheets_import.py` — nuevo (4 tests de integración del router).
+- `docs/04_historias_usuario/HU-06/HU-06_pruevas.md` — checklist TDD marcado en verde.
+- `docs/estado_actual_proyecto.md` — nota de cobertura de tests de HU-06.
+
+**Estado resultante:** 133/133 tests OK; ruff y black en verde. Los 4 criterios de aceptación de la HU-06 quedan verificados por tests automatizados (fila con error marcada en rojo, actualización masiva, fila válida intacta, fallo de marcación no interrumpe el import).
+
+
+## 2026-09-11 — HU-06 corregida: ciclo de corrección (hoja de pendientes + reimportación)
+
+**Qué se hizo:** se detectó y corrigió una mala interpretación de la HU-06. El pedido real del cliente es: al importar desde Google Sheets, "se cree o modifique la hoja de cálculo" y las filas que **no pudieran importarse** se resalten (rojo) para que el usuario las **edite/complete y las reimporte** en una próxima importación. La interpretación previa (marcar la hoja de origen con fondo rojo) no habilitaba ese ciclo editar→reimportar. Se rediseñó e implementó:
+
+- **`POST /sync/sheets/import`**: tras importar, crea/actualiza la hoja **"Pendientes de corrección"** (misma planilla; `add_worksheet` si no existe, si existe la limpia/re-escribe) con solo las filas que fallaron: columnas originales + columna **"motivo del error"**, todas resaltadas en rojo (una sola `batch_format`). Si no hay errores, la hoja queda con encabezados nada más.
+- **`POST /sync/sheets/reimport`** (nuevo): lee la hoja de pendientes como fuente (`Pendientes de corrección!A1:Z`), corre el mismo pipeline del core y regenera la hoja con lo que **siga fallando**; las filas corregidas se importan y desaparecen.
+- Se eliminaron `SheetMarkingPort`, `SheetsMarkingAdapter` y `uc6_marcar_errores_sheets.py` (interpretación anterior), junto con sus tests.
+- `ImportSheetUseCase.execute` ahora devuelve `SheetLectura` (`input_rows` + `encabezados` + `valores_crudos`) para poder volcar el contenido original de las filas fallidas.
+
+**Decisiones de arquitectura:** nuevo port de dominio `SheetCorreccionPort` (constante `TITULO_HOJA_PENDIENTES = "Pendientes de corrección"`; métodos `guardar_pendientes` y `leer_pendientes`) + `SheetsCorreccionAdapter`. El cliente gspread resuelve la hoja por nombre en el rango (`"Nombre!A1:Z"`) para que el reimport reutilice `ImportSheetUseCase` tal cual; se refactorizó el patrón clear/add-worksheet/update en `_obtener_o_crear_hoja` (lo comparte `exportar_tabla`). El "no interrumpe el import" sigue resuelto a nivel de router (`try/except SincronizacionError`). El mapping `row_number` (base 2) → índice de `valores_crudos` está documentado en UC6.
+
+**Archivos/módulos tocados:**
+- `app/domain/ports/sheet_correccion_port.py` — nuevo port `SheetCorreccionPort` + `TITULO_HOJA_PENDIENTES`.
+- `app/application/use_cases/uc6_actualizar_hoja_pendientes.py` — nuevo UC6 `ActualizarHojaPendientesUseCase` (agrupa errores por fila, arma columnas + motivo).
+- `app/application/use_cases/uc4a_importar_afiliado.py` — `execute` devuelve `SheetLectura`.
+- `app/infrastructure/google/sheets_correccion_adapter.py` — nuevo adapter (`guardar_pendientes` / `leer_pendientes`).
+- `app/infrastructure/google/google_sheets_client.py` — `guardar_pendientes`, `leer_pendientes`, resolución de hoja por nombre, `_obtener_o_crear_hoja`; se quitó `marcar_filas_con_errores`.
+- `app/infrastructure/dependencies/dependency_injection.py` — `build_correccion_port()` + `get_actualizar_pendientes_uc6()` reemplazan al wiring de marcación.
+- `app/presentation/routers/sync.py` — `/import` actualizado + `/reimport` nuevo + helper `_actualizar_pendientes_sin_interrumpir`.
+- Eliminados: `sheet_marking_port.py`, `sheets_marking_adapter.py`, `uc6_marcar_errores_sheets.py` y sus tests (`test_marcar_errores_sheets.py`, `test_sheets_marking_adapter.py`, `test_sheets_marking_client.py`).
+- Tests nuevos/rediseñados: `test_actualizar_hoja_pendientes.py`, `test_sheets_correccion_adapter.py`, `test_sheets_correccion_client.py`, `tests/unit/presentation/test_sync_sheets_import.py` (cubre `/import` y `/reimport`, RN4 y el ciclo).
+- Docs HU-06 (`HU-06.md`, `_caso_uso_expandido.md`, `_api.md`, `_modelos_datos.md`, `_pruevas.md`), `docs/estado_actual_proyecto.md`.
+
+**Estado resultante:** 139/139 tests OK; ruff y black en verde. HU-06 alineada al pedido real del cliente (crear/modificar una hoja con las filas no importadas resaltadas para corregirlas y reimportarlas). Pendiente: probar el ciclo completo contra Google Sheets real con credenciales.

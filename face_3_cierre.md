@@ -18,7 +18,7 @@ Se verificó la implementación end-to-end de cada HU contra el código fuente
 | HU-03 | Consultar afiliados (listado y por ID) | GET `/afiliados/` y GET `/afiliados/{id}` | `ListarAfiliadosUseCase` + `ObtenerAfiliadoPorIdUseCase` |
 | HU-04 | Modificar datos de afiliado | PATCH `/afiliados/{id}` | `ActualizarAfiliadoUseCase` |
 | HU-05 | Importar desde Google Sheets | POST `/sync/sheets/import` | `ImportSheetUseCase` + `ImportarAfiliadoUseCase.execute()` |
-| HU-06 | Marcar filas con errores en Sheets | Integrado en `POST /sync/sheets/import` | `MarcarErroresSheetsUseCase` (UC6) |
+| HU-06 | Ciclo de corrección: hoja de pendientes + reimportar | Integrado en `POST /sync/sheets/import` y `POST /sync/sheets/reimport` | `ActualizarHojaPendientesUseCase` (UC6) |
 | HU-07 | Dar de baja afiliado | DELETE `/afiliados/{id}` | `DarBajaAfiliadoUseCase` |
 | HU-08 | Generar tabla de afiliados activos en Sheets | POST `/sync/sheets/export` | `ExportarAfiliadosSheetsUseCase` (UC8) |
 
@@ -32,7 +32,7 @@ Se verificó la implementación end-to-end de cada HU contra el código fuente
 | GET | `/afiliados/{afiliado_id}` | Obtener afiliado por ID |
 | PATCH | `/afiliados/{afiliado_id}` | Actualizar afiliado |
 | DELETE | `/afiliados/{afiliado_id}` | Dar de baja afiliado |
-| POST | `/sync/sheets/import` | Importar desde Google Sheets + marcar errores |
+| POST | `/sync/sheets/import` | Importar desde Google Sheets + generar pendientes de corrección (HU-06) |
 | POST | `/sync/sheets/export` | Exportar tabla de afiliados activos a Sheets |
 
 ## 3. Arquitectura del pipeline de importación
@@ -46,7 +46,7 @@ Se verificó la implementación end-to-end de cada HU contra el código fuente
 | Puerto | Adapter | Responsabilidad |
 |---|---|---|
 | `SheetDataPort` | `GoogleSheetsAdapter` | Leer datos del Sheet |
-| `SheetMarkingPort` | `SheetsMarkingAdapter` | Marcar filas con errores (fondo rojo) |
+| `SheetCorreccionPort` | `SheetsCorreccionAdapter` | Hoja de pendientes de corrección (filas con error resaltadas) |
 | `SheetExportPort` | `SheetsExportAdapter` | Exportar tabla de afiliados activos |
 | `AfiliadoQueryPort` | `AfiliadoQueryRepository` | Consultar afiliados |
 | `AfiliadoCommandPort` | `AfiliadoCommandRepository` | Modificar afiliados |

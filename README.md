@@ -58,6 +58,7 @@ Esto simula la documentación generada por un **analista funcional junior en un 
 - Actualización de afiliados
 - Baja lógica de afiliados
 - Sincronización con Google Sheets
+- Ciclo de corrección de datos importados desde Sheets: hoja de pendientes + reimportación (HU-06)
 
 ---
 
@@ -71,10 +72,13 @@ Esto simula la documentación generada por un **analista funcional junior en un 
 | GET | `/afiliados/{id}` | Obtener afiliado por ID (UC2) |
 | PATCH | `/afiliados/{id}` | Actualizar afiliado (UC3) |
 | DELETE | `/afiliados/{id}` | Dar de baja afiliado (UC5) |
-| POST | `/sync/sheets/import` | Importar desde Google Sheets (UC4) + marcar errores (HU-06) |
+| POST | `/sync/sheets/import` | Importar desde Google Sheets (UC4) + generar hoja de pendientes de corrección (HU-06) |
+| POST | `/sync/sheets/reimport` | Reimportar filas corregidas desde la hoja de pendientes (HU-06) |
 | POST | `/sync/sheets/export` | Exportar tabla de afiliados activos a Sheets (HU-08) |
 
 > Las respuestas de error usan payload uniforme `{"error": "mensaje"}`. La importación responde con el detalle de errores de validación (campo, descripción y número de fila).
+>
+> **HU-06 (ciclo de corrección):** al importar desde Google Sheets, las filas que no pudieron importarse se vuelcan en la hoja **"Pendientes de corrección"** (misma planilla) con una columna extra **"motivo del error"**, resaltadas en rojo, para completar/editarlas y reimportarlas con `POST /sync/sheets/reimport`. Las filas corregidas dejan de figurar como pendientes; solo permanecen las que siguen fallando.
 
 ---
 
@@ -180,7 +184,9 @@ api-normalizacion/
 │   │       ├── uc2_obtener_afiliado_por_id.py
 │   │       ├── uc3_actualizar_afiliado.py
 │   │       ├── uc4a_importar_afiliado.py   ← lectura/transformación del Sheet (fuente)
-│   │       └── uc5_dar_baja_afiliado.py
+│   │       ├── uc5_dar_baja_afiliado.py
+│   │       ├── uc6_actualizar_hoja_pendientes.py  ← hoja de pendientes de corrección (HU-06)
+│   │       └── uc8_exportar_afiliados_sheets.py   ← export de activos a Sheets (HU-08)
 │   │
 │   │       💬 Implementación de casos de uso del sistema
 │   │       💬 El pipeline de importación es un UC único: absorbe UC1a (archivo),
@@ -222,7 +228,9 @@ api-normalizacion/
 │   │   │   ├── error_repository_port.py
 │   │   │   ├── domicilio_repository_port.py
 │   │   │   ├── dominio_repository_port.py
-│   │   │   └── sheet_data_port.py
+│   │   │   ├── sheet_data_port.py
+│   │   │   ├── sheet_correccion_port.py      ← hoja de pendientes de corrección (HU-06)
+│   │   │   └── sheet_export_port.py          ← export de afiliados activos (HU-08)
 │   │   │   💬 Interfaces (contratos) → patrón Ports & Adapters
 │   │   │
 │   │   ├── exceptions.py
@@ -267,7 +275,9 @@ api-normalizacion/
 │   │   │
 │   │   ├── google/
 │   │   │   ├── google_sheets_client.py
-│   │   │   └── google_sheets_adapter.py
+│   │   │   ├── google_sheets_adapter.py
+│   │   │   ├── sheets_correccion_adapter.py   ← hoja de pendientes de corrección (HU-06)
+│   │   │   └── sheets_export_adapter.py       ← export de activos (HU-08)
 │   │   │   💬 Integración con Google Sheets (API externa)
 │   │   │
 │   │   ├── dependencies/
@@ -320,9 +330,9 @@ api-normalizacion/
 │                ├── test_data_transformer.py
 │                ├── test_normalizacion.py
 │                ├── test_validacion.py
-│                ├── test_marcar_errores_sheets.py  ← HU-06
+│                ├── test_actualizar_hoja_pendientes.py  ← HU-06
 │                └── test_exportar_afiliados_sheets.py  ← HU-08
-│   💬 Tests unitarios del dominio (normalización, validación, etc.)
+│   💬 Tests unitarios del dominio (normalización, validación, corrección HU-06, etc.)
 │
 │   🎯 Responsabilidad:
 │   - Validar reglas de negocio
@@ -396,21 +406,19 @@ Clean Architecture + Hexagonal (Ports & Adapters), SQLAlchemy 2.0 async, DI con 
 
 ✔ Fase 3 — Implementación API REST: FINALIZADA
 
-Las 8 historias de usuario (HU-01 a HU-08) están implementadas. Pipeline de importación como UC único con lógica de dominio pura. Refactorización F1–F6 completada.
+Las 8 historias de usuario (HU-01 a HU-08) están implementadas. Pipeline de importación como UC único con lógica de dominio pura. Refactorización F1–F6 completada. **HU-06** implementa el ciclo de corrección: al importar se genera la hoja "Pendientes de corrección" con las filas que fallaron (resaltadas en rojo con su motivo) y `POST /sync/sheets/reimport` reimporta las corregidas.
 
 📄 Ver detalle del cierre: [face_3_cierre.md](face_3_cierre.md)
 
 ✔ Fase 4 — Pruebas y validación: FINALIZADA
 
-Suite de tests unitarios de dominio: **111/111 OK** (`pytest -q` desde la raíz). `ruff check .` y `black --check .` en verde.
+Suite de tests unitarios: **139/139 OK** (`pytest -q` desde la raíz). `ruff check .` y `black --check .` en verde. Incluye los 5 escenarios de aceptación de HU-06 (ciclo de corrección) y el escenario SH-UC4b-RN4 (el fallo al actualizar pendientes no interrumpe la importación).
 
 📄 Ver detalle del cierre: [face_4_cierre.md](face_4_cierre.md)
 
-⚠️ Verificaciones operativas pendientes (requieren entorno con BD real):
-- `alembic upgrade head` contra PostgreSQL
-- Comportamiento de `GET /afiliados/` con afiliados inactivos
-- Endpoints de Google Sheets con credenciales reales
-- Merge de rama `feature/refactorizacion-arquitectonica` → `develop`
+✅ Verificaciones operativas resueltas (2026-09-10): `alembic upgrade head` contra PostgreSQL real, sincronización de esquema (`alembic check` OK), comportamiento de `GET /afiliados/` con inactivos, endpoints de Google Sheets con credenciales reales (`/sync/sheets/import` y `/sync/sheets/export`), merge de `feature/refactorizacion-arquitectonica` → `develop`.
+
+🔵 Pendiente: probar el ciclo completo de HU-06 (importar → corregir en la hoja "Pendientes de corrección" → `/sync/sheets/reimport`) contra Google Sheets real con credenciales.
 
 ---
 
@@ -420,7 +428,8 @@ Suite de tests unitarios de dominio: **111/111 OK** (`pytest -q` desde la raíz)
 - Fase 2: Diseño técnico y arquitectura ✔
 - Fase 3: Implementación API REST ✔
 - Fase 4: Pruebas y validación ✔
-- Pendientes: verificaciones operativas contra BD real, merge a develop
+- Resuelto: verificaciones operativas contra BD real + Google Sheets, merge a develop ✔
+- Pendiente: probar el ciclo completo de HU-06 contra Google Sheets real con credenciales 🔵
 
 ---
 
