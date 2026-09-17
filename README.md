@@ -40,7 +40,7 @@ La documentación del análisis funcional se encuentra en la carpeta `docs/`:
 - `02_tecnico` — modelo de datos, decisiones técnicas, diagramas UML/ER
 - `03_procesos` — definición de "listo" (DoS)
 - `04_historias_usuario/HU-01..HU-08` — 8 historias de usuario (5 archivos c/u: HU, caso de uso expandido, api, modelos de datos, pruebas)
-- `07_metodologia_agil` — método Kanban
+- `05_metodologia_agil` — método Kanban
 - `06_auditorias` — informes de auditoría del proyecto
 - `estado_actual_proyecto.md` + `vitacora_agentica.md` — memoria del proyecto (foto actual + historial append-only)
 
@@ -102,6 +102,7 @@ Esto permite mantener el sistema modular y mantenible.
 - PostgreSQL
 - Pydantic
 - Google Sheets API
+- Docker (Fase 5)
 
 ---
 
@@ -135,6 +136,25 @@ alembic revision --autogenerate -m "descripcion"
 uvicorn app.main:app --reload
 ```
 ---
+
+## 🐳 Despliegue con Docker (Fase 5)
+
+La API está contenedorizada: `Dockerfile` (imagen `python:3.13-slim`, `EXPOSE 8002`) con
+`docker-entrypoint.sh` como entrypoint.
+
+El entrypoint automatiza el arranque: espera la conexión a PostgreSQL → aplica `alembic upgrade head`
+→ carga el seed de datos iniciales → levanta `uvicorn app.main:app --host 0.0.0.0 --port 8002`.
+
+```bash
+# Build de la imagen
+docker build -t api-normalizacion-afiliados .
+
+# Run del container (mapea el puerto 8002 y pasa las variables de entorno)
+docker run -p 8002:8002 --env-file .env api-normalizacion-afiliados
+```
+
+> Las credenciales de Google (`.credentials/`) quedan fuera de la imagen vía `.dockerignore`
+> y se inyectan por entorno junto con `DATABASE_URL`. La API queda disponible en `http://localhost:8002`.
 
 # 🏗️ Estructura del Proyecto — API Normalización de Afiliados
 
@@ -346,6 +366,15 @@ api-normalizacion/
 │   💬 Cierre Fase 3 — Implementación API REST
 ├── face_4_cierre.md 
 │   💬 Cierre Fase 4 — Pruebas y validación
+├── face_5_cierre.md 
+│   💬 Cierre Fase 5 — Contenedorización
+│
+├── Dockerfile  
+│   💬 Imagen del container (python:3.13-slim, EXPOSE 8002)
+├── docker-entrypoint.sh  
+│   💬 Entrypoint: espera BD → alembic → seed → uvicorn (puerto 8002)
+├── .dockerignore  
+│   💬 Exclusiones del build (venv, .git, .credentials, tests, caches)
 │
 ├── README.md  
 │   💬 Documentación principal del proyecto
@@ -416,6 +445,12 @@ Suite de tests unitarios: **139/139 OK** (`pytest -q` desde la raíz). `ruff che
 
 📄 Ver detalle del cierre: [face_4_cierre.md](face_4_cierre.md)
 
+✔ Fase 5 — Contenedorización: FINALIZADA
+
+API contenedorizada: `Dockerfile` (python:3.13-slim, `EXPOSE 8002`) + `docker-entrypoint.sh` (espera BD → `alembic upgrade head` → seed → uvicorn en 8002) + `.dockerignore`. Build: `docker build -t api-normalizacion-afiliados .`; run: `docker run -p 8002:8002 --env-file .env api-normalizacion-afiliados`.
+
+📄 Ver detalle del cierre: [face_5_cierre.md](face_5_cierre.md)
+
 ✅ Verificaciones operativas resueltas (2026-09-10): `alembic upgrade head` contra PostgreSQL real, sincronización de esquema (`alembic check` OK), comportamiento de `GET /afiliados/` con inactivos, endpoints de Google Sheets con credenciales reales (`/sync/sheets/import` y `/sync/sheets/export`), merge de `feature/refactorizacion-arquitectonica` → `develop`.
 
 🔵 Pendiente: probar el ciclo completo de HU-06 (importar → corregir en la hoja "Pendientes de corrección" → `/sync/sheets/reimport`) contra Google Sheets real con credenciales.
@@ -428,6 +463,7 @@ Suite de tests unitarios: **139/139 OK** (`pytest -q` desde la raíz). `ruff che
 - Fase 2: Diseño técnico y arquitectura ✔
 - Fase 3: Implementación API REST ✔
 - Fase 4: Pruebas y validación ✔
+- Fase 5: Contenedorización ✔
 - Resuelto: verificaciones operativas contra BD real + Google Sheets, merge a develop ✔
 - Pendiente: probar el ciclo completo de HU-06 contra Google Sheets real con credenciales 🔵
 
