@@ -1,12 +1,12 @@
 # Estado Actual del Proyecto
 
-> Última actualización: 2026-09-11
+> Última actualización: 2026-09-17
 > Este archivo es una FOTO del presente, no un historial. Para el historial de cambios ver `vitacora_agentica.md`.
 > El agente debe leer este archivo completo al iniciar cualquier tarea sobre el proyecto.
 
 ## 1. Resumen del proyecto
 
-API REST en Python/FastAPI para la normalización, validación y gestión de datos de afiliados de un sindicato. Actúa como capa intermedia entre fuentes externas (importación manual, Google Sheets y scripts clientes) y los sistemas de consulta. Stack: FastAPI + SQLAlchemy 2.0 async (asyncpg) + pydantic-settings, Python 3.13.5 (`app/.python-version`, venv en `./venv`). Rama activa: `feature/tests-hus06`.
+API REST en Python/FastAPI para la normalización, validación y gestión de datos de afiliados de un sindicato. Actúa como capa intermedia entre fuentes externas (importación manual, Google Sheets y scripts clientes) y los sistemas de consulta. Stack: FastAPI + SQLAlchemy 2.0 async (asyncpg) + pydantic-settings, Python 3.13.5 (`app/.python-version`, venv en `./venv`). Rama activa: `main` (todo el progreso hasta HU-08 + contenedorización se mergeó a `develop` y de ahí a `main` el 2026-09-15; `feature/tests-hus06` quedó contenida en `develop`).
 
 ## 2. Arquitectura
 
@@ -65,6 +65,7 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 - `requirements.txt` en `app/requirements.txt` (no en la raíz).
 - Seed de datos iniciales: `python -m app.infrastructure.database.seed_runner`.
 - Tests puros desacoplados de `DATABASE_URL` vía `tests/conftest.py` (setea un valor por defecto antes de importar módulos).
+- **Contenedorización (Fase 5, 2026-09-15)**: `Dockerfile` (`python:3.13-slim`, `EXPOSE 8002`, `ENTRYPOINT ["/app/docker-entrypoint.sh"]`), `docker-entrypoint.sh` (espera conexión a BD con reintentos → `alembic upgrade head` → seed → `uvicorn app.main:app --host 0.0.0.0 --port 8002`) y `.dockerignore`. Build: `docker build -t api-normalizacion-afiliados .`; run: `docker run -p 8002:8002 --env-file .env api-normalizacion-afiliados`.
 
 ## 7. Pendientes / TODO conocidos
 
@@ -78,10 +79,12 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 ## 8. Decisiones y convenciones vigentes
 
 - Comandos siempre desde la raíz del repo (imports `app.*`, nunca desde `app/`); no repetir `alembic init`.
-- `docs/` en formato Benn backend-only: `01_global`, `02_tecnico` (con `diagramas/`), `03_procesos`, `04_historias_usuario/HU-01..HU-08` (5 archivos c/u), `07_metodologia_agil`. No hay carpetas `05_mockups/` ni `06_uso_ia/`.
+- `docs/` en formato Benn backend-only: `01_global`, `02_tecnico` (con `diagramas/`), `03_procesos`, `04_historias_usuario/HU-01..HU-08` (5 archivos c/u), `05_metodologia_agil`, `06_auditorias`. No hay carpetas `05_mockups/` ni `06_uso_ia/`.
 - Commit messages en español, descriptivos, con prefijo MAYÚSCULAS (ej. `USECASE: ...`, `DOCUMENTACION: ...`); commits atómicos por unidad lógica.
 - El skill `di-architect-scaffold` describe el flujo de 6 pasos para implementar HUs (ya adaptado a este proyecto).
 - Reglas SOLID para escribir código Python: `.agents/rules/reglas-solid.md` (misma matriz que `.opencode/rules/reglas-solid.md` del frontend web_ifts12).
+- Regla de auditoría de documentación: `.agents/rules/auditoria-documentacion.md` (al auditar `docs/`, el documento fuente del grupo afectado debe actualizarse y generarse informe en `06_auditorias/auditoria-*.md`).
 - Skill `rest-api-design` adaptado a este repo: guía local en `references/fastapi-conventions.md` (mapeo status codes por excepción de dominio, naming vigente) + template `templates/endpoint_fastapi.py`. Payload de errores unificado: todas las excepciones de dominio usan `{"error": str}` (se eliminó el anidado de `ImportacionError` en F5).
 - `.agents/skills/pdf-to-markdown` y `virtualizacion`... no aplican como convención de producto; el skill `apa-software-doc`/`apa-formato` son plantillas de documentación.
 - Al terminar trabajo relevante, actualizar este archivo (in-place) y agregar entrada a `vitacora_agentica.md` (append-only).
+- Versionado por fases: último tag **v2.4.0** (Fase 5: contenedorización, 2026-09-17). Historial de tags: v1.0.0, v2.0.0 (refactor F1–F6), v2.1.0 (HU-06 marcación + estilo), v2.2.0 (HU-08), v2.3.0 (verificaciones operativas BD real), v2.3.1 (HU-06 ciclo corrección). Sin push.

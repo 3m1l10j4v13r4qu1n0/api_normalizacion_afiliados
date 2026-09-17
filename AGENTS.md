@@ -20,6 +20,10 @@ API REST de normalización de afiliados en Python/FastAPI con Clean Architecture
   - `venv/bin/ruff check .`
   - `venv/bin/black --check .`
   - `venv/bin/python -m pytest -q`
+- Contenedor (Fase 5, puerto 8002):
+  - `docker build -t api-normalizacion-afiliados .`
+  - `docker run -p 8002:8002 --env-file .env api-normalizacion-afiliados`
+  - El entrypoint (`docker-entrypoint.sh`) espera la BD, corre `alembic upgrade head`, carga el seed y levanta uvicorn en `:8002`.
 
 ## Setup / gotchas
 
@@ -47,6 +51,7 @@ Convenciones:
 - Excepciones de dominio se mapean a HTTP solo en `handlers.py`; no usar `try/except` de negocio en routers/use cases.
 - Tests unitarios usan `FakeRepository`/in-memory para aislar el dominio, sin BD (ver `tests/unit/domian/`; la carpeta se llama `domian` — tipeo original).
 - Reglas SOLID aplicadas al escribir código Python: ver `.agents/rules/reglas-solid.md`.
+- Regla de auditoría de documentación: ver `.agents/rules/auditoria-documentacion.md` (al auditar `docs/`, actualizar el documento fuente del área afectada y generar informe en `docs/06_auditorias/auditoria-*.md`).
 
 ## Flujo de implementación (reglas duras)
 
