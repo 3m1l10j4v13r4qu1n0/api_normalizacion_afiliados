@@ -45,5 +45,5 @@ la auditoría de infraestructura (09/09/2026) generó `docs/06_auditorias/audito
 1. Generar o actualizar el informe versionado en `docs/06_auditorias/auditoria-*.md`, referenciando
    el archivo del grupo modificado.
 2. Actualizar `docs/estado_actual_proyecto.md` (sección correspondiente, in-place).
-3. Agregar entrada en `docs/vitacora_agentica.md` (append-only) con fecha, qué se hizo,
+3. Agregar entrada en `docs/bitacora_agentica.md` (append-only) con fecha, qué se hizo,
    decisiones, archivos tocados y estado resultante.

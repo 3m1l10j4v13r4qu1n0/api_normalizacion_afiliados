@@ -1,15 +1,15 @@
 ---
-name: vitacora-agentica
+name: bitacora-agentica
 description: Historial cronológico del proyecto de uso educativo para ver que deciones toma el agente
 disable-model-invocation: true
 ---
 
 
-# Vitácora Agéntica
+# Bitácora Agéntica
 
 > Historial cronológico y append-only. NUNCA se borra ni se reescribe una entrada pasada.
 > Cada entrada corresponde a una sesión/tarea significativa de trabajo del agente sobre el proyecto.
-> Cuando este archivo crezca demasiado, archivar entradas viejas en `vitacora_YYYY-QX.md` y dejar acá solo un índice + las últimas entradas.
+> Cuando este archivo crezca demasiado, archivar entradas viejas en `bitacora_YYYY-QX.md` y dejar acá solo un índice + las últimas entradas.
 
 ---
 

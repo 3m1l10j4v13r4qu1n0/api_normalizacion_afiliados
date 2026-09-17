@@ -1,8 +1,8 @@
-# Vitácora Agéntica
+# Bitácora Agéntica
 
 > Historial cronológico y append-only. NUNCA se borra ni se reescribe una entrada pasada.
 > Cada entrada corresponde a una sesión/tarea significativa de trabajo del agente sobre el proyecto.
-> Cuando este archivo crezca demasiado, archivar entradas viejas en `vitacora_YYYY-QX.md` y dejar acá solo un índice + las últimas entradas.
+> Cuando este archivo crezca demasiado, archivar entradas viejas en `bitacora_YYYY-QX.md` y dejar acá solo un índice + las últimas entradas.
 
 ---
 
@@ -50,15 +50,15 @@
 
 ## 2026-09-04 — Commits atómicos y memoria del proyecto
 
-**Qué se hizo:** sobre la rama `feature/docs-formato-benn` se realizaron los commits atómicos pendientes: `AGENTS.md` y el directorio `.agents/` (skill adaptado + skills preexistentes) por separado. Luego se creó la memoria del proyecto: `docs/estado_actual_proyecto.md` (fuente de contexto, con funcionalidades, tests, gotchas y deuda técnica) y `docs/vitacora_agentica.md` (historial append-only, primera entrada de esta sesión).
+**Qué se hizo:** sobre la rama `feature/docs-formato-benn` se realizaron los commits atómicos pendientes: `AGENTS.md` y el directorio `.agents/` (skill adaptado + skills preexistentes) por separado. Luego se creó la memoria del proyecto: `docs/estado_actual_proyecto.md` (fuente de contexto, con funcionalidades, tests, gotchas y deuda técnica) y `docs/bitacora_agentica.md` (historial append-only, primera entrada de esta sesión).
 
 **Decisiones de arquitectura:** un commit por unidad lógica; la memoria vive en la raíz de `docs/` tal como define el `AGENTS.md`.
 
 **Archivos/módulos tocados:**
 - `docs/estado_actual_proyecto.md` — creado.
-- `docs/vitacora_agentica.md` — creado.
+- `docs/bitacora_agentica.md` — creado.
 
-**Estado resultante:** working tree limpio; quedó definido el mecanismo de actualización del estado y la vitácora para las próximas sesiones.
+**Estado resultante:** working tree limpio; quedó definido el mecanismo de actualización del estado y la bitácora para las próximas sesiones.
 
 ---
 
@@ -72,7 +72,7 @@
 - `.agents/rules/reglas-solid.md` — creado.
 - `AGENTS.md` — referencia a la regla y corrección de nota SGVIR.
 - `docs/estado_actual_proyecto.md` — sección 8 actualizada.
-- `docs/vitacora_agentica.md` — esta entrada.
+- `docs/bitacora_agentica.md` — esta entrada.
 
 **Estado resultante:** la regla queda como convención vigente a aplicar en futuras implementaciones de casos de uso/HUs.
 
@@ -118,7 +118,7 @@
 - **F3 — Split del core (SRP):** nuevo servicio de dominio puro `app/domain/services/importacion_pipeline.py`; `core_importar_afiliado` como orquestador; eliminar los wrappers de UC duplicados y recalibrar `dependency_injection.py` y routers.
 - **F4 — Deuda operativa:** agregar `gspread`/`google-auth` a requirements; unificar env de Google; arreglar `test_data_transformer.py`; desacoplar `DATABASE_URL` de los tests puros; constantes de estados y limpieza de código muerto.
 - **F5 — Endpoints:** uniformar payload de errores a `{"error": str}` (quitar anidado de `ImportacionError`); exponer lista de errores en `ImportResponse`.
-- **F6 — Documentación:** actualizar `docs/estado_actual_proyecto.md` y agregar entrada de vitácora al finalizar.
+- **F6 — Documentación:** actualizar `docs/estado_actual_proyecto.md` y agregar entrada de bitácora al finalizar.
 
 **Estado resultante:** plan registrado y quedó listo para implementarse en una nueva sesión. **No se tocó código de aplicación** en esta entrada; solo documentación. Working tree sin cambios de código.
 
@@ -258,7 +258,7 @@
 - `AGENTS.md` — gotchas actualizados.
 - `app/application/use_cases/uc4a_importar_afiliado.py`, `app/domain/services/data_transformer.py` — docstrings.
 
-**Estado resultante:** suite 100/100 tests OK; app carga con los 12 endpoints; documentación (estado, vitácora, AGENTS.md) coherente con el código. Plan de refactorización F1–F6 **completo**. Pendiente de decisión del usuario: merge de `feature/refactorizacion-arquitectonica` a `develop`.
+**Estado resultante:** suite 100/100 tests OK; app carga con los 12 endpoints; documentación (estado, bitácora, AGENTS.md) coherente con el código. Plan de refactorización F1–F6 **completo**. Pendiente de decisión del usuario: merge de `feature/refactorizacion-arquitectonica` a `develop`.
 
 ---
 
@@ -274,7 +274,7 @@
 **Archivos/módulos tocados:**
 - `AGENTS.md` — se agregó tabla de estado de HUs verificada + sección de pendientes de implementación
 - `docs/06_auditorias/auditoria-historias-usuario.md` — nuevo: informe de auditoría
-- `docs/vitacora_agentica.md` — esta entrada
+- `docs/bitacora_agentica.md` — esta entrada
 
 **Estado resultante:** el AGENTS.md ahora refleja el estado real de implementación de cada HU y detalla los pasos para completar HU-06 y HU-08.
 
@@ -390,7 +390,7 @@
 **Archivos/módulos tocados:**
 - `alembic/env.py` — import de `orm_models` + order de imports (ruff).
 - `docs/estado_actual_proyecto.md` — pendiente 3 resuelto.
-- `docs/vitacora_agentica.md` — esta entrada.
+- `docs/bitacora_agentica.md` — esta entrada.
 
 **Estado resultante:** checklist en verde (ruff, black, 111/111 tests, `alembic check` sin operaciones); BD real sincronizada con el modelo y seed cargado. Quedan pendientes operativos: verificar `GET /afiliados/` con inactivos, probar endpoints de Google Sheets con credenciales reales.
 
@@ -495,11 +495,11 @@
 
 ## 2026-09-17 — Auditoría de documentación y cierre de Fase 5 (contenedorización)
 
-**Qué se hizo:** se auditó el estado de la documentación contra el código real detectando desfases: el último trabajo registrado era del 2026-09-11 pero existían commits posteriores (contenedorización 2026-09-15, merges a `develop`/`main`) sin reflejar en `estado_actual_proyecto.md`, `vitacora_agentica.md`, `README.md` ni `AGENTS.md`. Se corrigió todo y se cerró la Fase 5 con tag.
+**Qué se hizo:** se auditó el estado de la documentación contra el código real detectando desfases: el último trabajo registrado era del 2026-09-11 pero existían commits posteriores (contenedorización 2026-09-15, merges a `develop`/`main`) sin reflejar en `estado_actual_proyecto.md`, `bitacora_agentica.md`, `README.md` ni `AGENTS.md`. Se corrigió todo y se cerró la Fase 5 con tag.
 
 **Hallazgos corregidos:**
 - `docs/estado_actual_proyecto.md` — fecha desactualizada, rama activa errónea (`feature/tests-hus06` → `main`), sin sección de contenedorización, referencia obsoleta `07_metodologia_agil` → `05_metodologia_agil`, regla `auditoria-documentacion.md` no listada, versionado sin reflejar tags.
-- `docs/vitacora_agentica.md` — faltaba la entrada de contenedorización.
+- `docs/bitacora_agentica.md` — faltaba la entrada de contenedorización.
 - `README.md` — línea 43 con `07_metodologia_agil` obsoleto + sin sección de despliegue Docker.
 - `AGENTS.md` — sin comandos Docker ni referencia a la regla de auditoría.
 
@@ -507,10 +507,31 @@
 
 **Archivos/módulos tocados:**
 - `docs/estado_actual_proyecto.md` — secciones 1, 6 y 8 actualizadas.
-- `docs/vitacora_agentica.md` — esta entrada.
+- `docs/bitacora_agentica.md` — esta entrada.
 - `face_5_cierre.md` — nuevo (cierre de Fase 5).
 - `README.md` — línea 43 corregida + sección Docker.
 - `AGENTS.md` — comandos de container + regla de auditoría.
 - `docs/06_auditorias/auditoria-memoria-docs.md` — nuevo informe de auditoría.
 
 **Estado resultante:** documentación al día con el código (139/139 tests OK, ruff/black en verde). Fase 5 cerrada con tag `v2.4.0` (sin push). Pendiente externo: probar el ciclo HU-06 contra Google Sheets real con credenciales.
+
+---
+
+## 2026-09-17 — Corrección ortográfica: `vitacora` → `bitacora`
+
+**Qué se hizo:** se corrigió el error de escritura del nombre de la bitácora (`vitacora` → `bitacora`) en todo el repo. Se renombraron el archivo y el skill, y se actualizaron todas las referencias para que no queden enlaces rotos.
+
+**Cambios:**
+- `docs/vitacora_agentica.md` → `docs/bitacora_agentica.md` (git mv, preserva historial).
+- `.agents/skills/vitacora-agentica/` → `.agents/skills/bitacora-agentica/` (git mv); se actualizó el `name:` del frontmatter.
+- Referencias actualizadas en `AGENTS.md`, `README.md`, `docs/estado_actual_proyecto.md`, `.agents/rules/auditoria-documentacion.md`, `.agents/skills/estado-actual-proyecto/SKILL.md` y `docs/06_auditorias/` (historial y auditoría de memoria).
+- Encabezado interno "# Vitácora Agéntica" → "# Bitácora Agéntica" y menciones en prosa ("la bitácora").
+
+**Decisiones de arquitectura:** por tratarse de un rename de archivo/skill, se actualizaron también las referencias dentro de las entradas históricas (no se alteró su contenido) para evitar enlaces rotos; esto no contradice la regla append-only.
+
+**Archivos/módulos tocados:**
+- `docs/bitacora_agentica.md` — renombrado desde `vitacora_agentica.md`.
+- `.agents/skills/bitacora-agentica/SKILL.md` — renombrado desde `vitacora-agentica`.
+- `AGENTS.md`, `README.md`, `docs/estado_actual_proyecto.md`, `.agents/rules/auditoria-documentacion.md`, `.agents/skills/estado-actual-proyecto/SKILL.md`, `docs/06_auditorias/auditoria-historias-usuario.md`, `docs/06_auditorias/auditoria-memoria-docs.md` — referencias corregidas.
+
+**Estado resultante:** sin referencias residuales a `vitacora`; `ruff`/`black`/`pytest` (139/139) en verde.
