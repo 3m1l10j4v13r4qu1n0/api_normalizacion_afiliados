@@ -470,3 +470,47 @@
 - Docs HU-06 (`HU-06.md`, `_caso_uso_expandido.md`, `_api.md`, `_modelos_datos.md`, `_pruevas.md`), `docs/estado_actual_proyecto.md`.
 
 **Estado resultante:** 139/139 tests OK; ruff y black en verde. HU-06 alineada al pedido real del cliente (crear/modificar una hoja con las filas no importadas resaltadas para corregirlas y reimportarlas). Pendiente: probar el ciclo completo contra Google Sheets real con credenciales.
+
+---
+
+## 2026-09-15 — F5: Contenedorización (Dockerfile + entrypoint)
+
+**Qué se hizo:** se contenedorizó la API para despliegue en container (commit `52f0b89` sobre rama `feature/dockerfile`, mergeada a `develop` en `1ac3a85` y de `develop` a `main` en `6defbff`).
+
+**Cambios:**
+- `Dockerfile` — imagen base `python:3.13-slim`, `EXPOSE 8002`, `ENTRYPOINT ["/app/docker-entrypoint.sh"]`, copia `app/requirements.txt` antes del código para aprovechar cache de capas.
+- `docker-entrypoint.sh` — espera conexión a PostgreSQL (hasta 30 intentos con 2s de intervalo), aplica `alembic upgrade head`, ejecuta el seed de datos iniciales (`seed_runner`) y levanta `uvicorn app.main:app --host 0.0.0.0 --port 8002`.
+- `.dockerignore` — excluye `venv/`, `.git/`, `.credentials/`, `tests/`, cache de ruff/pytest, etc.
+
+**Decisiones de arquitectura:** el container ejecuta migraciones + seed en el entrypoint (patrón común para entornos Docker de un solo servicio); el puerto expuesto es el `8002`.
+
+**Archivos/módulos tocados:**
+- `Dockerfile` — nuevo.
+- `docker-entrypoint.sh` — nuevo.
+- `.dockerignore` — nuevo.
+
+**Estado resultante:** la imagen queda lista para build/run con `--env-file .env`. Sin tag ni cierre de fase de contenedorización (se completan en la sesión del 2026-09-17 con el tag v2.4.0).
+
+---
+
+## 2026-09-17 — Auditoría de documentación y cierre de Fase 5 (contenedorización)
+
+**Qué se hizo:** se auditó el estado de la documentación contra el código real detectando desfases: el último trabajo registrado era del 2026-09-11 pero existían commits posteriores (contenedorización 2026-09-15, merges a `develop`/`main`) sin reflejar en `estado_actual_proyecto.md`, `vitacora_agentica.md`, `README.md` ni `AGENTS.md`. Se corrigió todo y se cerró la Fase 5 con tag.
+
+**Hallazgos corregidos:**
+- `docs/estado_actual_proyecto.md` — fecha desactualizada, rama activa errónea (`feature/tests-hus06` → `main`), sin sección de contenedorización, referencia obsoleta `07_metodologia_agil` → `05_metodologia_agil`, regla `auditoria-documentacion.md` no listada, versionado sin reflejar tags.
+- `docs/vitacora_agentica.md` — faltaba la entrada de contenedorización.
+- `README.md` — línea 43 con `07_metodologia_agil` obsoleto + sin sección de despliegue Docker.
+- `AGENTS.md` — sin comandos Docker ni referencia a la regla de auditoría.
+
+**Decisiones de arquitectura:** la contenedorización se registró como **Fase 5 formal** (cierre `face_5_cierre.md` + tag anotado `v2.4.0`) según `.agents/rules/versionado-fases.md`; se generó el informe `docs/06_auditorias/auditoria-memoria-docs.md` según `.agents/rules/auditoria-documentacion.md`; la rama `feature/tests-hus06` se conservó (ya mergeada, sin borrar por decisión del usuario).
+
+**Archivos/módulos tocados:**
+- `docs/estado_actual_proyecto.md` — secciones 1, 6 y 8 actualizadas.
+- `docs/vitacora_agentica.md` — esta entrada.
+- `face_5_cierre.md` — nuevo (cierre de Fase 5).
+- `README.md` — línea 43 corregida + sección Docker.
+- `AGENTS.md` — comandos de container + regla de auditoría.
+- `docs/06_auditorias/auditoria-memoria-docs.md` — nuevo informe de auditoría.
+
+**Estado resultante:** documentación al día con el código (139/139 tests OK, ruff/black en verde). Fase 5 cerrada con tag `v2.4.0` (sin push). Pendiente externo: probar el ciclo HU-06 contra Google Sheets real con credenciales.
