@@ -1,7 +1,7 @@
 # Estado Actual del Proyecto
 
 > Última actualización: 2026-09-17
-> Este archivo es una FOTO del presente, no un historial. Para el historial de cambios ver `vitacora_agentica.md`.
+> Este archivo es una FOTO del presente, no un historial. Para el historial de cambios ver `bitacora_agentica.md`.
 > El agente debe leer este archivo completo al iniciar cualquier tarea sobre el proyecto.
 
 ## 1. Resumen del proyecto
@@ -86,5 +86,5 @@ El pipeline de importación es un **UC único** (`core_importar_afiliado.py` →
 - Regla de auditoría de documentación: `.agents/rules/auditoria-documentacion.md` (al auditar `docs/`, el documento fuente del grupo afectado debe actualizarse y generarse informe en `06_auditorias/auditoria-*.md`).
 - Skill `rest-api-design` adaptado a este repo: guía local en `references/fastapi-conventions.md` (mapeo status codes por excepción de dominio, naming vigente) + template `templates/endpoint_fastapi.py`. Payload de errores unificado: todas las excepciones de dominio usan `{"error": str}` (se eliminó el anidado de `ImportacionError` en F5).
 - `.agents/skills/pdf-to-markdown` y `virtualizacion`... no aplican como convención de producto; el skill `apa-software-doc`/`apa-formato` son plantillas de documentación.
-- Al terminar trabajo relevante, actualizar este archivo (in-place) y agregar entrada a `vitacora_agentica.md` (append-only).
+- Al terminar trabajo relevante, actualizar este archivo (in-place) y agregar entrada a `bitacora_agentica.md` (append-only).
 - Versionado por fases: último tag **v2.4.0** (Fase 5: contenedorización, 2026-09-17). Historial de tags: v1.0.0, v2.0.0 (refactor F1–F6), v2.1.0 (HU-06 marcación + estilo), v2.2.0 (HU-08), v2.3.0 (verificaciones operativas BD real), v2.3.1 (HU-06 ciclo corrección). Sin push.

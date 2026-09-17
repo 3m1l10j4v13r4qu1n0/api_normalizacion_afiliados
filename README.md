@@ -42,7 +42,7 @@ La documentación del análisis funcional se encuentra en la carpeta `docs/`:
 - `04_historias_usuario/HU-01..HU-08` — 8 historias de usuario (5 archivos c/u: HU, caso de uso expandido, api, modelos de datos, pruebas)
 - `05_metodologia_agil` — método Kanban
 - `06_auditorias` — informes de auditoría del proyecto
-- `estado_actual_proyecto.md` + `vitacora_agentica.md` — memoria del proyecto (foto actual + historial append-only)
+- `estado_actual_proyecto.md` + `bitacora_agentica.md` — memoria del proyecto (foto actual + historial append-only)
 
 Esto simula la documentación generada por un **analista funcional junior en un proyecto real**.
 
